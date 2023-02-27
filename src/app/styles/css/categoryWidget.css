@@ -1,0 +1,94 @@
+@charset "UTF-8";
+
+/* */
+
+.category-widget {
+    position: relative;
+    margin-right: calc(var(--bs-gutter-x) * 2.2);
+}
+
+@media (min-width: 768px){
+
+    .category-widget {
+        margin-right: 82px;
+    }
+}
+
+.category-widget-image-wrapper {
+    position: relative;
+    padding-right: calc(var(--bs-gutter-x) * 0.5);
+}
+
+.category-widget img {
+    /* height: calc(80px + (90 - 80) * ((100vw - 320px) / (1920 - 320))); */
+    width: 100px;
+    -o-object-fit: contain;
+    object-fit: contain;
+    -o-object-position: bottom;
+    object-position: bottom;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    text-align: center;
+    z-index: 10;
+    right: -40px;
+
+    border-radius: 50%;
+}
+
+@media (min-width: 768px){
+
+    .category-widget img {
+        width: 110px;
+    }
+}
+
+@media (min-width: 992px){
+
+    .category-widget img {
+        width: 115px;
+    }
+}
+
+@media (min-width: 1200px){
+
+    .category-widget img {
+        width: 120px;
+        right: -60px;
+    }
+}
+
+.category-widget .category-widget-image:hover {
+    /* -webkit-animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
+    /* animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
+
+    -webkit-animation-duration: 14s;
+    -webkit-animation-timing-function: cubic-bezier(0.26, 0.26, 1, 1);
+    -webkit-animation-delay: 0s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-direction: normal;
+    -webkit-animation-fill-mode: none;
+    -webkit-animation-play-state: running;
+    -webkit-animation: rotateSmooth;
+
+    animation-duration: 14s;
+    animation-timing-function: cubic-bezier(0.26, 0.26, 1, 1);
+    animation-delay: 0s;
+    animation-iteration-count: infinite;
+    animation-direction: normal;
+    animation-fill-mode: none;
+    animation-play-state: running;
+    animation-name: rotateSmooth;
+}
+
+.category-widget .category-widget-button.btn {
+    position: relative;
+
+    background-color: var(--primary-color) !important;
+}
+
+.category-widget .category-widget-button.btn:hover {
+    background-color: var(--dark-primary-color) !important;
+}

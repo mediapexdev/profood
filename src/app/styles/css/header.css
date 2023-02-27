@@ -1,0 +1,107 @@
+@charset "UTF-8";
+
+/* */
+
+header {
+    margin: 0;
+
+    /* background-color: hsla(0, 0%, 100%, 0.19); */
+    /* background-clip: padding-box; */
+
+    /* -webkit-backdrop-filter: blur(35px); */
+    /* backdrop-filter: blur(35px); */
+
+    /* -webkit-box-shadow: 0 3px 6px -4px rgb(0 0 0 / 12%), 0 6px 16px 0 rgb(0 0 0 / 8%), 0 9px 28px 8px rgb(0 0 0 / 5%); */
+    /* box-shadow: 0 3px 6px -4px rgb(0 0 0 / 12%), 0 6px 16px 0 rgb(0 0 0 / 8%), 0 9px 28px 8px rgb(0 0 0 / 5%); */
+
+    /* overflow: hidden; */
+
+    /* box-shadow: none; */
+}
+
+[data-theme="light"] header {
+    background-color: #fff;
+    /* background: url('./../../../../public/media/images/backgrounds/dashboard.png') 0% 0% / cover fixed; */
+}
+
+[data-theme="dark"] header {
+    background-color: #1e1e2d;
+}
+
+/* header {
+
+    box-shadow: 0 3px 20px rgb(89 105 129 / 30%),
+                0 1px 2px rgb(0 0 0 / 5%),
+                0 0 0 1px rgb(89 105 129 / 10%) !important;
+}
+
+[data-theme="dark"] header {
+    box-shadow: 0 3px 20px rgb(0 0 0 / 30%),
+                0 1px 2px rgb(0 0 0 / 5%),
+                0 0 0 1px rgb(0 0 0 / 10%) !important;
+} */
+
+/* */
+
+header .logo-wrapper {
+    gap: calc(14px + (12 - 7) * ((100vw - 320px) / (1920 - 320)));
+}
+
+header .logo-img {
+    width: calc(100px + (130 - 100) * ((100vw - 320px) / (1920 - 320)));
+    height: auto;
+}
+
+/* */
+
+header .navbar-toggler {
+    position: relative;
+    width: 30px;
+    max-height: 30px;
+    padding: 0.25rem 0.15rem;
+    gap : 0.4em;
+    color: var(--kt-gray-800);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    -webkit-transition: all 0.3s ease-in-out 0s;
+    transition: all 0.3s ease-in-out 0s;
+}
+
+[data-theme="dark"] header .navbar-toggler {
+    color: var(--kt-white);
+}
+
+header .navbar-toggler:focus {
+    box-shadow: none;
+}
+
+header .navbar-toggler .line {
+    display: block;
+    height: 3px;
+    width: 100%;
+    background: var(--kt-gray-800);
+    border-radius: 0.1875rem;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+[data-theme="dark"] header .navbar-toggler .line {
+    background: var(--kt-white);
+}
+
+header .navbar-toggler .line:nth-child(3) {
+    width: 55%;
+    margin-right: auto;
+}
+
+header .navbar-toggler:hover .line:nth-child(3) {
+    width: 100%;
+}
+
+/* */
+
+.others-menu-wrapper {
+    padding-right: calc(var(--bs-gutter-x) * .5);
+    padding-left: calc(var(--bs-gutter-x) * .5);
+}

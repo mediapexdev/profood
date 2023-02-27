@@ -1,0 +1,145 @@
+@charset "UTF-8";
+
+/* */
+
+body {
+    /* background: url('./../../../../public/media/images/backgrounds/dashboard.png') 0% 0% / cover fixed; */
+    /* background-color: #fff; */
+    /* background: url('./../../../../public/media/images/backgrounds/bg-dark-2.jpg') 0% 0% / cover fixed; */
+    /* background: url('./../../../../public/media/images/backgrounds/bg.jpg'); */
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 0% 50%;
+    background-attachment: fixed;
+    /* overflow-x: hidden; */
+}
+
+body > .background-overlay {
+    position: fixed;
+    background-attachment: scroll;
+    background-color: #fff;
+    /* background-image: radial-gradient(at center center, #0000003D 0%, #000000C9 100%); */
+    /* background-image: radial-gradient(at center center, #ffffff3D 0%, #ffffffC9 100%); */
+    opacity: 0.8;
+    border-radius: var(--bs-card-border-radius);
+
+    /* background-color: hsla(0,0%,100%,.19);
+    -webkit-backdrop-filter: blur(42px);
+    backdrop-filter: blur(42px); */
+}
+
+[data-theme="dark"] body {
+    /* background-color: #22282c; */
+    background-image: url('./../../../../public/media/images/backgrounds/bg.jpg');
+}
+
+[data-theme="light"] body {
+    /* background-color: #fff; */
+    /* background-image: url('./../../../../public/media/images/backgrounds/bg-light-2-blur.jpg'); */
+    /* background-image: url('./../../../../public/media/images/backgrounds/bg-light.jpg'); */
+    /* background-image: url('./../../../../public/media/images/backgrounds/profood-1.jpg'); */
+    /* background-image: url('./../../../../public/media/images/backgrounds/bg-light-blur.jpg'); */
+    /* background-image: url('./../../../../public/media/images/backgrounds/bg-light-retouched-4.jpg'); */
+    background-image: url('./../../../../public/media/images/backgrounds/bg-light-retouched-3.jpg');
+}
+
+/* */
+
+.user-img1 {
+    position: fixed;
+    top: 280px;
+}
+
+@media (min-width: 1400px){
+
+    .user-img1 {
+        top: 450px;
+    }
+}
+
+/* */
+
+.section-main-banner {
+    padding-top: calc(25px + (30 - 25) * ((100vw - 320px) / (1920 - 320)));
+    padding-bottom: calc(25px + (30 - 25) * ((100vw - 320px) / (1920 - 320)));
+}
+
+/* */
+
+.section-typesBox {
+    padding-top: calc(25px + (30 - 25) * ((100vw - 320px) / (1920 - 320)));
+    padding-bottom: calc(25px + (30 - 25) * ((100vw - 320px) / (1920 - 320)));
+}
+
+.section-typesBox .section-container {
+    padding-bottom: 20px;
+    border-radius: 8px;
+
+}
+
+.section-typesBox .section-body {
+    position: relative;
+    
+    /* background: url('./../../../../public/media/images/backgrounds/dashboard.png') 0% 0% / cover fixed; */
+    /* padding: calc(15px + (18 - 15) * ((100vw - 320px) / (1920 - 320))); */
+    /* border-radius: 10px calc(37px + (65 - 37) * ((100vw - 320px) / (1920 - 320))) 10px 10px; */
+}
+
+/* */
+
+.section-categories {
+    padding-top: calc(25px + (30 - 25) * ((100vw - 320px) / (1920 - 320)));
+    padding-bottom: calc(25px + (30 - 25) * ((100vw - 320px) / (1920 - 320)));
+}
+
+.section-categories .section-heading {
+    /* background-color: #000; */
+    padding-top: 1.4rem;
+    padding-bottom: 1.4rem;
+
+    border-radius: 0.6rem;
+    /* background-color: hsla(0, 0%, 100%, 0.19); */
+    background-clip: padding-box;
+
+    /* -webkit-backdrop-filter: blur(1px); */
+    /* backdrop-filter: blur(1px); */
+
+    /* -webkit-box-shadow: 0 3px 6px -4px rgb(0 0 0 / 12%),
+                        0 6px 16px 0 rgb(0 0 0 / 8%),
+                        0 9px 28px 8px rgb(0 0 0 / 5%);
+    box-shadow: 0 3px 6px -4px rgb(0 0 0 / 12%),
+                0 6px 16px 0 rgb(0 0 0 / 8%),
+                0 9px 28px 8px rgb(0 0 0 / 5%); */
+
+    /* box-shadow: 0 3px 20px rgb(0 0 0 / 30%),
+        0 1px 2px rgb(0 0 0 / 5%),
+        0 0 0 1px rgb(0 0 0 / 10%) !important; */
+}
+
+.section-categories h3 {
+    position: relative;
+    display: block;
+    font-weight: 700;
+    line-height: 22px;
+    text-align: center;
+}
+
+.section-categories h3 .separator::after,
+.section-categories h3 .separator::before {
+    border-width: 2px;
+}
+
+[data-theme="light"] .section-categories h3 .separator::after,
+[data-theme="light"] .section-categories h3 .separator::before {
+    /* border-color: #f1f1f1; */
+    /* border-color: hsla(0, 0%, 100%, 0.3); */
+}
+
+/* [data-theme="dark"] .section-categories h3 .separator::after,
+[data-theme="dark"] .section-categories h3 .separator::before {
+    border-color: #4d4e4d;
+} */
+
+.section-categories .section-body {
+    margin-top: calc(50px + (50 - 25) * ((100vw - 320px) / (1920 - 320)));
+}

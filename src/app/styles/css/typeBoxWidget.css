@@ -1,0 +1,204 @@
+@charset "UTF-8";
+
+/* */
+
+.type-box-widget,
+.type-box-widget-content {
+    margin-top: 50px;
+}
+
+.type-box-widget {
+    cursor: pointer;
+    -webkit-transition: all 400ms ease;
+    transition: all 400ms ease;
+    /* background: url('./../../../../public/media/images/backgrounds/dashboard.png') 0% 0% / cover fixed; */
+
+    /* color: #fff; */
+}
+
+/* .types-box-list-widget .col:nth-child(1) .type-box-widget {
+    -webkit-animation-delay: 0s;
+    animation-delay: 0s;
+}
+
+.types-box-list-widget .col:nth-child(2) .type-box-widget {
+    -webkit-animation-delay: 200ms;
+    animation-delay: 200ms;
+}
+
+.types-box-list-widget .col:nth-child(3) .type-box-widget {
+    -webkit-animation-delay: 400ms;
+    animation-delay: 400ms;
+}
+
+.types-box-list-widget .col:nth-child(4) .type-box-widget {
+    -webkit-animation-delay: 600ms;
+    animation-delay: 600ms;
+} */
+
+.type-box-widget:hover {
+    /* background-color: rgba(234,106,18,0.7); */
+    background-color: var(--primary-color);
+    color: #fff;
+    /* cursor: pointer; */
+}
+
+@media (min-width: 992px){
+
+    .type-box-widget {
+        margin-top: 65px;
+    }
+}
+
+@media (min-width: 1200px){
+
+    .type-box-widget {
+        margin-top: 75px;
+    }
+}
+
+.type-box-widget-content {
+    margin-top: 75px;
+}
+
+@media (min-width: 768px){
+
+    .type-box-widget-content {
+        margin-top: 70px;
+    }
+}
+
+@media (min-width: 992px){
+
+    .type-box-widget-content {
+        margin-top: 80px;
+    }
+}
+
+@media (min-width: 1200px){
+
+    .type-box-widget-content {
+        margin-top: 90px;
+    }
+}
+
+.type-box-widget:hover .type-box-widget-image {
+    /* -webkit-animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
+    /* animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
+
+    -webkit-animation-duration: 14s;
+    -webkit-animation-timing-function: cubic-bezier(0.26, 0.26, 1, 1);
+    -webkit-animation-delay: 0s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-direction: normal;
+    -webkit-animation-fill-mode: none;
+    -webkit-animation-play-state: running;
+    -webkit-animation: rotateSmooth;
+
+    animation-duration: 14s;
+    animation-timing-function: cubic-bezier(0.26, 0.26, 1, 1);
+    animation-delay: 0s;
+    animation-iteration-count: infinite;
+    animation-direction: normal;
+    animation-fill-mode: none;
+    animation-play-state: running;
+    animation-name: rotateSmooth;
+}
+
+/* */
+.type-box-widget-image-wrapper {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    -webkit-transform: translateY(-40px);
+    transform: translateY(-40px);
+}
+
+.type-box-widget-image {
+    height: 120px;
+    width: 120px;
+    min-width: 120px;
+    -o-object-fit: cover;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+@media (min-width: 420px){
+
+    .type-box-widget-image {
+        height: 125px;
+        width: 125px;
+        min-width: 125px;
+    }
+}
+
+@media (min-width: 576px){
+
+    .type-box-widget-image-wrapper {
+        -webkit-transform: translateY(-45px);
+        transform: translateY(-45px);
+    }
+}
+
+@media (min-width: 768px){
+
+    .type-box-widget-image-wrapper {
+        -webkit-transform: translateY(-55px);
+        transform: translateY(-55px);
+    }
+
+    .type-box-widget-image {
+        height: 135px;
+        width: 135px;
+        min-width: 135px;
+    }
+}
+
+@media (min-width: 992px){
+
+    .type-box-widget-image {
+        height: 140px;
+        width: 140px;
+        min-width: 140px;
+    }
+}
+
+@media (min-width: 1200px){
+
+    .type-box-widget-image-wrapper {
+        -webkit-transform: translateY(-65px);
+        transform: translateY(-65px);
+    }
+
+    .type-box-widget-image {
+        height: 160px;
+        width: 160px;
+        min-width: 160px;
+    }
+}
+
+/* */
+
+.type-box-widget .type-box-title{
+    font-family: "Quicksand","sans-serif";
+    font-weight: bold;
+    line-height: 25px;
+    color: inherit;
+}
+
+.type-box-widget .type-box-slices-number{
+    font-weight: 600;
+    /* color: var(--primary-color); */
+}
+
+.type-box-widget .type-box-price-wrapper{
+    font-weight: 600;
+    color: var(--dark-primary-color);
+    /* color: #fff; */
+}
+
+.type-box-widget:hover .type-box-slices-number,
+.type-box-widget:hover .type-box-price-wrapper {
+    color: inherit;
+}
