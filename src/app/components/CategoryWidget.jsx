@@ -1,10 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import {toAbsolutePublicUrl} from '../helpers/AssetHelpers';
 
 
 const CategoryWidget = ({category}) => {
 
+    const navigate = useNavigate();
+	/**
+	 * 
+	 */
+	const handleCategoryClick = () => {
+		navigate('/slices/categories');
+	}
     /**
      * 
      */
@@ -38,7 +46,15 @@ const CategoryWidget = ({category}) => {
                         </div>
                     </div>
                     <div className="category-widget-buttons-wrapper">
-                        <a className="category-widget-button btn btn-sm btn-primary" href="#" tabIndex="0" role="button">Découvrir</a>
+                        <button
+                            type='button'
+                            className="category-widget-button btn btn-sm btn-primary"
+                            href="#"
+                            tabIndex="0"
+                            onClick={handleCategoryClick}
+                        >
+                            <span>Découvrir</span>
+                        </button>
                     </div>
                 </div>
             </div>

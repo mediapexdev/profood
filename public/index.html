@@ -30,29 +30,29 @@
 		<link rel="stylesheet" href="%PUBLIC_URL%/assets/plugins/global/plugins.bundle.css" />
 		<!-- end::Global Stylesheets Bundle -->
 	</head>
-	<body>
+	<body data-kt-name="profood">
 		<noscript>Vous devez activer JavaScript pour utiliser cette application.</noscript>
-    	<!-- begin::Theme mode setup on page load -->
+    	<!--begin::Theme mode setup on page load-->
 		<script>
 			if (document.documentElement) {
-				const defaultThemeMode = "system";
+				const default_theme_mode = 'system';
 
-				const hasKTName = document.body.hasAttribute("data-kt-name");
-				const lsKey = "kt_" + (hasKTName ? name + "_" : "") + "theme_mode_value";
-				let themeMode = localStorage.getItem(lsKey);
+				const has_KTName = document.body.hasAttribute('data-kt-name');
+				const ls_Key = 'kt_' + (has_KTName ? name + '_' : '') + 'theme_mode_value';
+				let theme_mode = localStorage.getItem(ls_Key);
 
-				if (!themeMode) {
-					if (defaultThemeMode === "system") {
-						themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+				if (!theme_mode) {
+					if (default_theme_mode === 'system') {
+						theme_mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 					}
 					else {
-						themeMode = defaultThemeMode;
+						theme_mode = default_theme_mode;
 					}
 				}
-				document.documentElement.setAttribute("data-theme", themeMode);
-			}            
+				document.documentElement.setAttribute('data-theme', theme_mode);
+			}
 		</script>
-		<!-- end::Theme mode setup on page load -->
+		<!--end::Theme mode setup on page load-->
 		<div class="background-overlay"></div>
 		<div id="root"></div>
 		<!--

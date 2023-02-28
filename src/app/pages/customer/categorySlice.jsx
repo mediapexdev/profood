@@ -12,8 +12,8 @@ const CategorySlice = () => {
   useEffect(() => {
     api.get("get-slices-by-category").then((res) => {
       setCategories(res.data);
-    },[]);
-   });
+    });
+   },[]);
   const selectedCategoryId = useSelector(
     (state) => state.slice.selectedCategory
   );

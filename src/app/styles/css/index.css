@@ -17,30 +17,33 @@ body {
 body > .background-overlay {
     position: fixed;
     background-attachment: scroll;
-    background-color: #fff;
-    /* background-image: radial-gradient(at center center, #0000003D 0%, #000000C9 100%); */
-    /* background-image: radial-gradient(at center center, #ffffff3D 0%, #ffffffC9 100%); */
-    opacity: 0.8;
-    border-radius: var(--bs-card-border-radius);
-
-    /* background-color: hsla(0,0%,100%,.19);
-    -webkit-backdrop-filter: blur(42px);
-    backdrop-filter: blur(42px); */
 }
 
 [data-theme="dark"] body {
     /* background-color: #22282c; */
-    background-image: url('./../../../../public/media/images/backgrounds/bg.jpg');
+    /* background-image: url('./../../../../public/media/images/backgrounds/bg-light-retouched-3.jpg'); */
+    background-image: url('./../../../../public/media/images/backgrounds/bg-dark-4.jpg');
+}
+
+[data-theme="dark"] body > .background-overlay {
+    background-color: #000;
+    opacity: 0.7;
 }
 
 [data-theme="light"] body {
-    /* background-color: #fff; */
-    /* background-image: url('./../../../../public/media/images/backgrounds/bg-light-2-blur.jpg'); */
-    /* background-image: url('./../../../../public/media/images/backgrounds/bg-light.jpg'); */
-    /* background-image: url('./../../../../public/media/images/backgrounds/profood-1.jpg'); */
-    /* background-image: url('./../../../../public/media/images/backgrounds/bg-light-blur.jpg'); */
-    /* background-image: url('./../../../../public/media/images/backgrounds/bg-light-retouched-4.jpg'); */
+    background-color: transparent;
     background-image: url('./../../../../public/media/images/backgrounds/bg-light-retouched-3.jpg');
+}
+
+[data-theme="light"] body > .background-overlay {
+    background-color: #fff;
+    /* background-image: radial-gradient(at center center, #0000003D 0%, #000000C9 100%); */
+    /* background-image: radial-gradient(at center center, #ffffff3D 0%, #ffffffC9 100%); */
+    opacity: 0.8;
+
+    /* background-color: hsla(0,0%,100%,.19);
+    -webkit-backdrop-filter: blur(42px);
+    backdrop-filter: blur(42px); */
 }
 
 /* */

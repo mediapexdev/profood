@@ -5,10 +5,19 @@ import React from "react";
 import {toAbsolutePublicUrl} from './../../../helpers/AssetHelpers';
 
 
+/**
+ * 
+ * @returns 
+ */
 const UserMenu = () => {
-
+    /**
+     * 
+     */
     const default_avatar = (true) ? 'blank.svg'  : 'blank-dark.svg';
 
+    /**
+     * 
+     */
 	return (
 		<>
             {/* begin::Menu Toggle */}
@@ -26,6 +35,7 @@ const UserMenu = () => {
                     />
                 </div>
             {/* end::Menu Toggle */}
+            {/* begin::User Menu */}
             <div
                 id="userMenu"
                 className="offcanvas offcanvas-end"
@@ -34,6 +44,7 @@ const UserMenu = () => {
                 tabIndex="-1"
                 aria-labelledby="offcanvasRightLabel"
             >
+                {/* begin::Offcanvas header */}
                 <div className="offcanvas-header">
                     <h5
                         id="offcanvasRightLabel"
@@ -48,8 +59,12 @@ const UserMenu = () => {
                         aria-label="Close"
                     ></button>
                 </div>
+                {/* end::Offcanvas header */}
+                {/* begin::Offcanvas body */}
                 <div className="offcanvas-body"></div>
+                {/* end::Offcanvas body */}
             </div>
+            {/* end::User Menu */}
 		</>
 	);
 };

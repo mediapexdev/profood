@@ -1,6 +1,6 @@
 import React from "react";
 import MainMenu from "./MainMenu";
-import ThemeMenu from "./ThemeMenu";
+import ThemeMenu from "./theme-mode/ThemeMenu";
 import UserMenu from "./UserMenu";
 import CartWrapper from "../../../components/cart/CartWrapper";
 
