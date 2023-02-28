@@ -32,8 +32,8 @@ export const SliceWidget = ({ slice}) => {
             </span> */}
           </div>
         </div>
-        <span className="text-success text-end fw-bold fs-5">
-          {slice.price} F cfa
+        <span className="text-end fw-bold fs-5" style={{color:'#dc601f'}}>
+          {slice.weight} kg
         </span>
         <div className="row align-items-center justify-content-center">
           <div className="col">

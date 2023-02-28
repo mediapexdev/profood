@@ -5,8 +5,9 @@ import { globalCounter, initChoice } from "../../../store";
 export const Elements=()=>{
     const choices=useSelector((state)=>state.counter.choices);
     const globalSliceCounter=globalCounter();
-    const slice_number=useSelector((state)=>state.slice.selectedBox.slices_number)
-    console.log(globalSliceCounter);
+    const selectedBox=useSelector((state)=>state.slice.selectedBox);
+    const slice_number=selectedBox.slices_number;
+    console.log(selectedBox);
     const dispatch=useDispatch();
     const initChoices=()=>{
         console.log('clicked');
@@ -14,16 +15,16 @@ export const Elements=()=>{
     }
     return(
         <div className="col">
-            <div className="row mb-3"><button className="btn btn-primary" onClick={()=>{addToCart(choices);initChoices()}}>Ajouter au panier</button></div>
+            <div className="row mb-3"><button className="btn btn-primary" onClick={()=>{addToCart(choices,selectedBox.id);initChoices()}}>Ajouter au panier</button></div>
             <div className="row mb-3"><button className="btn btn-warning" onClick={initChoices}>Réinitialiser mes choix</button></div>
             <div className="row">Evolution choix: {globalSliceCounter}/ {slice_number}</div>
         </div>
     );
 }
 
-function addToCart(choices){
+function addToCart(choices,selectedBox){
     const data={
-        "type_box_id":1,
+        "type_box_id":selectedBox,
         "user_id":1,
         "choices":choices
     }
