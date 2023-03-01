@@ -9,10 +9,12 @@ export const CartWidget = () => {
   const [showSlices,setShowSlices]=useState("active");
   const [boxes,setBoxes]=useState([]);
   const [slices,setSlices]=useState([]);
+  const [montantBox,setMontantBox]=useState(0);
+  const [montantSlice,setMontantSlice]=useState(0);
   const setSelection=(selected)=>{
     console.log('clicked slices')
     setSlectedType(selected);
-    if(selected==1){
+    if(selected===1){
       setShowBoxes("active");
       setShowSlices("");
     }
@@ -23,19 +25,28 @@ export const CartWidget = () => {
     console.log(selectedType);
   }
   useEffect(() => {
+    let value1=0;
+    let value2=0;
     api.get("get-cart/").then((res) => {
       setBoxes(res.data['boxes']);
       setSlices(res.data['slices']);
+      console.log(res.data['boxes']);
+      console.log(montantSlice+" "+montantBox);
     });
+    boxes.map((box)=> value1+=Number(box.type.price));
+    slices.map((slice)=> value2+=Number(slice.slice.price)*slice.quantity);
+    setMontantBox(value1);
+    setMontantSlice(value2);
   }, []);
-  console.log(slices);
+  let montantTotal=montantBox+montantSlice;
+  // console.log(boxes);
   return (
     <div className="card-body pt-0">
-      {selectedType==1 && <div className="table-responsive mb-8">
+      {selectedType===1 && <div className="table-responsive mb-8">
         <Table boxes={boxes}/>
       </div>
       }
-      {selectedType==0 && <div className="table-responsive mb-8">
+      {selectedType===0 && <div className="table-responsive mb-8">
         <Slices slices={slices} />
       </div>}
       <div className="d-flex flex-stack bg-success rounded-3 p-6 mb-11">
@@ -47,16 +58,16 @@ export const CartWidget = () => {
         </div>
         <div className="fs-6 fw-bold text-white text-end">
           <span className="d-block lh-1 mb-2" data-kt-pos-element="total">
-            $100.50
+            {montantBox}
           </span>
           <span className="d-block mb-2" data-kt-pos-element="discount">
-            -$8.00
+            {montantSlice}
           </span>
           <span className="d-block mb-9" data-kt-pos-element="tax">
-            $11.20
+            {montantTotal*2/100}
           </span>
           <span className="d-block fs-2qx lh-1" data-kt-pos-element="grant-total">
-            $93.46
+            {montantTotal+montantTotal*2/100}
           </span>
         </div>
       </div>
