@@ -42,7 +42,7 @@ export const Subtable = ({ slices }) => {
               className="fw-bold text-primary fs-2"
               data-kt-pos-element="item-total"
             >
-              {slice.slice.price}
+              {slice.slice.weight}
             </span>
           </td>
         </tr>
