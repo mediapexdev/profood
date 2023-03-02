@@ -17,6 +17,7 @@ const Index = () => {
 	 * 
 	 */
 	const [typesBoxList, setTypesBoxList] = useState([]);
+	const [categoriesList, setCategoriesList] = useState([]);
 
 	useEffect(() => {
 		api.get("/get-typesBox").then((res) => setTypesBoxList(res.data));
@@ -26,16 +27,11 @@ const Index = () => {
 	/**
 	 * 
 	 */
-	const [categoriesList, setCategoriesList] = useState([]);
-
-	/**
-	 * 
-	 */
 	return (
 		<>
 			<Header />
 			<div className="position-relative">
-				<div className="user-img1">
+				<div className="shape-img1">
 					<svg
 						width="1920"
 						viewBox="0 0 1857 327"

@@ -15,7 +15,7 @@ const TypesBoxListWidget = (params) => {
      */
     return (
         <div className="types-box-list-widget">
-            <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 gx-9 gy-9">
+            <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xl-4 g-10">
                 {
                     params.typesBoxList.map((typeBox) => (
                         <div

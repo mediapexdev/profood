@@ -12,27 +12,35 @@ import './styles/css/bannerWidget.css';
 import './styles/css/typeBox.css';
 import './styles/css/typeBoxWidget.css';
 import './styles/css/categoryWidget.css';
+import './styles/css/sliceWidget.css';
 import './styles/css/index.css';
 
-import CustomerHomePage from "./pages/customer/index";
-import Slices from "./pages/customer/slices";
 import NotFound from "./pages/NotFound";
+import CustomerHomePage from "./pages/customer/index";
+import SlicesByTypeBox from "./pages/customer/slices-by-type-box";
 import CategorySlice from "./pages/customer/categorySlice";
 
 
+/**
+ * 
+ * @returns 
+ */
 const App = () => {
-  return (
-    <>    
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<CustomerHomePage />} />
-          <Route path="*" element={<NotFound />} />
-          <Route path="/slices" element={<Slices />} />
-          <Route path="/slices/categories" element={<CategorySlice />} />
-        </Routes>
-      </BrowserRouter>
-    </>
-  );
+	/**
+	 * 
+	 */
+	return (
+    	<>    
+			<BrowserRouter>
+				<Routes>
+				<Route path="/" element={<CustomerHomePage />} />
+				<Route path="*" element={<NotFound />} />
+				<Route path="/slices" element={<SlicesByTypeBox />} />
+				<Route path="/slices/categories" element={<CategorySlice />} />
+				</Routes>
+			</BrowserRouter>
+    	</>
+	);
 };
 
 export default App;
