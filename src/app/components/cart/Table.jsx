@@ -72,7 +72,6 @@ export const Table = ({boxes}) => {
           className="fs-6 collapse ps-10"
           data-bs-parent="#kt_accordion_2"
         >
-          <tbody>
             <Subtable slices={box.box_slices}/>
             {/* {box.box_slices.map((slice)=>
               <tr key={slice.id} data-kt-pos-element="item">
@@ -118,7 +117,6 @@ export const Table = ({boxes}) => {
               </td>
               </tr>
             )} */}
-          </tbody>
         </div>
       </div>
       ))

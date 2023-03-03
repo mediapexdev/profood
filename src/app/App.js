@@ -18,7 +18,9 @@ import CustomerHomePage from "./pages/customer/index";
 import Slices from "./pages/customer/slices";
 import NotFound from "./pages/NotFound";
 import CategorySlice from "./pages/customer/categorySlice";
-
+import LoginForm from "./pages/customer/signin";
+import { app } from "../firebase";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 
 const App = () => {
   return (
@@ -29,6 +31,7 @@ const App = () => {
           <Route path="*" element={<NotFound />} />
           <Route path="/slices" element={<Slices />} />
           <Route path="/slices/categories" element={<CategorySlice />} />
+          <Route path="/signin" element={<LoginForm />} />
         </Routes>
       </BrowserRouter>
     </>

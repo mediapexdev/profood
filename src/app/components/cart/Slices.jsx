@@ -1,8 +1,9 @@
 export const Slices = ({ slices }) => {
     return (
+      <>
       <tbody>
         {slices.map((slice) => (
-          <tr data-kt-pos-element="item">
+          <tr key={slice.id} data-kt-pos-element="item">
             <td className="pe-0">
               <div className="d-flex align-items-center">
                 <img
@@ -46,6 +47,7 @@ export const Slices = ({ slices }) => {
           </tr>
         ))}
       </tbody>
+      </>
     );
   };
   

@@ -37,6 +37,7 @@ export const CartWidget = () => {
     slices.map((slice)=> value2+=Number(slice.slice.price)*slice.quantity);
     setMontantBox(value1);
     setMontantSlice(value2);
+    console.log(value2);
   }, []);
   let montantTotal=montantBox+montantSlice;
   // console.log(boxes);
