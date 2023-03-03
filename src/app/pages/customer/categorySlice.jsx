@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import api from "../../../api/api";
-import CategoryWidget from "../../components/CategoryWidget";
+import CategoryWidget from "../../components/categories/CategoryWidget";
 import Categories from "../../components/CategoySlice/categories";
 import { Elements } from "../../components/CategoySlice/elements";
 import SlicesList from "../../components/CategoySlice/slices";

@@ -9,15 +9,16 @@ import './styles/css/animations.css';
 import './styles/css/global.css';
 import './styles/css/header.css';
 import './styles/css/bannerWidget.css';
-import './styles/css/typeBox.css';
+// import './styles/css/typeBox.css';
 import './styles/css/typeBoxWidget.css';
 import './styles/css/categoryWidget.css';
 import './styles/css/sliceWidget.css';
 import './styles/css/index.css';
+import './styles/css/slices-by-type-box.css';
 
 import NotFound from "./pages/NotFound";
 import CustomerHomePage from "./pages/customer/index";
-import SlicesByTypeBox from "./pages/customer/slices-by-type-box";
+import SlicesByTypeBox from "./pages/slices-by-type-box/index";
 import CategorySlice from "./pages/customer/categorySlice";
 
 

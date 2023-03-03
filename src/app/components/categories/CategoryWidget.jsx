@@ -1,12 +1,15 @@
-import React from 'react';
+import React from "react";
 import { useNavigate } from 'react-router-dom';
 
-import {toAbsolutePublicUrl} from '../helpers/AssetHelpers';
+import {toAbsolutePublicUrl} from '../../helpers/AssetHelpers';
 
 
 const CategoryWidget = ({category}) => {
-
+    /**
+     * 
+     */
     const navigate = useNavigate();
+
 	/**
 	 * 
 	 */
@@ -39,6 +42,7 @@ const CategoryWidget = ({category}) => {
                         <div className="category-products-number-wrapper">
                             {/* <p className="category-products-number content-color font-sm">{this.props.category.slice_number} produits</p> */}
                             <p className="category-products-number content-color font-sm">10 produits</p>
+                            {/* <p className="category-products-number content-color font-sm">{slices_number}</p> */}
                         </div>
                     </div>
                     <div className="category-widget-buttons-wrapper">

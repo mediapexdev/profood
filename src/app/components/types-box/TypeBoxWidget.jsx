@@ -1,9 +1,9 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { changeBoxType } from '../../store';
+import { changeBoxType } from '../../../store';
 
-import {toAbsolutePublicUrl} from './../helpers/AssetHelpers';
+import {toAbsolutePublicUrl} from '../../helpers/AssetHelpers';
 
 
 /**
@@ -49,7 +49,7 @@ const TypeBoxWidget = ({typeBox}) => {
 							<h3 className="type-box-title card-title title-color font-md">{typeBox.wording}</h3>
 						</div>
 						<div className="type-box-slices-number-wrapper">
-							<p className="type-box-slices-number content-color font-sm">{typeBox.slices_number} découpes</p>
+							<span className="type-box-slices-number content-color font-sm">{typeBox.slices_number} découpes</span>
 						</div>
 						<div className='d-flex flex-row flex-nowrap align-items-center justify-content-between'>
 							<div className="type-box-price-wrapper font-sm">

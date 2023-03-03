@@ -1,7 +1,7 @@
 import React from "react";
 
 // import TypeBox from "../../../../components/cards/TypeBox";
-import TypeBoxWidget from "../../../../components/TypeBoxWidget";
+import TypeBoxWidget from "./TypeBoxWidget";
 
 
 /**

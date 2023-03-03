@@ -1,6 +1,6 @@
 import React from "react";
 
-import CategoryWidget from "../../../../components/CategoryWidget";
+import CategoryWidget from "./CategoryWidget";
 
 /**
  * 

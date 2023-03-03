@@ -4,8 +4,8 @@ import api from "../../../api/api";
 
 import Header from "./layout/Header";
 import MainBannerWidget from "./components/widgets/MainBannerWidget";
-import TypeBoxListWidget from "./components/widgets/TypesBoxListWidget";
-import CategoryListWidget from "./components/widgets/CategoryListWidget";
+import TypeBoxListWidget from "../../components/types-box/TypesBoxListWidget";
+import CategoryListWidget from "../../components/categories/CategoryListWidget";
 // import MainSliderWidget from "./components/widgets/MainSliderWidget";
 
 /**

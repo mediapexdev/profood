@@ -172,6 +172,7 @@
 
 /* */
 
+.type-box .type-box-title,
 .type-box-widget .type-box-title{
     font-family: "Quicksand","sans-serif";
     font-weight: bold;
@@ -179,12 +180,20 @@
     color: inherit;
 }
 
+.type-box .type-box-slices-number,
+.type-box .type-box-price-wrapper,
 .type-box-widget .type-box-slices-number,
 .type-box-widget .type-box-price-wrapper {
     font-weight: 600;
 }
 
-.type-box-widget .type-box-price-wrapper{
+.type-box .type-box-slices-number-wrapper,
+.type-box-widget .type-box-slices-number-wrapper {
+    margin-bottom: 1rem;
+}
+
+.type-box .type-box-price-wrapper,
+.type-box-widget .type-box-price-wrapper {
     color: var(--dark-primary-color);
 }
 

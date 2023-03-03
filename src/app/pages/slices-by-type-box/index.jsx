@@ -3,11 +3,12 @@ import { useSelector } from "react-redux";
 
 import api from "../../../api/api";
 
-import Header from "./layout/Header";
-import TypeBoxWidget from "../../components/TypeBoxWidget";
-import Categories from "../../components/categories/Categories";
+import Header from "../customer/layout/Header";
+import TypeBoxWidget from "../../components/types-box/TypeBoxWidget";
+import TypeBox from "./TypeBox";
+import Categories from "./Categories";
 import SlicesListWidget from "../../components/slices/SlicesListWidget";
-import { Elements } from "../../components/slices/elements";
+import { Controls } from "./Controls";
 
 /**
  * 
@@ -53,25 +54,21 @@ const SlicesByTypeBox = () => {
 			<Header />
 			<main>
 				<div className="container-fluid">
-					<section id="sectionSlices" className="section-slices section-boxed container-fluid px-0">
+					<section id="sectionSlices" className="section-slices section-boxed container-fluid pt-10 px-0">
 						<div className="section-container container-fluid px-0">
 							<div className="row">
-								<div className="col-12">
+								{/* <div className="col-12">
 									<TypeBoxWidget typeBox={typeBox} />
-								</div>
+								</div> */}
 								<div className="col-12">
-									<div className="row align-items-center justify-content-between">
-										<div className="col">
+									<div className="card mb-5 mb-xl-10">
+            							<div className="card-body pt-9 pb-0">
+											<TypeBox type_box={typeBox} />
+											<Controls />
 											<Categories categories={categories} />
-										</div>
-										<div className="col">
-											<Elements />
 										</div>
 									</div>
 								</div>
-								{/* <div className="col-12">
-									<Elements />
-								</div> */}
 								<div className="col-12">
 									<SlicesListWidget selectedCategory={selectedCategory} />
 								</div>
