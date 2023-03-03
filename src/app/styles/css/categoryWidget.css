@@ -83,9 +83,12 @@
     animation-name: rotateSmooth;
 }
 
+.category-widget .category-products-number {
+    font-weight: 600;
+}
+
 .category-widget .category-widget-button.btn {
     position: relative;
-
     background-color: var(--primary-color) !important;
 }
 

@@ -23,6 +23,7 @@ body > .background-overlay {
     /* background-color: #22282c; */
     /* background-image: url('./../../../../public/media/images/backgrounds/bg-light-retouched-3.jpg'); */
     background-image: url('./../../../../public/media/images/backgrounds/bg-dark-4.jpg');
+    /* background-image: url('./../../../../public/media/images/backgrounds/bg-dark-5.jpg'); */
 }
 
 [data-theme="dark"] body > .background-overlay {
@@ -37,25 +38,20 @@ body > .background-overlay {
 
 [data-theme="light"] body > .background-overlay {
     background-color: #fff;
-    /* background-image: radial-gradient(at center center, #0000003D 0%, #000000C9 100%); */
     /* background-image: radial-gradient(at center center, #ffffff3D 0%, #ffffffC9 100%); */
     opacity: 0.8;
-
-    /* background-color: hsla(0,0%,100%,.19);
-    -webkit-backdrop-filter: blur(42px);
-    backdrop-filter: blur(42px); */
 }
 
 /* */
 
-.user-img1 {
+.shape-img1 {
     position: fixed;
     top: 280px;
 }
 
 @media (min-width: 1400px){
 
-    .user-img1 {
+    .shape-img1 {
         top: 450px;
     }
 }
@@ -144,5 +140,5 @@ body > .background-overlay {
 } */
 
 .section-categories .section-body {
-    margin-top: calc(50px + (50 - 25) * ((100vw - 320px) / (1920 - 320)));
+    margin-top: calc(35px + (35 - 25) * ((100vw - 320px) / (1920 - 320)));
 }

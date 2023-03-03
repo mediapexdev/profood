@@ -1,6 +1,6 @@
 import React from "react";
 
-import CategoryWidget from "../../../../components/CategoryWidget";
+import CategoryWidget from "./CategoryWidget";
 
 /**
  * 
@@ -13,7 +13,7 @@ const CategoryListWidget = (params) => {
      */
 	return (
         <div className="category-list-widget">
-            <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 gy-10">
+            <div className="row row-cols-1 row-cols-sm-2 row-cols-xl-3 gy-10">
                 {
                     params.categoriesList.map((category) => (
                         <div

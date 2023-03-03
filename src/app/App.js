@@ -9,33 +9,41 @@ import './styles/css/animations.css';
 import './styles/css/global.css';
 import './styles/css/header.css';
 import './styles/css/bannerWidget.css';
-import './styles/css/typeBox.css';
+// import './styles/css/typeBox.css';
 import './styles/css/typeBoxWidget.css';
 import './styles/css/categoryWidget.css';
+import './styles/css/sliceWidget.css';
 import './styles/css/index.css';
+import './styles/css/slices-by-type-box.css';
 
-import CustomerHomePage from "./pages/customer/index";
-import Slices from "./pages/customer/slices";
 import NotFound from "./pages/NotFound";
+import CustomerHomePage from "./pages/customer/index";
+import SlicesByTypeBox from "./pages/slices-by-type-box/index";
 import CategorySlice from "./pages/customer/categorySlice";
 import LoginForm from "./pages/customer/signin";
 import { app } from "../firebase";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 
+/**
+ * 
+ * @returns 
+ */
 const App = () => {
-  return (
-    <>    
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<CustomerHomePage />} />
-          <Route path="*" element={<NotFound />} />
-          <Route path="/slices" element={<Slices />} />
-          <Route path="/slices/categories" element={<CategorySlice />} />
-          <Route path="/signin" element={<LoginForm />} />
-        </Routes>
-      </BrowserRouter>
-    </>
-  );
+	/**
+	 * 
+	 */
+	return (
+    	<>    
+			<BrowserRouter>
+				<Routes>
+				<Route path="/" element={<CustomerHomePage />} />
+				<Route path="*" element={<NotFound />} />
+				<Route path="/slices" element={<SlicesByTypeBox />} />
+				<Route path="/slices/categories" element={<CategorySlice />} />
+				</Routes>
+			</BrowserRouter>
+    	</>
+	);
 };
 
 export default App;

@@ -8,10 +8,8 @@
 }
 
 .type-box-widget {
-    cursor: pointer;
     -webkit-transition: all 400ms ease;
     transition: all 400ms ease;
-    /* background: url('./../../../../public/media/images/backgrounds/dashboard.png') 0% 0% / cover fixed; */
 
     /* color: #fff; */
 }
@@ -35,13 +33,6 @@
     -webkit-animation-delay: 600ms;
     animation-delay: 600ms;
 } */
-
-.type-box-widget:hover {
-    /* background-color: rgba(234,106,18,0.7); */
-    background-color: var(--primary-color);
-    color: #fff;
-    /* cursor: pointer; */
-}
 
 @media (min-width: 992px){
 
@@ -106,6 +97,7 @@
 }
 
 /* */
+
 .type-box-widget-image-wrapper {
     position: absolute;
     left: 0;
@@ -136,16 +128,16 @@
 @media (min-width: 576px){
 
     .type-box-widget-image-wrapper {
-        -webkit-transform: translateY(-45px);
-        transform: translateY(-45px);
+        -webkit-transform: translateY(-48px);
+        transform: translateY(-48px);
     }
 }
 
 @media (min-width: 768px){
 
     .type-box-widget-image-wrapper {
-        -webkit-transform: translateY(-55px);
-        transform: translateY(-55px);
+        -webkit-transform: translateY(-52px);
+        transform: translateY(-52px);
     }
 
     .type-box-widget-image {
@@ -167,8 +159,8 @@
 @media (min-width: 1200px){
 
     .type-box-widget-image-wrapper {
-        -webkit-transform: translateY(-65px);
-        transform: translateY(-65px);
+        -webkit-transform: translateY(-60px);
+        transform: translateY(-60px);
     }
 
     .type-box-widget-image {
@@ -180,6 +172,7 @@
 
 /* */
 
+.type-box .type-box-title,
 .type-box-widget .type-box-title{
     font-family: "Quicksand","sans-serif";
     font-weight: bold;
@@ -187,18 +180,28 @@
     color: inherit;
 }
 
-.type-box-widget .type-box-slices-number{
+.type-box .type-box-slices-number,
+.type-box .type-box-price-wrapper,
+.type-box-widget .type-box-slices-number,
+.type-box-widget .type-box-price-wrapper {
     font-weight: 600;
-    /* color: var(--primary-color); */
 }
 
-.type-box-widget .type-box-price-wrapper{
-    font-weight: 600;
+.type-box .type-box-slices-number-wrapper,
+.type-box-widget .type-box-slices-number-wrapper {
+    margin-bottom: 1rem;
+}
+
+.type-box .type-box-price-wrapper,
+.type-box-widget .type-box-price-wrapper {
     color: var(--dark-primary-color);
-    /* color: #fff; */
 }
 
-.type-box-widget:hover .type-box-slices-number,
-.type-box-widget:hover .type-box-price-wrapper {
-    color: inherit;
+.type-box-widget .type-box-widget-button.btn {
+    position: relative;
+    background-color: var(--primary-color) !important;
+}
+
+.type-box-widget .type-box-widget-button.btn:hover {
+    background-color: var(--dark-primary-color) !important;
 }

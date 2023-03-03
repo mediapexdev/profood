@@ -6,14 +6,19 @@
     /* background-image: url('./../../../../public/media/images/banners/home-banner-3.jpg'); */
     /* background-image: url('./../../../../public/media/images/banners/home-banner-3.jpg'); */
     /* background-image: url('./../../../../public/media/images/banners/scooter-livraison-Profood.png'); */
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    /* background-position: center center; */
+    /* background-repeat: no-repeat; */
+    /* background-size: cover; */
+
+    /* background-image: linear-gradient(to right,#c64e03,#d89031); */
+    border-radius: var(--bs-card-border-radius);
+    /* color: #fff; */
 }
 
 .main-banner-widget .background-overlay {
     background-color: transparent;
-    background-image: radial-gradient(at center center, #0000003D 0%, #000000C9 100%);
+    /* background-image: radial-gradient(at center center, #0000003D 0%, #000000C9 100%); */
+    background-image: linear-gradient(to right,#c64e03,#d89031);
     opacity: 0.0;
     border-radius: var(--bs-card-border-radius);
 }

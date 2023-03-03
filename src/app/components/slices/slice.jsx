@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { decreaseSlice, globalCounter, incrementSlice } from "../../../store";
 
-export const SliceWidget = ({ slice}) => {
+export const SliceBox = ({ slice}) => {
   let choices=useSelector((state)=>state.counter.choices);
   const globalSliceCounter=globalCounter();
   const type_box_number=useSelector((state)=>state.slice.selectedBox.slices_number)
