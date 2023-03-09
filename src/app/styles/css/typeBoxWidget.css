@@ -73,7 +73,7 @@
     }
 }
 
-.type-box-widget:hover .type-box-widget-image {
+.type-box-widget:hover .type-box-image {
     /* -webkit-animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
     /* animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
 
@@ -98,27 +98,30 @@
 
 /* */
 
-.type-box-widget-image-wrapper {
+.type-box-widget .type-box-image-wrapper {
     position: absolute;
     left: 0;
     right: 0;
-    text-align: center;
     -webkit-transform: translateY(-40px);
     transform: translateY(-40px);
 }
 
-.type-box-widget-image {
+.type-box-image-wrapper {
+    text-align: center;
+}
+
+.type-box-image {
     height: 120px;
     width: 120px;
     min-width: 120px;
+    border-radius: 50%;
     -o-object-fit: cover;
     object-fit: cover;
-    border-radius: 50%;
 }
 
 @media (min-width: 420px){
 
-    .type-box-widget-image {
+    .type-box-image {
         height: 125px;
         width: 125px;
         min-width: 125px;
@@ -127,7 +130,7 @@
 
 @media (min-width: 576px){
 
-    .type-box-widget-image-wrapper {
+    .type-box-widget .type-box-image-wrapper {
         -webkit-transform: translateY(-48px);
         transform: translateY(-48px);
     }
@@ -135,12 +138,12 @@
 
 @media (min-width: 768px){
 
-    .type-box-widget-image-wrapper {
+    .type-box-widget .type-box-image-wrapper {
         -webkit-transform: translateY(-52px);
         transform: translateY(-52px);
     }
 
-    .type-box-widget-image {
+    .type-box-image {
         height: 135px;
         width: 135px;
         min-width: 135px;
@@ -149,7 +152,7 @@
 
 @media (min-width: 992px){
 
-    .type-box-widget-image {
+    .type-box-image {
         height: 140px;
         width: 140px;
         min-width: 140px;
@@ -158,12 +161,12 @@
 
 @media (min-width: 1200px){
 
-    .type-box-widget-image-wrapper {
+    .type-box-widget .type-box-image-wrapper {
         -webkit-transform: translateY(-60px);
         transform: translateY(-60px);
     }
 
-    .type-box-widget-image {
+    .type-box-image {
         height: 160px;
         width: 160px;
         min-width: 160px;

@@ -16,18 +16,18 @@ const ThemeMenu = () => {
 	 */
 	// const [mode, setMode] = useState(localStorage.getItem('data-theme'));
 	const [mode, setMode] = useState(ThemeModeComponent.getMode());
-	const [current_mode, changeMode] = useState(ThemeModeComponent.getMode());
 
-    useEffect(() => {
-        changeMode(() => {
-
-            // Store mode value in storage
-            if(localStorage) {
-                // localStorage.setItem('data-theme', mode);
-                ThemeModeComponent.setMode(mode);
-            }
-        });
-    });
+    /**
+     * 
+     */
+    const changeMode = () => {
+        // Store mode value in storage
+        if(localStorage) {
+            // localStorage.setItem('data-theme', mode);
+            ThemeModeComponent.setMode(mode);
+        }
+    };
+    useEffect(() => changeMode() , [mode]);
 
     /**
      * 

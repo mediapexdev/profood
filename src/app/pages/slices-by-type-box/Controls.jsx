@@ -40,16 +40,16 @@ export const Controls = () => {
      * 
      */
     return(
-        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between position-relative mb-3 border">
+        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between position-relative mb-5 mb-lg-8 border">
 
             <Progressbar current_value={globalSliceCounter} min_value={0} max_value={slice_number} />
 
-            <div className="align-self-start d-flex flex-row align-items-center justify-content-between gap-5">
+            <div className="align-self-start d-flex flex-row align-items-center justify-content-between gap-5 mt-5 mt-md-0">
                 <button
                     className="btn btn-primary"
                     onClick={() => {
                         addToCart(choices, selectedBox.id);
-                        initChoices()
+                        initChoices();
                     }}
                 >
                     <span>Ajouter au panier</span>

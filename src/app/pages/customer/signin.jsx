@@ -3,6 +3,7 @@ import {
   faPersonCircleCheck,
   faPhoneAlt,
   faStopwatch,
+  faLock
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";

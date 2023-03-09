@@ -22,14 +22,14 @@ const CategoryWidget = ({category}) => {
     return (
         <div className="category-widget card">
             <div className="category-widget-container card-container d-flex flex-row-reverse align-items-center">
-                <div className="category-widget-image-wrapper">
+                <div className="category-image-wrapper">
                     <img
-                        className="category-widget-image blur-shadow position-start"
+                        className="category-image blur-shadow position-start"
                         src={toAbsolutePublicUrl('/media/images/illustrations/categories/' + category.id + '.jpg')}
                         alt={category.wording}
                     />
                     <img
-                        className="category-widget-image"
+                        className="category-image"
                         src={toAbsolutePublicUrl('/media/images/illustrations/categories/' + category.id + '.jpg')}
                         alt={category.wording}
                     />

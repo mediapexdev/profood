@@ -4,7 +4,7 @@ export default axios.create({
   baseURL:
     process.env.NODE_ENV === "production"
       ? "https://api-profood.herokuapp.com/"
-      : "http://localhost:8000/api/",
+      : "http://192.168.1.4:8000/api/",
   
   // withCredentials: true,
   // headers: {

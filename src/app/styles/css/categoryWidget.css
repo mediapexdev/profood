@@ -14,7 +14,7 @@
     }
 }
 
-.category-widget-image-wrapper {
+.category-image-wrapper {
     position: relative;
     padding-right: calc(var(--bs-gutter-x) * 0.5);
 }
@@ -60,7 +60,7 @@
     }
 }
 
-.category-widget .category-widget-image:hover {
+.category-widget .category-image:hover {
     /* -webkit-animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
     /* animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
 

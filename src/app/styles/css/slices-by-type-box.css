@@ -5,3 +5,11 @@
 .section-slices {
     padding-bottom: calc(25px + (30 - 25) * ((100vw - 320px) / (1920 - 320)));
 }
+
+.heading {
+    border-radius: var(--bs-card-border-radius);
+}
+
+.heading .card-body {
+    padding: 2rem 1.25rem 0 1.25rem;
+}
