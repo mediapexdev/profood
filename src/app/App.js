@@ -20,9 +20,8 @@ import NotFound from "./pages/NotFound";
 import CustomerHomePage from "./pages/customer/index";
 import SlicesByTypeBox from "./pages/slices-by-type-box/index";
 import CategorySlice from "./pages/customer/categorySlice";
-import LoginForm from "./pages/customer/signin";
-import { app } from "../firebase";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
+import SignupForm from "./pages/customer/signup";
+import LoginForm from "./components/signin/LoginForm";
 
 /**
  * 
@@ -40,6 +39,8 @@ const App = () => {
 				<Route path="*" element={<NotFound />} />
 				<Route path="/slices" element={<SlicesByTypeBox />} />
 				<Route path="/slices/categories" element={<CategorySlice />} />
+				<Route path="/signup" element={<SignupForm />} />
+				<Route path="/signin" element={<LoginForm />} />
 				</Routes>
 			</BrowserRouter>
     	</>
