@@ -37,7 +37,7 @@ const App = () => {
 				<Routes>
 				<Route path="/" element={<CustomerHomePage />} />
 				<Route path="*" element={<NotFound />} />
-				<Route path="/slices" element={<SlicesByTypeBox />} />
+				<Route path="/slices/typeBoxId" element={<SlicesByTypeBox/>} />
 				<Route path="/slices/categories" element={<CategorySlice />} />
 				<Route path="/signup" element={<SignupForm />} />
 				<Route path="/signin" element={<LoginForm />} />

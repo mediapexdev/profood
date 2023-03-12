@@ -4,30 +4,36 @@ import { useSelector } from "react-redux";
 import api from "../../../api/api";
 
 import Header from "../customer/layout/Header";
-import TypeBoxWidget from "../../components/types-box/TypeBoxWidget";
 import TypeBox from "./TypeBox";
 import Categories from "./Categories";
 import SlicesListWidget from "../../components/slices/SlicesListWidget";
 import { Controls } from "./Controls";
+import { useParams } from "react-router-dom";
 
 /**
  * 
  * @returns 
  */
 const SlicesByTypeBox = () => {
+	const {typeBoxId}=useParams();
 	/**
 	 * 
 	 */
 	const [typeBox, setTypeBox] = useState([]);
 	const [categories, setCategories] = useState([]);
+	// const selectedTypeBoxId = useSelector(
+    // 	(state) => state.slice.selectedBox
+  	// );
+	console.log(typeBoxId);
 
 	/**
 	 * 
 	 */
 	useEffect(() => {
-		api.get("get-slices-by-Box/1").then((res) => {
+		api.get("get-slices-by-Box/"+typeBoxId,{"Access-Control-Allow-Origin" : 'http://127.0.0.1:3000'}).then((res) => {
 			setTypeBox(res.data["typeBox"]);
 			setCategories(res.data["categories"]);
+			console.log(res)
 		});
 	}, []);
 
@@ -64,7 +70,7 @@ const SlicesByTypeBox = () => {
 									<div className="card mb-5 mb-xl-10">
             							<div className="card-body pt-9 pb-0">
 											<TypeBox type_box={typeBox} />
-											<Controls />
+											<Controls selectedBox={typeBox}/>
 											<Categories categories={categories} />
 										</div>
 									</div>

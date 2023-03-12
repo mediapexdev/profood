@@ -3,12 +3,13 @@ import { globalCounter, initChoice } from "../../../store";
 
 import api from "../../../api/api";
 import Progressbar from "./Progressbar";
+import { useState } from "react";
 
 /**
  * 
  * @returns 
  */
-export const Controls = () => {
+export const Controls = ({selectedBox}) => {
     /**
      * 
      */
@@ -17,7 +18,8 @@ export const Controls = () => {
 
     const choices = useSelector((state)=>state.counter.choices);
 
-    const selectedBox = useSelector((state) => state.slice.selectedBox);
+    // const selectedBoxId = useSelector((state) => state.slice.selectedBox);
+    // const [selectedBox,setSelectedBox]=useState();
 
     const slice_number = selectedBox.slices_number;
 

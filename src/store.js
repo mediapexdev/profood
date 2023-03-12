@@ -8,7 +8,7 @@ import { configureStore, createAction, createReducer } from "@reduxjs/toolkit";
  */
 const initialState = {
 	selectedCategory: 1,
-	selectedBox: null,
+	selectedBox: 1,
 };
 
 /**
@@ -78,6 +78,7 @@ const sliceReducer = createReducer(initialState, (builder) => {
     })
     .addCase(changeBoxType, (state, action) => {
       state.selectedBox = action.selectedBox;
+	  console.log(action.selectedBox)
       return action.payload;
     });
 });
