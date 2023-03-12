@@ -45,7 +45,7 @@ const SliceWidget = ({slice}) => {
                         className="slice-image img-fluid"
                         // src={toAbsolutePublicUrl('/media/images/illustrations/slices/boeuf/filet-de-boeuf.png')}
                         // src={toAbsolutePublicUrl('/media/images/illustrations/slices/' + slice.category_id + '/' + slice.id + '.png')}
-                        src={toAbsolutePublicUrl('/media/images/illustrations/slices/boeuf/' + slice.id + '.png')}
+                        src={toAbsolutePublicUrl('/media/images/illustrations/slices/' + slice.illustration)}
                         alt={slice.wording}
                     />
                 </div>
