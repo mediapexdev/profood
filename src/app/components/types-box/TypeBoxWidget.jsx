@@ -20,7 +20,7 @@ const TypeBoxWidget = ({typeBox}) => {
 	 */
 	const handleBoxClick = () => {
 		dispatch({type:changeBoxType.toString(), selectedBox:typeBox.id});
-		navigate('/slices/:'+typeBox.id);
+		navigate('/slices/'+typeBox.id);
 	}
 	/**
 	 * 
