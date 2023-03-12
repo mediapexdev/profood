@@ -10,6 +10,6 @@ export default axios.create({
   headers: {
     Accept: "*/*",
     "Content-Type": "application/json",
-    "Access-Control-Allow-Origin" : ['http://127.0.0.1:3000','https://profood.vercel.app']
+    "Access-Control-Allow-Origin" : 'https://profood.vercel.app'
   },
 });
