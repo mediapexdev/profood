@@ -20,13 +20,14 @@ const Progressbar = ({current_value, max_value, min_value}) => {
                 </div>
                 <div className="progress h-8px mx-3 w-100 bg-light mb-3">
                     <div
-                        className="progress-bar bg-success rounded h-8px"
+                        className="progress-bar rounded h-8px"
                         role="progressbar"
                         aria-valuenow={current_value}
                         aria-valuemin={min_value}
                         aria-valuemax={max_value}
                         style={{
-                            width: `${current_value}0%`
+                            width: `${current_value}0%`,
+                            backgroundImage: 'linear-gradient(to right,#c64e03,#d89031)'
                         }}
                     ></div>
                 </div>

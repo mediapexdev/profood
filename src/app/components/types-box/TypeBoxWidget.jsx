@@ -31,14 +31,14 @@ const TypeBoxWidget = ({typeBox}) => {
 			// onClick={handleBoxClick}
 		>
 			<div className="type-box-widget-container card-container">
-				<div className="type-box-widget-image-wrapper">
+				<div className="type-box-image-wrapper">
 					<img
-						className="type-box-widget-image img-fluid blur-shadow position-bottom"
+						className="type-box-image img-fluid blur-shadow position-bottom"
 						src={toAbsolutePublicUrl('/media/images/illustrations/boxes/' + typeBox.id + '.jpg')}
 						alt={typeBox.wording}
 					/>
 					<img
-						className="type-box-widget-image img-fluid"
+						className="type-box-image img-fluid"
 						src={toAbsolutePublicUrl('/media/images/illustrations/boxes/' + typeBox.id + '.jpg')}
 						alt={typeBox.wording}
 					/>
@@ -53,7 +53,8 @@ const TypeBoxWidget = ({typeBox}) => {
 						</div>
 						<div className='d-flex flex-row flex-nowrap align-items-center justify-content-between'>
 							<div className="type-box-price-wrapper font-sm">
-								<span className='type-box-price me-2'>{typeBox.price}</span>
+								{/* <span className='type-box-price me-2'>{typeBox.price}</span> */}
+								<span className='type-box-price me-2'>{ new Intl.NumberFormat('fr-FR').format(typeBox.price)}</span>
 								<small className='type-box-price-currency'>Fcfa</small>
 							</div>
 							<div className="type-box-widget-buttons-wrapper">

@@ -20,8 +20,8 @@ const Index = () => {
 	const [categoriesList, setCategoriesList] = useState([]);
 
 	useEffect(() => {
-		api.get("/get-typesBox").then((res) => setTypesBoxList(res.data));
-		api.get("/get-categories").then((res) => setCategoriesList(res.data));
+		api.get("/get-typesBox", {}).then((res) => setTypesBoxList(res.data)).catch((error) => console.log(error));
+		api.get("/get-categories").then((res) => setCategoriesList(res.data)).catch((error) => console.log(error));
 	}, []);
 
 	/**

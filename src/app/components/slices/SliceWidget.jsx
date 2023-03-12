@@ -40,9 +40,9 @@ const SliceWidget = ({slice}) => {
     return (
         <div className="slice-widget card h-100">
             {/* <div className="slice-widget-container card-container d-flex flex-column align-items-center"> */}
-                <div className="slice-widget-image-wrapper">
+                <div className="slice-image-wrapper">
                     <img
-                        className="slice-widget-image img-fluid"
+                        className="slice-image img-fluid"
                         // src={toAbsolutePublicUrl('/media/images/illustrations/slices/boeuf/filet-de-boeuf.png')}
                         // src={toAbsolutePublicUrl('/media/images/illustrations/slices/' + slice.category_id + '/' + slice.id + '.png')}
                         src={toAbsolutePublicUrl('/media/images/illustrations/slices/boeuf/' + slice.id + '.png')}

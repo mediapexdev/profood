@@ -67,7 +67,7 @@ const SlicesByTypeBox = () => {
 									<TypeBoxWidget typeBox={typeBox} />
 								</div> */}
 								<div className="col-12">
-									<div className="card mb-5 mb-xl-10">
+									<div className="heading card mb-5 mb-xl-10">
             							<div className="card-body pt-9 pb-0">
 											<TypeBox type_box={typeBox} />
 											<Controls selectedBox={typeBox}/>

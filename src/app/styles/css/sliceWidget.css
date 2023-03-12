@@ -13,14 +13,14 @@
                 0 9px 28px 8px rgb(0 0 0 / 5%) !important; */
 }
 
-.slice-widget .slice-widget-image-wrapper {
+.slice-widget .slice-image-wrapper {
     /* width: 70%; */
     /* width: 100px; */
     /* margin: 0 auto; */
     padding-top: 12px;
 }
 
-.slice-widget .slice-widget-image-wrapper img {
+.slice-widget .slice-image-wrapper img {
     display: block;
     margin: 0 auto;
     width: 70%;

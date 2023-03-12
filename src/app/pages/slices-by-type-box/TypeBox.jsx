@@ -16,20 +16,20 @@ const TypeBox = ({type_box}) => {
             <div className="type-box d-flex flex-wrap flex-sm-nowrap mb-5">
 				
 				<div className="me-7 mb-4">
-					<div className="symbol symbol-100px symbol-lg-160px symbol-fixed position-relative">
-						{/* <img src="http://localhost:8001/assets/media/svg/avatars/blank.svg" alt="Avatar" /> */}
+					<div className="type-box-image-wrapper">
 						<img
+                            className="type-box-image"
                             src={toAbsolutePublicUrl('/media/images/illustrations/boxes/' + type_box.id + '.jpg')}
 						    alt={type_box.wording}
                         />
 					</div>
 				</div>
 
-				<div className="flex-grow-1">
+				<div className="flex-grow-1 pt-2">
 					<div className="d-flex justify-content-between align-items-start flex-wrap mb-2">
                         <div className="type-box-infos d-flex flex-column">
                             <div className="type-box-title-wrapper">
-							    <h3 className="type-box-title card-title title-color font-md">{type_box.wording}</h3>
+							    <h3 className="type-box-title card-title title-color fs-2">{type_box.wording}</h3>
 						    </div>
                             <div className="d-flex flex-column flex-wrap">
                                 <div className="type-box-slices-number-wrapper d-flex align-items-center">
@@ -50,7 +50,7 @@ const TypeBox = ({type_box}) => {
                                         </svg>
                                     </span> */}
                                     <span>
-                                        <span className='type-box-price me-2'>{type_box.price}</span>
+                                        <span className='type-box-price me-2'>{new Intl.NumberFormat('fr-FR').format(type_box.price)}</span>
                                         <small className='type-box-price-currency'>Fcfa</small>
                                     </span>
 							    </div>
