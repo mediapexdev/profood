@@ -14,6 +14,7 @@ export const CartWidget = () => {
   const [montantSlice,setMontantSlice]=useState(0);
   const [isCartEmpty,setIsCartEmpty]=useState(true);
   const token=localStorage.getItem('token');
+  let montantTotal=0;
   const setSelection=(selected)=>{
     console.log('clicked slices')
     setSlectedType(selected);
@@ -28,8 +29,6 @@ export const CartWidget = () => {
     console.log(selectedType);
   }
   useEffect(() => {
-    let value1=0;
-    let value2=0;
     console.log(token);
     api.get('/get-cart',{
       headers:{
@@ -43,16 +42,19 @@ export const CartWidget = () => {
           setSlices(res.data['slices']);
           console.log(res.data['boxes']);
           console.log(montantSlice+" "+montantBox);
-        }
+              }
       });
-    
+  }, []);
+  useEffect(()=>{
+    let value1=0;
+    let value2=0;
     boxes.map((box)=> value1+=Number(box.type.price));
     slices.map((slice)=> value2+=Number(slice.slice.price)*slice.quantity);
     setMontantBox(value1);
     setMontantSlice(value2);
     console.log(value2);
-  }, []);
-  let montantTotal=montantBox+montantSlice;
+    montantTotal=montantBox+montantSlice;
+  })
   // console.log(boxes);
   if(isCartEmpty){
     return(
