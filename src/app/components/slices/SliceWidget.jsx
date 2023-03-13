@@ -29,7 +29,7 @@ const SliceWidget = ({slice}) => {
      * 
      */
     const addSlice = () => {
-        if(type_box_number > globalSliceCounter) {
+        if(type_box_number < globalSliceCounter) {
             dispatch({ type: incrementSlice.toString(), slice: slice})
         }
     };
