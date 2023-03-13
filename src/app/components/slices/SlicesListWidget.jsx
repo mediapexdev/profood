@@ -7,7 +7,7 @@ import SliceWidget from "./SliceWidget";
  * @param {*} param0 
  * @returns 
  */
-const SlicesWidgetList = ({ selectedCategory }) => {
+const SlicesWidgetList = ({ selectedCategory,slices_number}) => {
 	/**
 	 * 
 	 */
@@ -18,7 +18,7 @@ const SlicesWidgetList = ({ selectedCategory }) => {
 					<div
 						key={slice.id}
 						className="">
-						<SliceWidget slice={slice} />
+						<SliceWidget slice={slice} slices_number={slices_number}/>
 					</div>
       			))}
     		</div>

@@ -24,18 +24,18 @@ const SlicesByTypeBox = () => {
 	// const selectedTypeBoxId = useSelector(
     // 	(state) => state.slice.selectedBox
   	// );
-	console.log(typeBoxId);
 
 	/**
 	 * 
 	 */
 	useEffect(() => {
-		api.get("get-slices-by-Box/"+typeBoxId,{"Access-Control-Allow-Origin" : 'http://127.0.0.1:3000'}).then((res) => {
+		api.get("get-slices-by-Box/"+typeBoxId).then((res) => {
 			setTypeBox(res.data["typeBox"]);
 			setCategories(res.data["categories"]);
 			console.log(res)
 		});
 	}, []);
+	console.log(typeBox.slices_number);
 
 	/**
 	 * 
@@ -76,7 +76,7 @@ const SlicesByTypeBox = () => {
 									</div>
 								</div>
 								<div className="col-12">
-									<SlicesListWidget selectedCategory={selectedCategory} />
+									<SlicesListWidget selectedCategory={selectedCategory} slices_number={typeBox.slices_number}/>
 								</div>
 							</div>
 						</div>

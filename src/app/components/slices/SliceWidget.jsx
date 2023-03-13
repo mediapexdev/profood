@@ -9,7 +9,7 @@ import PlusIcon from '../svg/PlusIcon';
 import { toAbsolutePublicUrl } from '../../helpers/AssetHelpers';
 
 
-const SliceWidget = ({slice}) => {
+const SliceWidget = ({slice,slices_number}) => {
     /**
      * 
      */
@@ -17,7 +17,7 @@ const SliceWidget = ({slice}) => {
 
     const globalSliceCounter = globalCounter();
 
-    const type_box_number = useSelector((state) => state.slice.selectedBox.slices_number);
+    // const type_box_number = useSelector((state) => state.slice.selectedBox.slices_number);
 
     const slice_update = choices.find((choice) => choice.slice.id === slice.id);
 
@@ -29,8 +29,8 @@ const SliceWidget = ({slice}) => {
      * 
      */
     const addSlice = () => {
-        if(type_box_number < globalSliceCounter) {
-            dispatch({ type: incrementSlice.toString(), slice: slice})
+        if(slices_number > globalSliceCounter) {
+            dispatch({ type: incrementSlice.toString(), slice: slice});
         }
     };
 
