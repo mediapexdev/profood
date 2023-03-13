@@ -3,7 +3,7 @@ import axios from "axios";
 export default axios.create({
   baseURL:
     process.env.NODE_ENV === "production"
-      ? "https://api-profood.herokuapp.com/"
+      ? "https://api-profood.herokuapp.com/api/"
       : "http://localhost:8000/api/",
   
   // withCredentials: true,
