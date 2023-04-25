@@ -21,6 +21,7 @@ const SlicesByTypeBox = () => {
 	 */
 	const [typeBox, setTypeBox] = useState([]);
 	const [categories, setCategories] = useState([]);
+	const token=localStorage.getItem('token');
 	// const selectedTypeBoxId = useSelector(
     // 	(state) => state.slice.selectedBox
   	// );
@@ -34,6 +35,13 @@ const SlicesByTypeBox = () => {
 			setCategories(res.data["categories"]);
 			console.log(res)
 		});
+		api.get('/user',{
+			headers:{
+			  Authorization:`Bearer ${token}`,
+			}
+		  }).then(response => {
+			console.log(response.data);
+		  });
 	}, []);
 	console.log(typeBox.slices_number);
 

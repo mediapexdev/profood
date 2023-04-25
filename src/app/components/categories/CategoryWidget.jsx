@@ -14,7 +14,7 @@ const CategoryWidget = ({category}) => {
 	 * 
 	 */
 	const handleCategoryClick = () => {
-		navigate('/slices/categories');
+		navigate('/slices/categories/'+category.id);
 	}
     /**
      * 

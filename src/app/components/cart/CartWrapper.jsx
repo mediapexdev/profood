@@ -87,6 +87,7 @@ const CartWrapper = () => {
                 {/* end::Offcanvas header */}
                 {/* begin::Offcanvas body */}
                 <div className="offcanvas-body">
+                    RIEN
                     <CartWidget />
                 </div>
                 {/* end::Offcanvas body */}

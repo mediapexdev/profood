@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import api from "../../../api/api";
 import CategoryWidget from "../../components/categories/CategoryWidget";
 import Categories from "../../components/CategoySlice/categories";
@@ -8,6 +9,7 @@ import SlicesList from "../../components/CategoySlice/slices";
 
 
 const CategorySlice = () => {
+  const {category_id}=useParams();
   const [categories, setCategories] = useState([]);
   useEffect(() => {
     api.get("get-slices-by-category").then((res) => {

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import api from "../../../api/api";
+import Paytech from "./Paytech";
 import { Slices } from "./Slices";
 import { Table } from "./Table";
 
@@ -55,7 +56,6 @@ export const CartWidget = () => {
     console.log(value2);
     montantTotal=montantBox+montantSlice;
   })
-  // console.log(boxes);
   if(isCartEmpty){
     return(
       <div className="card-body pt-0">
@@ -66,6 +66,7 @@ export const CartWidget = () => {
   else{
     return (
       <div className="card-body pt-0">
+        RIEN
         {selectedType===1 && <div className="table-responsive mb-8">
           <Table boxes={boxes}/>
         </div>
@@ -125,7 +126,8 @@ export const CartWidget = () => {
               <span className="fs-7 fw-bold d-block">E-Wallet</span>
             </label>
           </div>
-          <button className="btn btn-primary fs-1 w-100 py-4">Commander</button>
+          <button className="btn btn-primary fs-1 w-100 py-4" id="pay" onclick="buy(1)">Commander</button>
+          <Paytech />
         </div>
       </div>
     );

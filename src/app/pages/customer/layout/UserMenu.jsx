@@ -1,4 +1,5 @@
 import React from "react";
+import { CartWidget } from "../../../components/cart/Cart";
 // import Link from "react-router-dom";
 // import { Outlet, Link } from "react-router-dom";
 
@@ -61,7 +62,7 @@ const UserMenu = () => {
                 </div>
                 {/* end::Offcanvas header */}
                 {/* begin::Offcanvas body */}
-                <div className="offcanvas-body"></div>
+                <div className="offcanvas-body"><CartWidget /></div>
                 {/* end::Offcanvas body */}
             </div>
             {/* end::User Menu */}
