@@ -1,0 +1,8 @@
+@charset "UTF-8";
+
+/* */
+
+ion-header ion-img {
+    width: calc(100px + (130 - 100) * ((100vw - 320px) / (1920 - 320)));
+    height: auto;
+}

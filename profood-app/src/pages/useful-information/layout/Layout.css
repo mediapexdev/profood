@@ -1,0 +1,34 @@
+@charset "UTF-8";
+
+/* */
+
+.useful-information-content {
+    background: var(--ion-background-color);
+}
+
+.useful-information-content ion-text {
+    background: var(--ion-background-color);
+    font-family: "Inter", "sans-serif" !important;
+}
+
+.useful-information-content ion-text p {
+    line-height: 1.6rem;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.useful-information-content.privacy-policy-content ion-text .title-wrapper,
+.useful-information-content.terms-and-conditions-content ion-text .title-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.useful-information-content.privacy-policy-content ion-text .icon-wrapper,
+.useful-information-content.terms-and-conditions-content ion-text .icon-wrapper {
+    height: 18px;
+    width: 18px;
+    margin-top: 7px;
+    color: var(--ion-color-primary);
+}

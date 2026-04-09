@@ -1,0 +1,11 @@
+@charset "UTF-8";
+
+/* */
+
+.slice-list-widget.cart-slice-list-widget {
+    margin-top: 15px;
+}
+
+.slice-list-widget.cart-slice-list-widget ion-col {
+    margin-bottom: 15px;
+}

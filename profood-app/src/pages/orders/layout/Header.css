@@ -1,0 +1,35 @@
+@charset "UTF-8";
+
+/* */
+
+.orders-page-header .orders-info-toolbar {
+    --min-height: 40px;
+}
+
+.orders-page-header .orders-info-toolbar .orders-info,
+.orders-page-header .orders-info-toolbar .orders-count,
+.orders-page-header .orders-info-toolbar .btn-refresh {
+    font-family: "Mulish","sans-serif";
+}
+
+.orders-page-header .orders-info-toolbar .orders-count {
+    --padding-top: 5px;
+    --padding-bottom: 5px;
+    --padding-end: 8px;
+    --padding-start: 8px;
+    margin-right: 0.4rem;
+}
+
+[data-theme="dark"] .orders-page-header .orders-info-toolbar .orders-count {
+    --color: #121212;
+}
+
+[data-theme="light"] .orders-page-header .orders-info-toolbar .orders-count {
+    --color: #fefefe;
+    font-weight: 600;
+}
+
+.orders-page-header .orders-info-toolbar .btn-refresh {
+    --box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    --border-radius: 4px;
+}

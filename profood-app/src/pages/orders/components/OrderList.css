@@ -1,0 +1,10 @@
+@charset "UTF-8";
+
+/* */
+.order-list-widget {
+    margin-top: 15px;
+}
+
+.order-list-widget ion-col {
+    margin-bottom: 15px;
+}

@@ -1,0 +1,155 @@
+@charset "UTF-8";
+
+/* */
+
+.category-details {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0 calc(2rem * 0.5) calc(0.5rem * 0.5) calc(2rem * 0.5);
+    border-radius: 0 !important;
+    contain: layout;
+    overflow: visible;
+    -webkit-transition: all 400ms ease;
+    transition: all 400ms ease;;
+}
+
+/* .category-details::after {
+    left: 0;
+    bottom: -5px;
+    background-position: left 0 top -2px;
+    position: absolute;
+    width: 100%;
+    height: 5px;
+    --background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAHBAMAAADzDtBxAAAAD1BMVEUAAAAAAAAAAAAAAAAAAABPDueNAAAABXRSTlMUCS0gBIh/TXEAAAAaSURBVAjXYxCEAgY4UIICBmMogMsgFLtAAQCNSwXZKOdPxgAAAABJRU5ErkJggg==);
+    background-repeat: repeat-x;
+    content: "";
+} */
+
+.category-details .category-image-wrapper {
+    position: relative;
+    display: flex;
+    padding: 0;
+}
+
+.category-details .category-image-wrapper img {
+    width: 64px;
+    height: 64px;
+    max-width: 64px;
+    max-height: 64px;
+    -o-object-fit: contain;
+    object-fit: contain;
+    margin: auto;
+    border-radius: 50%;
+    text-align: center;
+    z-index: 10;
+}
+
+@media (min-width: 576px){
+
+    .category-details .category-image-wrapper img {
+        width: 72px;
+        height: 72px;
+        max-width: 72px;
+        max-height: 72px;
+    }
+}
+
+@media (min-width: 768px){
+
+    .category-details .category-image-wrapper img {
+        width: 76px;
+        height: 76px;
+        max-width: 76px;
+        max-height: 76px;
+    }
+}
+
+@media (min-width: 992px){
+
+    .category-details .category-image-wrapper img {
+        width: 80px;
+        height: 80px;
+        max-width: 80px;
+        max-height: 80px;
+    }
+}
+
+@media (min-width: 1200px){
+
+    .category-details .category-image-wrapper img {
+        width: 88px;
+        height: 88px;
+        max-width: 88px;
+        max-height: 88px;
+    }
+}
+
+.category-details .category-image:hover {
+    /* -webkit-animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
+    /* animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
+
+    -webkit-animation-duration: 14s;
+    -webkit-animation-timing-function: cubic-bezier(0.26, 0.26, 1, 1);
+    -webkit-animation-delay: 0s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-direction: normal;
+    -webkit-animation-fill-mode: none;
+    -webkit-animation-play-state: running;
+    /* -webkit-animation: rotateSmooth; */
+
+    animation-duration: 14s;
+    animation-timing-function: cubic-bezier(0.26, 0.26, 1, 1);
+    animation-delay: 0s;
+    animation-iteration-count: infinite;
+    animation-direction: normal;
+    animation-fill-mode: none;
+    animation-play-state: running;
+    animation-name: rotateSmooth;
+}
+
+/* */
+
+.category-details .category-details-content {
+    padding: 0;
+}
+
+.category-details .category-details-content .btn-show-menu,
+.category-details .category-details-content .btn-reset-cart,
+.category-details .category-details-content .btn-add-to-cart {
+    --box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    --border-radius: 4px;
+}
+
+.category-details .choice-infos,
+.category-details .selected-products-number,
+.category-details .category-products-number,
+.category-details .category-details-content .btn-show-menu,
+.category-details .category-details-content .btn-reset-cart,
+.category-details .category-details-content .btn-add-to-cart {
+    font-family: "Mulish","sans-serif";
+}
+
+.category-details .category-products-number {
+    font-weight: 600;
+}
+
+.category-details .selected-products-number {
+    --padding-top: 5px;
+    --padding-bottom: 5px;
+    --padding-end: 8px;
+    --padding-start: 8px;
+    margin-left: 0.4rem;
+}
+
+[data-theme="dark"] .category-details .selected-products-number {
+    --color: #121212;
+}
+
+[data-theme="light"] .category-details .selected-products-number {
+    --color: #fefefe;
+    font-weight: 600;
+}

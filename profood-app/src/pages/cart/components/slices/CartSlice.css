@@ -1,0 +1,40 @@
+@charset "UTF-8";
+
+/* */
+
+.slice-widget.cart-slice-widget .slice-widget-buttons-wrapper {
+    padding: 0;
+    justify-content: space-between !important;
+}
+
+.slice-widget.cart-slice-widget .slice-widget-buttons-wrapper ion-label {
+    background-color: transparent;
+    border: none;
+    text-align: center;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.slice-widget.cart-slice-widget .slice-widget-buttons-wrapper .box-quantity {
+    margin: 0;
+    padding: 3px 10px;
+    font-size: calc(18px + (22 - 18) * ((100vw - 320px) / (1920 - 320)));
+    color: var(--ion-color-primary) !important;
+}
+
+.slice-widget.cart-slice-widget .slice-widget-buttons-wrapper .btn-remove {
+    margin: 0 !important;
+    height: 36px !important;
+}
+
+.slice-widget.cart-slice-widget .slice-widget-buttons-wrapper .btn-remove::part(native) {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+.slice-widget.cart-slice-widget .slice-widget-buttons-wrapper .btn-remove ion-icon {
+    color: #fff !important;
+}

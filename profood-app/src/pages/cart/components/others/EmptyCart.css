@@ -1,0 +1,15 @@
+@charset "UTF-8";
+
+/* */
+
+.empty-cart {
+    font-family: "Mulish", "sans-serif";
+}
+
+.empty-cart .empty-cart-text {
+    line-height: 1.6rem;
+}
+
+[data-theme='light'] .empty-cart .empty-cart-text {
+    font-weight: 500;
+}

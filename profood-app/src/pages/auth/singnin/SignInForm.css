@@ -1,0 +1,30 @@
+@charset "UTF-8";
+
+/*  */
+
+#signInForm .password-visibility-toggler-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+}
+
+@media (min-width: 512px){
+    
+    #signInForm .password-visibility-toggler-wrapper {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+#signInForm .password-visibility-toggler-wrapper ion-button {
+    align-self: flex-end;
+}
+
+/*  */
+
+.btn-go-back::part(native)::after {
+    background-color: var(--ion-color-base) !important;
+    opacity: 0.08 !important;
+}

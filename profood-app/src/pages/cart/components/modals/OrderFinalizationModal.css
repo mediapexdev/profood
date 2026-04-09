@@ -1,0 +1,110 @@
+@charset "UTF-8";
+
+/* */
+
+#orderFinalizationModalContent ion-list{
+    background: transparent !important;
+}
+
+#orderFinalizationModalContent ion-item{
+    border-radius: 4px;
+}
+
+#orderFinalizationModalContent ion-item::part(native){
+    padding-inline-start: 16px;
+    padding-inline-end: 16px;
+}
+
+#orderFinalizationModalContent ion-item ion-label{
+    color: var(--ion-color-dark-contrast) !important;
+}
+
+/* [data-theme="dark"] #orderFinalizationModalContent ion-item ion-label{
+    color: var(--ion-color-dark-contrast);
+} */
+
+/*  */
+
+#orderFinalizationModalContent .payment-methods-list-widget {
+    margin-top: 15px;
+}
+
+#orderFinalizationModalContent .payment-methods-list-widget ion-col {
+    margin-bottom: 15px;
+}
+
+#orderFinalizationModalContent .payment-method-widget {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    margin-inline: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-radius: 4px !important;
+    contain: layout;
+}
+
+#orderFinalizationModalContent .payment-method-widget.card-disabled {
+    opacity: 0.6;
+}
+
+[data-theme="dark"] #orderFinalizationModalContent .payment-method-widget.card-disabled {
+    opacity: 1;
+}
+
+#orderFinalizationModalContent .payment-method-widget.card-disabled .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background-clip: padding-box;
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#orderFinalizationModalContent .payment-method-widget.card-disabled .overlay::after {
+    content: attr(data-text);
+    font-family: "Mulish", "sans-serif";
+    font-size: calc(16px + (18 - 16) * ((100vw - 320px) / (1920 - 320))) !important;
+    font-weight: 500;
+    color: var(--ion-color-primary);
+}
+
+@media (min-width: 576px) {
+
+    #orderFinalizationModalContent ion-col:first-child .payment-method-widget {
+        margin-inline-end: 10px !important;
+    }
+
+    #orderFinalizationModalContent ion-col:nth-child(2) .payment-method-widget {
+        margin-inline-start: 10px !important;
+    }
+}
+
+/* .payment-method-widget ion-card-content {
+    padding-top: 16px !important;
+} */
+
+/*  */
+
+#orderFinalizationModalContent .payment-method-widget .payment-method-image-wrapper {
+    width: 32px;
+    height: 32px;
+}
+
+#orderFinalizationModalContent .payment-method-widget .payment-method-image-wrapper .payment-method-image {
+    display: inline-block;
+    margin: 0 auto;
+    width: 100%;
+}
+
+#orderFinalizationModalContent .payment-method-widget .payment-method-title {
+    font-family: "Mulish","sans-serif";
+    line-height: 1.5em;
+    /* margin-bottom: 0.8rem; */
+    text-transform: none;
+}

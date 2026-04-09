@@ -1,0 +1,59 @@
+@charset "UTF-8";
+
+/* */
+
+.no-locality,
+#btnConfirmLocality,
+#btnCancelPayment,
+#localityModal ion-toolbar ion-title {
+    font-family: "Mulish", "sans-serif";
+}
+
+/* */
+
+[data-theme='dark'] #localityModal ion-toolbar ion-searchbar {
+    color: #acacac !important;
+}
+
+[data-theme='light'] #localityModal ion-toolbar ion-searchbar {
+    color: #262626 !important;
+    /* font-family: "Mulish", "sans-serif"; */
+}
+
+/* */
+
+.no-locality .image-wrapper {
+    max-width: 250px;
+}
+
+.locality .locality-illustration-wrapper {
+    max-width: 32px;
+}
+
+.no-locality .image-wrapper img,
+.locality .locality-illustration-wrapper img {
+    width: 100%;
+    display: inline-block;
+}
+
+.locality .locality-text,
+.no-locality .no-locality-text {
+    line-height: 1.6rem;
+}
+
+[data-theme='light'] .no-locality .no-locality-text {
+    font-weight: 500;
+}
+
+#localitiesList ion-label {
+    font-weight: 500;
+}
+
+[data-theme='dark'] #localitiesList ion-label {
+    font-weight: 400;
+}
+
+#localitiesList {
+    /* background: var(--ion-background-color); */
+    background: transparent !important;
+}

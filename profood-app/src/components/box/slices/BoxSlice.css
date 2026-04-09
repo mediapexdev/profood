@@ -1,0 +1,31 @@
+@charset "UTF-8";
+
+/* */
+
+.box-slice-widget {
+    /* box-shadow: none !important; */
+    box-shadow: 0 1px 8px rgb(0 0 0 / 30%),
+                0 1px 2px rgb(0 0 0 / 5%),
+                0 0 0 1px rgb(0 0 0 / 10%) !important;
+}
+
+/* [data-theme="light"] .box-slice-widget {
+    background: hsla(0, 0%, 76%, 0.19) !important;
+} */
+
+.box-slice-widget .selected-products-number {
+    --padding-top: 5px;
+    --padding-bottom: 5px;
+    --padding-end: 8px;
+    --padding-start: 8px;
+    font-family: "Mulish","sans-serif";
+}
+
+[data-theme="dark"] .box-slice-widget .selected-products-number {
+    --color: #121212;
+}
+
+[data-theme="light"] .box-slice-widget .selected-products-number {
+    --color: #fefefe;
+    font-weight: 600;
+}

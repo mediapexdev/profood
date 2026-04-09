@@ -1,0 +1,19 @@
+@charset "UTF-8";
+
+/* */
+
+.progressbar-widget {
+    height: 6px;
+}
+
+ion-progress-bar.progressbar-widget::part(progress) {
+    background: linear-gradient(to right, #c64e03, #d89031);
+}
+
+ion-progress-bar.progressbar-widget::part(track) {
+    background: linear-gradient(to right, #c64e03, #d89031);
+}
+
+ion-progress-bar.progressbar-widget::part(stream) {
+    background-image: radial-gradient(ellipse at center, #c64e03 0%, #d89031 30%, transparent 30%);
+}

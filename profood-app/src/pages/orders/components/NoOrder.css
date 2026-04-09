@@ -1,0 +1,15 @@
+@charset "UTF-8";
+
+/* */
+
+.no-order {
+    font-family: "Mulish", "sans-serif";
+}
+
+.no-order .no-order-text {
+    line-height: 1.6rem;
+}
+
+[data-theme='light'] .no-order .no-order-text {
+    font-weight: 500;
+}

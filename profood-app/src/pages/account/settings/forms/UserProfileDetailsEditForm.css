@@ -1,0 +1,12 @@
+@charset "UTF-8";
+
+/*  */
+
+#userProfileDetailsEditForm .avatar-wrapper [data-image-input-action='change'] {
+    transform: translate(-60%, -30%);
+}
+
+#userProfileDetailsEditForm .avatar-wrapper [data-image-input-action='cancel'],
+#userProfileDetailsEditForm .avatar-wrapper [data-image-input-action='remove'] {
+    transform: translate(-70%, -70%);
+}

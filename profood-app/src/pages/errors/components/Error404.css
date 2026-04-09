@@ -1,0 +1,16 @@
+@charset "UTF-8";
+
+/* */
+
+.error-404 {
+    font-family: "Mulish", "sans-serif";
+}
+
+.error-404 .image-wrapper {
+    max-width: 280px;
+}
+
+.error-404 .image-wrapper img {
+    width: 100%;
+    display: inline-block;
+}

@@ -1,0 +1,123 @@
+@charset "UTF-8";
+
+/*  */
+
+.order-card-details {
+    min-height: 70px;
+    text-align: center;
+    position: relative;
+}
+
+/*  */
+
+.order-widget {
+    border-radius: 6px !important;
+}
+
+.order-widget .order-widget-header,
+.order-widget .order-widget-content {
+    -webkit-padding-start: 14px;
+    padding-inline-start: 14px;
+    -webkit-padding-end: 14px;
+    padding-inline-end: 14px;
+}
+
+.order-widget .order-widget-header .btn-see-details-wrapper {
+    align-self: flex-start !important;
+}
+
+.order-widget .order-widget-header .btn-see-details {
+    margin-top: 1px;
+}
+
+.order-widget .order-widget-header .btn-see-details::part(native) {
+    color: #fff;
+}
+
+/* [data-theme="dark"] .order-widget .order-widget-header .btn-see-details::part(native) {
+    background: rgba(255, 255, 255, 0.86) !important;
+    background-color: rgba(240, 101, 72, 0.66) !important;
+    color: #fff;
+}
+
+[data-theme="light"] .order-widget .order-widget-header .btn-see-details::part(native) {
+    background: rgba(34, 36, 40, 0.86) !important;
+    background-color: rgba(240, 101, 72, 0.80) !important;
+    color: #fff;
+} */
+
+/* [data-theme="light"] .order-widget .order-widget-header .btn-see-details::part(native):hover {
+    background-color: rgba(240, 101, 72, 0.96) !important;
+} */
+
+.order-widget ion-card-title {
+    font-family: "Quicksand","sans-serif";
+}
+
+.order-widget ion-card-subtitle,
+.order-widget .order-widget-header .btn-see-details {
+    font-family: "Mulish","sans-serif";
+}
+
+.order-widget .row-title ion-label {
+    color: #777 !important;
+}
+
+.order-widget .order-widget-content-row {
+    max-width: 215px;
+}
+
+[data-theme="dark"] .order-widget ion-label.order-amount,
+[data-theme="light"] .order-widget ion-label.order-amount {
+    color: #d89031 !important;
+}
+
+/*  */
+
+[data-theme="dark"] .order-widget ion-label.order-status,
+[data-theme="dark"] .order-widget ion-label.order-delivered-date {
+    color: #909090 !important;
+}
+
+[data-theme="light"] .order-widget ion-label.order-status,
+[data-theme="light"] .order-widget ion-label.order-delivered-date {
+    color: #707070 !important;
+}
+
+[data-theme="dark"] .order-widget .order-status-wrapper,
+[data-theme="dark"] .order-widget .order-delivered-date-wrapper {
+    border-top: 1px solid rgba(146, 148, 156, 0.08);
+}
+
+[data-theme="light"] .order-widget .order-status-wrapper,
+[data-theme="light"] .order-widget .order-delivered-date-wrapper {
+    border-top: 1px solid rgba(146, 148, 156, 0.1);
+}
+
+.order-widget ion-label.order-status,
+.order-widget ion-label.order-delivered-date {
+    font-size: 0.9825em;
+}
+
+.order-widget ion-label.order-status.cancelled {
+    color: var(--ion-color-danger) !important;
+}
+
+/*  */
+
+.order-widget ion-chip {
+    cursor: default;
+    pointer-events: none;
+}
+
+.order-widget ion-chip.order-payment-status {
+    font-size: 12px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    /* min-height: 24px; */
+}
+
+[data-theme="dark"] .order-widget ion-label.order-status.cancelled,
+[data-theme="dark"] .order-widget ion-chip.order-payment-status.unpaid {
+    color: rgb(240, 101, 72) !important;
+}

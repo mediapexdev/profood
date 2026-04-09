@@ -1,0 +1,24 @@
+@charset "UTF-8";
+
+/* */
+
+#orderDetailsPageHeader ion-toolbar.personal {
+    --min-height: 44px;
+}
+
+#orderDetailsPageHeader ion-toolbar.personal ion-buttons {
+    -webkit-margin-end: 4px;
+    -webkit-margin-start: 4px;
+    margin-inline-end: 4px;
+    margin-inline-start: 4px;
+    --min-height: 32px;
+}
+
+#orderDetailsPageHeader ion-toolbar .btn-cancel,
+#orderDetailsPageHeader ion-toolbar .btn-invoice {
+    --border-radius: 4px !important;
+}
+
+[data-theme="dark"] #orderDetailsPageHeader ion-toolbar .btn-cancel::part(native) {
+    color: rgb(240, 101, 72);
+}

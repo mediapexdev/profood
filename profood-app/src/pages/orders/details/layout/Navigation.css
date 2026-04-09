@@ -1,0 +1,22 @@
+@charset "UTF-8";
+
+/* */
+
+/* #btnMenuOrder {
+    background-color: var(--ion-color-dark) !important;
+    color: var(--ion-color-light) !important;
+} */
+
+/* ion-segment-button#btnMenuOrder::part(indicator-background) {
+    background: var(--ion-color-dark);
+}
+
+ion-segment-button#btnMenuOrder::part(native) {
+    color: var(--ion-color-dark-contrast) !important;
+}
+
+ion-segment-button#btnMenuOrder:not(.segment-button-checked) ion-label {
+    color: var(--ion-color-dark-contrast) !important;
+} */
+
+/* [data-theme="light"] */

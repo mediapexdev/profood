@@ -1,0 +1,25 @@
+@charset "UTF-8";
+
+/* */
+
+.category-content-header.content-header {
+    /* margin-bottom: 2rem; */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.category-content-header.content-header .translucent-style {
+    /* -webkit-backdrop-filter: blur(40px); */
+    /* backdrop-filter: blur(40px); */
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+[data-theme="dark"] .category-content-header.content-header .translucent-style {
+    background: hsla(0, 0%, 12%, 1.10);
+}
+
+[data-theme="light"] .category-content-header.content-header .translucent-style {
+    background: hsla(0, 0%, 100%, 1.10);
+}
