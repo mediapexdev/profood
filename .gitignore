@@ -81,10 +81,25 @@ logs/
 tmp/
 debug.log
 
-# --- Claude / AI tooling local state ---
-.claude/settings.local.json
-.claude/cache/
+# --- AI assistant configuration and state (kept local only) ---
+.claude/
 .claude-mem/
+.aider*
+.continue/
+.cursorrules
+.mcp.json
+.windsurfrules
+.github/copilot-instructions.md
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+# Sub-project AI configs
+**/.claude/
+**/.cursorrules
+**/.windsurfrules
+**/AGENTS.md
+**/CLAUDE.md
+**/GEMINI.md
 
 # --- Root-level session screenshots (temp) ---
 screen_*.png
