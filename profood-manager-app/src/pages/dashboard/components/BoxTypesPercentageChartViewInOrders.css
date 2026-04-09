@@ -1,0 +1,11 @@
+@charset "UTF-8";
+
+/*  */
+
+#boxTypesPercentageChartViewInOrders .apexcharts-datalabels .apexcharts-text {
+    fill: #fff !important;
+}
+
+#boxTypesPercentageChartViewInOrders path {
+    stroke: var(--card-bg) !important;
+}

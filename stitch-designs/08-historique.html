@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profood Livreur - Historique</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e66e26",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#201212",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+<!-- Header Section -->
+<header class="sticky top-0 z-10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-4 py-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-primary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">history</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight">Historique des Livraisons</h1>
+</div>
+<button class="p-2 hover:bg-primary/5 rounded-full transition-colors">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+</header>
+<main class="max-w-md mx-auto">
+<!-- Stats Quick Overview -->
+<div class="grid grid-cols-3 gap-3 p-4">
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-primary/5 shadow-sm">
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Aujourd'hui</p>
+<div class="flex items-end gap-1 mt-1">
+<span class="text-2xl font-bold">12</span>
+<span class="text-[10px] text-green-600 font-bold pb-1">+2%</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-primary/5 shadow-sm">
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Semaine</p>
+<div class="flex items-end gap-1 mt-1">
+<span class="text-2xl font-bold">84</span>
+<span class="text-[10px] text-red-600 font-bold pb-1">-5%</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-primary/5 shadow-sm">
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Ce mois</p>
+<div class="flex items-end gap-1 mt-1">
+<span class="text-2xl font-bold">320</span>
+<span class="text-[10px] text-green-600 font-bold pb-1">+10%</span>
+</div>
+</div>
+</div>
+<!-- Date Picker Section -->
+<section class="px-4 py-2">
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 border border-primary/5 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<button class="p-2 hover:bg-primary/5 rounded-full">
+<span class="material-symbols-outlined text-primary">chevron_left</span>
+</button>
+<p class="font-bold text-slate-800 dark:text-slate-200">Octobre 2023</p>
+<button class="p-2 hover:bg-primary/5 rounded-full">
+<span class="material-symbols-outlined text-primary">chevron_right</span>
+</button>
+</div>
+<div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-2">
+<div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div><div>D</div>
+</div>
+<div class="grid grid-cols-7 gap-1">
+<div class="h-10 flex items-center justify-center text-slate-300">28</div>
+<div class="h-10 flex items-center justify-center text-slate-300">29</div>
+<div class="h-10 flex items-center justify-center text-slate-300">30</div>
+<button class="h-10 w-full rounded-lg flex items-center justify-center hover:bg-primary/10">1</button>
+<button class="h-10 w-full rounded-lg flex items-center justify-center hover:bg-primary/10">2</button>
+<button class="h-10 w-full rounded-lg flex items-center justify-center hover:bg-primary/10">3</button>
+<button class="h-10 w-full rounded-lg flex items-center justify-center hover:bg-primary/10">4</button>
+<button class="h-10 w-full rounded-lg flex items-center justify-center bg-primary text-white font-bold">5</button>
+<button class="h-10 w-full rounded-lg flex items-center justify-center hover:bg-primary/10">6</button>
+<button class="h-10 w-full rounded-lg flex items-center justify-center hover:bg-primary/10">7</button>
+<button class="h-10 w-full rounded-lg flex items-center justify-center hover:bg-primary/10">8</button>
+<button class="h-10 w-full rounded-lg flex items-center justify-center hover:bg-primary/10">9</button>
+<button class="h-10 w-full rounded-lg flex items-center justify-center hover:bg-primary/10">10</button>
+<button class="h-10 w-full rounded-lg flex items-center justify-center hover:bg-primary/10">11</button>
+</div>
+</div>
+</section>
+<!-- Past Deliveries List -->
+<section class="px-4 py-6">
+<h3 class="text-lg font-bold mb-4 flex items-center justify-between">
+<span>Livraisons passées</span>
+<span class="text-sm font-medium text-primary">Voir tout</span>
+</h3>
+<div class="space-y-3">
+<!-- Card 1 -->
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border-l-4 border-primary shadow-sm flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait d'un client masculin souriant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4iYenbVBmVJxL4w5P61Ujf7R8aP8YGOYLLggbbQbiZJPObfwCXVyJ6VEFtSc_yYoMim6qI_66mhqI-dxJGCVHRaCumFVDOSvEcN8tx3DnSfDnNvZbF9HvJeBdWnu_f1JpmOk4q7wI0vprDF8E3En8OUVDz-p37HaTJ5-zFW8ERB3OHV6nuDl7wXbB9D2uxtMrptlQYiYAIVqMPsMet9-TCHK6XaGe-6J1PZB-XYBtgLTdrQ1F-7Zndi1fOH5Df_i071JZaXtFOYBn"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-bold text-slate-800 dark:text-slate-100">Jean Dupont</h4>
+<span class="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full uppercase">Terminé</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">5 Oct 2023 • 14:30</p>
+<div class="flex items-center gap-1 mt-2 text-primary">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-xs font-medium">12 Rue de Rivoli, Paris</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-primary">12.50€</p>
+<span class="text-[10px] text-slate-400">Pourboire incl.</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border-l-4 border-slate-300 shadow-sm flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait d'une cliente féminine souriante" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-o3DXv-GdtjQm188hV1Zenia5SZIl-Tjk-9TN5VZ560K9byWD5JytFjch_x-Ezw-_kRyhLo4dsrUsdtOmWEx_a51RtAh5gwe47U_g0FafUPL9vPsY3yti5sJRi7vQvLPcbJgPiDer0TgzvAunT2vRqb72H7m4_NwlWaCDKP2isbgrqjNVIA9gHTUiLPfQVTo3lIIjtl0f2lrH1bpbpQtOV7PSqGVWZxl1pLfYo2aSh3U4sMQMfgS9DBLyuBKNADbgVErVrC7iVeoF"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-bold text-slate-800 dark:text-slate-100">Marie L.</h4>
+<span class="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full uppercase">Annulé</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">5 Oct 2023 • 12:15</p>
+<div class="flex items-center gap-1 mt-2 text-slate-400">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-xs font-medium">45 Blvd Saint-Germain, Paris</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-slate-400">0.00€</p>
+<span class="text-[10px] text-slate-400">Refus client</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border-l-4 border-primary shadow-sm flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait d'un client avec barbe" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDINTrqBGmfAuz_52exY6VYvUlJTrm_JGbqBWCuKQNwOnt86ThguZJ5ftnzSqWdTq9cf5XcXnfOE_gjSec_XcmEvfDbhhwcFmB-9AIDUw0h7eOCCeeIsdVvVrw6vwOIHcu6RMdt7T62fSxatWpTslS7mA5iSBKfqqClPf9eobNTj2BdY7FsIU2i_Q4STXfMUh_YPv2KcwJSR16CSTPaoGqfavJpoqyI9XVqUqTERUwbxzbMmfjorJ1YGlYkt-mSiAWWnG7-wGqm7QW1"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-bold text-slate-800 dark:text-slate-100">Ahmed B.</h4>
+<span class="text-[10px] font-bold px-2 py-0.5 bg-green-100 text-green-700 rounded-full uppercase">Terminé</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">4 Oct 2023 • 19:45</p>
+<div class="flex items-center gap-1 mt-2 text-primary">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-xs font-medium">8 Avenue Foch, Paris</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-primary">15.80€</p>
+<span class="text-[10px] text-slate-400">Course XXL</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-3 z-50">
+<div class="max-w-md mx-auto flex justify-between items-center">
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">delivery_dining</span>
+<span class="text-[10px] font-bold">En cours</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined font-bold">history</span>
+<span class="text-[10px] font-bold">Historique</span>
+</a>
+<div class="relative -top-8">
+<button class="bg-primary text-white w-14 h-14 rounded-full shadow-lg shadow-primary/30 flex items-center justify-center border-4 border-background-light dark:border-background-dark">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[10px] font-bold">Stats</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Profil</span>
+</a>
+</div>
+</nav>
+</body></html>

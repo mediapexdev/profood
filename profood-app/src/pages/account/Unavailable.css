@@ -1,0 +1,25 @@
+@charset "UTF-8";
+
+/* */
+
+.unavailable-user-profile-info,
+.unavailable-user-profile-info ion-button {
+    font-family: "Mulish", "sans-serif";
+}
+
+.unavailable-user-profile-info .image-wrapper {
+    width: 200px;
+}
+
+.unavailable-user-profile-info .image-wrapper img {
+    width: 100%;
+    display: inline-block;
+}
+
+.unavailable-user-profile-info .unavailable-user-profile-info-text {
+    line-height: 1.6rem;
+}
+
+[data-theme='light'] .unavailable-user-profile-info .unavailable-user-profile-info-text {
+    font-weight: 500;
+}

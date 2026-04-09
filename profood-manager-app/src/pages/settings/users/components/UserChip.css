@@ -1,0 +1,7 @@
+@charset "UTF-8";
+
+/*  */
+
+.user-chip .full-name-wrapper a:not(:hover):not(:active) {
+    color: inherit !important;
+}

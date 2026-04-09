@@ -1,0 +1,35 @@
+@charset "UTF-8";
+
+/*  */
+
+.chip {
+    font-family: "Mulish", "sans-serif";
+}
+
+.chip .img-wrapper.rounded img {
+    border-radius: var(--bs-border-radius);
+}
+
+.chip .img-wrapper.rounded-sm img {
+    border-radius: var(--bs-border-radius-sm);
+}
+
+.chip .img-wrapper.rounded-md img {
+    border-radius: var(--bs-border-radius);
+}
+
+.chip .img-wrapper.rounded-lg img {
+    border-radius: var(--bs-border-radius-lg);
+}
+
+.chip .img-wrapper.rounded-xl img {
+    border-radius: var(--bs-border-radius-xl);
+}
+
+.chip .img-wrapper.rounded-xxl img {
+    border-radius: var(--bs-border-radius-xxl);
+}
+
+.chip .img-wrapper.rounded-circle img {
+    border-radius: 50%;
+}

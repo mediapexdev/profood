@@ -1,0 +1,15 @@
+@charset "UTF-8";
+
+/*  */
+
+.categories-table thead th.category{
+    min-width: 200px !important;
+}
+
+.categories-table thead th.product-count{
+    min-width: 115px !important;
+}
+
+.categories-table thead th.date-added{
+    min-width: 150px !important;
+}

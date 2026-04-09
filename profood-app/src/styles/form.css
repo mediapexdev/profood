@@ -1,0 +1,162 @@
+@charset "UTF-8";
+
+/*  */
+
+ion-modal.form-modal form,
+ion-modal.form-modal form ion-title,
+ion-modal.form-modal form ion-note,
+ion-modal.form-modal form ion-input,
+ion-modal.form-modal form ion-button {
+    font-family: "Mulish", "sans-serif";
+}
+
+ion-modal.form-modal form ion-title {
+    padding-inline: 0;
+}
+
+ion-modal.form-modal form .avatar,
+ion-modal.form-modal form .illustration {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    background: #f2f2f2;
+}
+
+[data-theme="dark"] ion-modal.form-modal form .avatar,
+[data-theme="dark"] ion-modal.form-modal form .illustration {
+    background: #202020;
+}
+
+ion-modal.form-modal form .avatar img.clickable,
+ion-modal.form-modal form .illustration img.clickable {
+    cursor: pointer;
+}
+
+ion-modal.form-modal form .avatar [data-image-input-action],
+ion-modal.form-modal form .illustration [data-image-input-action] {
+    cursor: pointer;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+
+ion-modal.form-modal form .avatar [data-image-input-action='change'],
+ion-modal.form-modal form .avatar [data-image-input-action='select'],
+ion-modal.form-modal form .illustration [data-image-input-action='change'],
+ion-modal.form-modal form .illustration [data-image-input-action='select']{
+    left: 100%;
+    top: 0;
+}
+
+ion-modal.form-modal form .avatar [data-image-input-action='cancel'],
+ion-modal.form-modal form .avatar [data-image-input-action='remove'],
+ion-modal.form-modal form .illustration [data-image-input-action='cancel'],
+ion-modal.form-modal form .illustration [data-image-input-action='remove'] {
+    left: 100%;
+    top: 100%;
+}
+
+ion-modal.form-modal form .avatar [data-image-input-action='change'] input,
+ion-modal.form-modal form .avatar [data-image-input-action='select'] input,
+ion-modal.form-modal form .illustration [data-image-input-action='change'] input,
+ion-modal.form-modal form .illustration [data-image-input-action='select'] input {
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden;
+    opacity: 0;
+}
+
+form .avatar-wrapper .allowed-file-types-text,
+form .illustration-wrapper .allowed-file-types-text {
+    font-size: 12px;
+}
+
+ion-modal.form-modal form ion-select + .error-text,
+ion-modal.form-modal form .avatar-wrapper .error-text,
+ion-modal.form-modal form .illustration-wrapper .error-text {
+    color: var(--ion-color-danger) !important;
+    padding-top: 5px;
+    font-size: 12px;
+    display: none;
+}
+
+ion-modal.form-modal form ion-select.ion-touched.ion-invalid + .error-text,
+ion-modal.form-modal form .avatar-wrapper .illustration.ion-touched.ion-invalid + .error-text,
+ion-modal.form-modal form .illustration-wrapper .illustration.ion-touched.ion-invalid + .error-text {
+    display: block;
+}
+
+ion-modal.form-modal form ion-item {
+    --background: transparent;
+    --background-hover: transparent;
+}
+
+ion-modal.form-modal form .btns-wrapper {
+    gap: 0.25rem;
+}
+
+/* ion-modal.form-modal form .btns-wrapper ion-button:first-child {
+    margin-right: 0 !important;
+}
+
+ion-modal.form-modal form .btns-wrapper ion-button:last-child {
+    margin-left: 0 !important;
+} */
+
+.form ion-input[disabled]{
+    opacity: 0.7;
+}
+
+[data-theme="dark"] .form ion-input[disabled]{
+    opacity: 0.6;
+}
+
+/*  */
+
+.password-visibility-toggler-wrapper {
+    padding-top: 13px;
+}
+
+.password-input .input-wrapper {
+    padding-right: 48px !important;
+}
+
+ion-input > .password-visibility-toggler-wrapper {
+    position: absolute;
+    top: 0;
+    right: 8px;
+    display: block !important;
+    z-index: 1;
+}
+
+.password-visibility-toggler {
+    margin: 0;
+    --padding-start: 0.4rem !important;
+    --padding-end: 0 !important;
+}
+
+.password-visibility-toggler ion-icon {
+    font-size: 22px;
+}
+
+/* form .ipt-helper-text,
+.password-meter-control-wrapper {
+    width: calc(100% - 28px);
+} */
+
+/*  */
+
+.form .ipt-helper-text{
+    padding-top: 8px;
+    font-size: 12.4px;
+    font-family: inherit;
+}
+
+/*  */
+
+#recaptchaContainer.v-hidden {
+    visibility: hidden !important;
+}
+
+#recaptchaContainer:not(.v-hidden):not(:empty) {
+    padding-top: 50px !important;
+}

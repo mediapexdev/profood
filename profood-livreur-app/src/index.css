@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #e37025;
+  --color-background-light: #f8f6f6;
+  --color-background-dark: #201212;
+  --font-display: "Work Sans", sans-serif;
+}
+
+/*
+ * Safe-area helper: exposes iOS/Android safe-area insets as CSS properties
+ * so components can use pb-[env(safe-area-inset-bottom)] etc.
+ * On devices without a notch/home-indicator the values resolve to 0.
+ */
+:root {
+  --sai-top: env(safe-area-inset-top, 0px);
+  --sai-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/*
+ * Tab-bar pages need enough bottom padding to clear the fixed BottomNav
+ * plus the device safe-area. This class replaces the old static pb-28.
+ */
+.pb-nav {
+  padding-bottom: calc(80px + var(--sai-bottom));
+}
+
+/*
+ * App shell — on screens wider than 480px the app renders inside a centred
+ * phone-width column with a subtle shadow, simulating a mobile device.
+ * On actual mobile devices the shell fills the viewport edge-to-edge.
+ */
+@media (min-width: 481px) {
+  #root {
+    max-width: 480px;
+    margin-inline: auto;
+    min-height: 100dvh;
+    position: relative;
+    overflow-x: hidden;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+    background-color: var(--color-background-light);
+  }
+
+  /* Tinted background visible behind the centred shell */
+  body {
+    background-color: #ebe8e8;
+  }
+}

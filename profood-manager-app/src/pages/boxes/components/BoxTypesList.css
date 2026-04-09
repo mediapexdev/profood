@@ -1,0 +1,13 @@
+@charset "UTF-8";
+
+/*  */
+
+.boxTypes-table thead th.box-type{
+    min-width: 200px !important;
+}
+
+.boxTypes-table thead th.price,
+.boxTypes-table thead th.capacity,
+.boxTypes-table thead th.date-added{
+    min-width: 150px !important;
+}

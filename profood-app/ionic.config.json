@@ -1,0 +1,7 @@
+{
+  "name": "Profood",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

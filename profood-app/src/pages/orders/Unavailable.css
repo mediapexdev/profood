@@ -1,0 +1,25 @@
+@charset "UTF-8";
+
+/* */
+
+.unavailable-order,
+.unavailable-order ion-button {
+    font-family: "Mulish", "sans-serif";
+}
+
+.unavailable-order .image-wrapper {
+    width: 250px;
+}
+
+.unavailable-order .image-wrapper img {
+    width: 100%;
+    display: inline-block;
+}
+
+.unavailable-order .unavailable-order-text {
+    line-height: 1.6rem;
+}
+
+[data-theme='light'] .unavailable-order .unavailable-order-text {
+    font-weight: 500;
+}

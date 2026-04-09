@@ -1,0 +1,476 @@
+/**
+ * Desktop Navigation Header Styles
+ *
+ * This component is only visible on desktop screens (≥992px)
+ * Provides a fixed top navigation bar with logo, links, search, and cart
+ *
+ * Layout Structure:
+ * [Logo] [Nav Links] [Search Bar] [Cart Icon]
+ *
+ * Theme Support:
+ * - Light mode: White background with dark text
+ * - Dark mode: Dark background with light text
+ */
+
+/* ==========================================================================
+   Base Header Styles
+   ========================================================================== */
+
+.desktop-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Light Mode Theme */
+.desktop-nav--light {
+    background-color: #ffffff;
+}
+
+.desktop-nav--light .desktop-nav__logo-text {
+    color: #2C3E50;
+}
+
+.desktop-nav--light .desktop-nav__link {
+    color: #2C3E50;
+}
+
+.desktop-nav--light .desktop-nav__cart-icon {
+    color: #2C3E50;
+}
+
+/* Dark Mode Theme */
+.desktop-nav--dark {
+    background-color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.desktop-nav--dark .desktop-nav__logo-text {
+    color: #ECF0F1;
+}
+
+.desktop-nav--dark .desktop-nav__link {
+    color: #ECF0F1;
+}
+
+.desktop-nav--dark .desktop-nav__cart-icon {
+    color: #ECF0F1;
+}
+
+/* ==========================================================================
+   Container Layout
+   ========================================================================== */
+
+.desktop-nav__container {
+    max-width: 1400px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+/* ==========================================================================
+   Logo Section
+   ========================================================================== */
+
+.desktop-nav__logo {
+    flex-shrink: 0;
+}
+
+.desktop-nav__logo-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.desktop-nav__logo-link:hover {
+    opacity: 0.8;
+}
+
+/* Logo image styling */
+.desktop-nav__logo .logo {
+    display: flex;
+    align-items: center;
+}
+
+.desktop-nav__logo .logo-image {
+    height: 40px;
+    width: auto;
+}
+
+/* ==========================================================================
+   Navigation Links
+   ========================================================================== */
+
+.desktop-nav__links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-shrink: 0;
+}
+
+.desktop-nav__link {
+    position: relative;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 4px;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+}
+
+.desktop-nav__link:hover {
+    color: #E74C3C !important;
+}
+
+/* Active link indicator - underline effect */
+.desktop-nav__link--active {
+    color: #E74C3C !important;
+}
+
+.desktop-nav__link--active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #E74C3C;
+    border-radius: 2px;
+}
+
+/* ==========================================================================
+   Search Bar Section
+   ========================================================================== */
+
+.desktop-nav__search {
+    flex: 1;
+    max-width: 400px;
+}
+
+.desktop-nav__searchbar {
+    --background: rgba(0, 0, 0, 0.05);
+    --border-radius: 24px;
+    --box-shadow: none;
+    --placeholder-color: #95a5a6;
+    --icon-color: #95a5a6;
+    height: 40px;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Dark mode search bar styling */
+.desktop-nav--dark .desktop-nav__searchbar {
+    --background: rgba(255, 255, 255, 0.1);
+    --color: #ECF0F1;
+    --placeholder-color: #bdc3c7;
+    --icon-color: #bdc3c7;
+}
+
+/* Prevent search bar input interaction (readonly, navigate to search page on click) */
+.desktop-nav__searchbar input {
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   Cart Section
+   ========================================================================== */
+
+.desktop-nav__cart-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.desktop-nav__cart {
+    position: relative;
+    cursor: pointer;
+    padding: 8px;
+    transition: transform 0.2s ease;
+}
+
+.desktop-nav__cart:hover {
+    transform: scale(1.1);
+}
+
+.desktop-nav__cart-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.desktop-nav__cart-icon {
+    font-size: 28px;
+    transition: color 0.2s ease;
+}
+
+.desktop-nav__cart:hover .desktop-nav__cart-icon {
+    color: #E74C3C !important;
+}
+
+/* Cart item count badge */
+.desktop-nav__cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ==========================================================================
+   Responsive Behavior
+   ========================================================================== */
+
+/* Hide on mobile and tablet - only show on desktop screens */
+@media (max-width: 991px) {
+    .desktop-nav {
+        display: none;
+    }
+}
+
+/* Adjust container padding on smaller desktop screens */
+@media (min-width: 992px) and (max-width: 1200px) {
+    .desktop-nav__container {
+        padding: 0 24px;
+        gap: 16px;
+    }
+
+    .desktop-nav__links {
+        gap: 24px;
+    }
+
+    .desktop-nav__search {
+        max-width: 300px;
+    }
+}
+
+/* Optimize layout for very large screens */
+@media (min-width: 1600px) {
+    .desktop-nav__container {
+        max-width: 1600px;
+        padding: 0 48px;
+    }
+
+    .desktop-nav__search {
+        max-width: 500px;
+    }
+}
+
+/* ==========================================================================
+   Accessibility Enhancements
+   ========================================================================== */
+
+/* Focus states for keyboard navigation */
+.desktop-nav__logo-link:focus,
+.desktop-nav__link:focus,
+.desktop-nav__cart:focus {
+    outline: 2px solid #E74C3C;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Ensure sufficient color contrast in both themes */
+.desktop-nav--light .desktop-nav__link {
+    color: #2C3E50; /* WCAG AA compliant */
+}
+
+.desktop-nav--dark .desktop-nav__link {
+    color: #ECF0F1; /* WCAG AA compliant */
+}
+
+/* ==========================================================================
+   Performance Optimizations
+   ========================================================================== */
+
+/* Use hardware acceleration for transform animations */
+.desktop-nav__cart {
+    will-change: transform;
+}
+
+/* Prevent layout shift from badge appearing/disappearing */
+.desktop-nav__cart-icon-wrapper {
+    min-width: 28px;
+    min-height: 28px;
+}
+
+/* ==========================================================================
+   Cart Dropdown
+   ========================================================================== */
+
+.desktop-nav__cart-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 320px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 1001;
+    overflow: hidden;
+}
+
+.desktop-nav__cart-wrapper:hover .desktop-nav__cart-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.desktop-nav__cart-dropdown--dark {
+    background: #2a2a2a;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Empty cart state */
+.desktop-nav__cart-empty {
+    padding: 32px 24px;
+    text-align: center;
+    color: #95a5a6;
+}
+
+.desktop-nav__cart-empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.desktop-nav__cart-empty p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Cart items list */
+.desktop-nav__cart-items {
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 12px;
+}
+
+.desktop-nav__cart-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.desktop-nav__cart-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.desktop-nav__cart-dropdown--dark .desktop-nav__cart-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.desktop-nav__cart-item-img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.desktop-nav__cart-item-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.desktop-nav__cart-item-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #2C3E50;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.desktop-nav__cart-dropdown--dark .desktop-nav__cart-item-name {
+    color: #ECF0F1;
+}
+
+.desktop-nav__cart-item-qty {
+    font-size: 12px;
+    color: #95a5a6;
+}
+
+.desktop-nav__cart-item-price {
+    font-size: 13px;
+    font-weight: 600;
+    color: #E74C3C;
+}
+
+/* More items indicator */
+.desktop-nav__cart-more {
+    text-align: center;
+    padding: 8px;
+    font-size: 12px;
+    color: #95a5a6;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    margin-top: 8px;
+}
+
+.desktop-nav__cart-dropdown--dark .desktop-nav__cart-more {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Cart footer */
+.desktop-nav__cart-footer {
+    padding: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.desktop-nav__cart-dropdown--dark .desktop-nav__cart-footer {
+    border-top-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.desktop-nav__cart-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #2C3E50;
+}
+
+.desktop-nav__cart-dropdown--dark .desktop-nav__cart-total {
+    color: #ECF0F1;
+}
+
+.desktop-nav__cart-total-amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: #E74C3C;
+}
+
+.desktop-nav__cart-btn {
+    --border-radius: 8px;
+    margin: 0;
+    font-weight: 600;
+}

@@ -1,0 +1,351 @@
+/**
+ * Responsive Styles for Profood App
+ *
+ * Provides desktop-optimized layouts and responsive utilities.
+ *
+ * Breakpoints:
+ * - Mobile: < 576px
+ * - Tablet: 576px - 991px
+ * - Desktop: ≥ 992px
+ */
+
+/* ==========================================================================
+   App Container
+   ========================================================================== */
+
+/**
+ * Main app container for desktop centering and consistent padding
+ * Centers content and constrains max-width on larger screens
+ */
+.app-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Tablet styles (≥576px) */
+@media (min-width: 576px) {
+  .app-container {
+    padding: 0 20px;
+  }
+}
+
+/* Desktop styles (≥992px) */
+@media (min-width: 992px) {
+  .app-container {
+    max-width: 1280px;
+    padding: 0 24px;
+  }
+}
+
+/* ==========================================================================
+   Breakpoint Utility Classes
+   ========================================================================== */
+
+/**
+ * Visibility utilities for responsive design
+ * Use these to conditionally show/hide elements based on screen size
+ */
+
+/* Hide on mobile, show on desktop */
+.hide-mobile {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .hide-mobile {
+    display: block;
+  }
+}
+
+/* Show on mobile, hide on desktop */
+.hide-desktop {
+  display: block;
+}
+
+@media (min-width: 992px) {
+  .hide-desktop {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   IonContent Desktop Optimization
+   ========================================================================== */
+
+/**
+ * Adds consistent padding and max-width to ion-content on desktop
+ * Improves readability by preventing content from spanning full width
+ */
+@media (min-width: 992px) {
+  ion-content {
+    --padding-start: 24px;
+    --padding-end: 24px;
+  }
+
+  /* Center content within ion-content for better desktop experience */
+  ion-content::part(scroll) {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+}
+
+/* ==========================================================================
+   Product Grid Utilities
+   ========================================================================== */
+
+/**
+ * Responsive product grid for displaying items
+ *
+ * Mobile: 1 column (full width cards)
+ * Small tablet: 2 columns (≥480px)
+ * Tablet: 3 columns (≥768px)
+ * Desktop: 4 columns (≥992px)
+ *
+ * Usage: Add .product-grid to container holding product cards
+ */
+.product-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 0;
+}
+
+/* Small tablet: 2 columns (≥480px) */
+@media (min-width: 480px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Tablet: 3 columns (≥768px) */
+@media (min-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px 0;
+  }
+}
+
+/* Desktop: 4 columns (≥992px) */
+@media (min-width: 992px) {
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    padding: 24px 0;
+  }
+}
+
+/* ==========================================================================
+   Additional Responsive Utilities
+   ========================================================================== */
+
+/**
+ * Responsive spacing utilities
+ * Provides consistent spacing that scales with screen size
+ */
+.responsive-section {
+  padding: 16px 0;
+}
+
+@media (min-width: 576px) {
+  .responsive-section {
+    padding: 24px 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .responsive-section {
+    padding: 32px 0;
+  }
+}
+
+/**
+ * Responsive card container for better desktop layout
+ * Prevents cards from stretching too wide on large screens
+ */
+.responsive-card-container {
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .responsive-card-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+}
+
+/**
+ * Two-column layout for forms and details on desktop
+ * Stacks on mobile, side-by-side on desktop
+ */
+.responsive-two-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 992px) {
+  .responsive-two-column {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
+/**
+ * Responsive text sizing
+ * Slightly larger text on desktop for better readability
+ */
+@media (min-width: 992px) {
+  .responsive-text {
+    font-size: 1.05em;
+    line-height: 1.6;
+  }
+}
+
+/**
+ * Responsive button groups
+ * Stack on mobile, inline on desktop
+ */
+.responsive-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+@media (min-width: 576px) {
+  .responsive-button-group {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .responsive-button-group > * {
+    flex: 1;
+  }
+}
+
+/**
+ * Desktop navigation improvements
+ * Better spacing and sizing for larger screens
+ */
+@media (min-width: 992px) {
+  ion-header ion-toolbar {
+    --min-height: 64px;
+  }
+
+  ion-tabs ion-tab-bar {
+    --min-height: 60px;
+  }
+}
+
+/**
+ * Responsive image containers
+ * Ensures images scale properly across all screen sizes
+ */
+.responsive-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/**
+ * Product card specific responsive styles
+ * Adjusts image aspect ratio and content spacing
+ */
+.product-grid .product-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.product-grid .product-card-image {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+@media (min-width: 992px) {
+  .product-grid .product-card-image {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/**
+ * Modal/Dialog responsive sizing
+ * Constrain modal width on desktop for better UX
+ */
+@media (min-width: 992px) {
+  ion-modal {
+    --width: 90%;
+    --max-width: 720px;
+    --height: auto;
+    --max-height: 90%;
+  }
+
+  ion-modal.modal-fullscreen {
+    --width: 100%;
+    --max-width: 100%;
+    --height: 100%;
+    --max-height: 100%;
+  }
+}
+
+/**
+ * Desktop list items with better spacing
+ */
+@media (min-width: 992px) {
+  ion-list {
+    border-radius: 8px;
+  }
+
+  ion-item {
+    --padding-start: 20px;
+    --padding-end: 20px;
+    --min-height: 56px;
+  }
+}
+
+/**
+ * Responsive padding for pages
+ * Ensures consistent spacing across different screen sizes
+ */
+.page-content {
+  padding: 16px;
+}
+
+@media (min-width: 576px) {
+  .page-content {
+    padding: 20px;
+  }
+}
+
+@media (min-width: 992px) {
+  .page-content {
+    padding: 32px 24px;
+  }
+}
+
+/* ==========================================================================
+   Desktop Navigation Spacing
+   ========================================================================== */
+
+/**
+ * Add margin-top for desktop nav to prevent content from being hidden
+ * The fixed header has a height of 64px, so we add matching margin
+ * Target the split-pane to push both sidebar and content down
+ */
+@media (min-width: 992px) {
+  ion-split-pane {
+    margin-top: 64px;
+  }
+
+  /* Also handle pages without split-pane */
+  ion-app > ion-router-outlet {
+    margin-top: 64px;
+  }
+}

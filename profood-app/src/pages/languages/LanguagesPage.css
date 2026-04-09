@@ -1,0 +1,24 @@
+@charset "UTF-8";
+
+/* */
+
+#languagesList ion-radio {
+    font-family: "Mulish", "sans-serif";
+    --border-radius: 4px;
+    --inner-border-radius: 2px;
+    --color: #8A8A8A;
+    /* --color-checked: #6815ec; */
+    --color-checked: var(--ion-color-primary);
+}
+  
+#languagesList ion-radio.ios::part(container) {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #8A8A8A;
+    border-radius: 4px;
+}
+
+#languagesList ion-radio.radio-checked.ios::part(container) {
+    /* border-color: #6815ec; */
+    border-color: var(--ion-color-primary);
+}

@@ -1,0 +1,60 @@
+@charset "UTF-8";
+
+/**
+ * Cart Page Styles
+ *
+ * Mobile: Single column with header
+ * Desktop: Centered container with title
+ */
+
+/* Container for cart content */
+.cart-page-container {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Desktop header - hidden on mobile */
+.cart-desktop-header {
+    display: none;
+}
+
+.cart-desktop-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 24px 0;
+    color: var(--ion-text-color);
+}
+
+.cart-item-count {
+    font-weight: 400;
+    font-size: 1.25rem;
+    color: var(--ion-color-medium);
+    margin-left: 8px;
+}
+
+/* Desktop styles (≥992px) */
+@media (min-width: 992px) {
+    #cartPageContent {
+        --padding-start: 24px;
+        --padding-end: 24px;
+        --padding-top: 32px;
+    }
+
+    .cart-page-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* Show desktop header with title */
+    .cart-desktop-header {
+        display: block;
+        margin-bottom: 8px;
+    }
+}
+
+/* Large desktop (≥1200px) */
+@media (min-width: 1200px) {
+    .cart-page-container {
+        max-width: 900px;
+    }
+}

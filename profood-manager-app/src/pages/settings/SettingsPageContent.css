@@ -1,0 +1,71 @@
+@charset "UTF-8";
+
+/*  */
+
+#homePageContent .menu-item-card {
+    box-shadow: 0 1px 8px rgb(0 0 0 / 30%),
+                0 1px 2px rgb(0 0 0 / 5%),
+                0 0 0 1px rgb(0 0 0 / 10%) !important;
+}
+
+/*  */
+
+[data-theme='light'] .general {
+    background: radial-gradient(94.09% 94.09% at 50% 50%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%), rgba(255, 168, 0, 0.6);
+}
+
+[data-theme='dark'] .general {
+    background: radial-gradient(94.09% 94.09% at 50% 50%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%), rgba(255, 168, 0, 0.8);
+}
+
+[data-theme='light'] .general .icon-wrapper,
+[data-theme='light'] .general .title-text {
+    color: #343434 !important;
+}
+
+[data-theme='dark'] .general .title-text,
+[data-theme='dark'] .general .icon-wrapper {
+    color: #fff !important;
+}
+
+/*  */
+
+[data-theme='light'] .compte-utilisateur {
+    /* background: radial-gradient(110.23% 110.23% at 50% 50%, rgba(255, 255, 255, 0.27) 0%, rgba(255, 255, 255, 0) 100%), rgba(137, 80, 252, 0.6); */
+    background: radial-gradient(94.09% 94.09% at 50% 50%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%), rgba(255, 168, 0, 0.6);
+}
+
+[data-theme='dark'] .compte-utilisateur {
+    /* background: radial-gradient(110.23% 110.23% at 50% 50%, rgba(255, 255, 255, 0.27) 0%, rgba(255, 255, 255, 0) 100%), rgba(137, 80, 252, 0.8); */
+    background: radial-gradient(94.09% 94.09% at 50% 50%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%), rgba(255, 168, 0, 0.8);
+}
+
+[data-theme='light'] .compte-utilisateur .icon-wrapper,
+[data-theme='light'] .compte-utilisateur .title-text {
+    color: #343434 !important;
+}
+
+[data-theme='dark'] .compte-utilisateur .title-text,
+[data-theme='dark'] .compte-utilisateur .icon-wrapper {
+    color: #fff !important;
+}
+
+/*  */
+
+[data-theme='light'] .utilisateurs {
+    background: radial-gradient(83.15% 83.15% at 50% 50%, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%), rgba(27, 197, 189, 0.6);
+}
+
+[data-theme='dark'] .utilisateurs {
+    background: radial-gradient(83.15% 83.15% at 50% 50%, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%), rgba(27, 197, 189, 0.8);
+}
+
+[data-theme='light'] .utilisateurs .icon-wrapper,
+[data-theme='light'] .utilisateurs .title-text {
+    color: #343434 !important;
+}
+
+[data-theme='dark'] .utilisateurs .title-text,
+[data-theme='dark'] .utilisateurs .icon-wrapper {
+    color: #fff !important;
+}

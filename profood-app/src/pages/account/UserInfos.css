@@ -1,0 +1,99 @@
+@charset "UTF-8";
+
+/* */
+
+.user-infos-widget,
+.user-infos-widget .card .card-title,
+.user-infos-widget .card ion-note {
+    font-family: "Mulish", "sans-serif";
+}
+
+.user-infos-widget .card {
+    /* height: calc(100vh - 135px); */
+    border-radius: 6px;
+}
+
+.user-infos-widget .card .avatar-wrapper {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    /* --border-radius: 50%; */
+}
+
+.user-infos-widget .card ion-title{
+    padding-inline-start: 0;
+}
+
+.user-infos-widget .card .user-infos-element-wrapper .icon-wrapper {
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    line-height: 46px;
+    padding: 10px;
+    background-color: #e8eff3;
+}
+
+[data-theme="dark"] .user-infos-widget .card .user-infos-element-wrapper .icon-wrapper {
+    background-color: #1a1a1a;
+}
+
+[data-theme="light"] .user-infos-widget .card .user-infos-element-wrapper .icon-wrapper {
+    background-color: var(--ion-color-step-50, #f2f2f2);
+}
+
+.notice {
+    /* border: 1px dashed rgb(114, 57, 234); */
+    border-radius: 0.475rem;
+    /* background: #2f264f; */
+    /* background: var(--ion-color-primary); */
+    /* background: rgba(226, 150, 59, 0.18); */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+}
+
+@media (min-width: 612px) {
+
+    .notice {
+        flex-direction: row;
+        align-items: center;
+        justify-content: stretch;
+    }
+
+    .notice .notice-icon-wrapper {
+        margin-right: 1rem;
+    }
+}
+
+.notice .notice-icon-wrapper {
+    align-self: center;
+}
+
+.notice .notice-icon {
+    font-size: 2rem;
+}
+
+.notice .notice-title {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.10rem;
+    font-weight: 600;
+}
+
+[data-theme="dark"] .notice .notice-text {
+    color: #bfbfbf !important;
+}
+
+[data-theme="light"] .notice .notice-text {
+    color: #3f3f3f !important;
+    font-weight: 600 !important;
+}
+
+.notice .notice-text {
+    color: #cdcdde !important;
+}
+
+.notice .notice-text .notice-link {
+    text-decoration: none;
+}

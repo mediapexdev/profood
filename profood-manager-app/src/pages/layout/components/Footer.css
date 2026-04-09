@@ -1,0 +1,26 @@
+@charset "UTF-8";
+
+/* */
+
+#mainFooter {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    min-height: 48px;
+    /* overflow: hidden; */
+    /* box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.15) !important; */
+    /* box-shadow: 0 2px 2px #0000003d, 0 0 2px #0000001f; */
+    z-index: var(--footer-zIndex);
+    background-color: var(--footer-bg);
+}
+
+@media (min-width: 992px){
+    
+    /* .page-layout:not(#homePageLayout) #mainFooter {
+        left: 6px;
+    } */
+    #mainFooter {
+        left: var(--sidebar-width);
+    }
+}

@@ -1,0 +1,794 @@
+@charset "UTF-8";
+
+/*  */
+
+.table.table-row-dashed tr,
+.table.table-cell-dashed th,
+.table.table-cell-dashed td {
+    border-style: dashed !important;
+}
+
+.table.table-row-dotted tr,
+.table.table-cell-dotted th,
+.table.table-cell-dotted td {
+    border-style: dotted !important;
+}
+
+.table.table-row-solid tr,
+.table.table-cell-solid th,
+.table.table-cell-solid td {
+    border-style: solid !important;
+}
+
+/*  */
+
+.table.gy-0 th,
+.table.gy-0 td {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.table.gy-1 th,
+.table.gy-1 td {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+}
+
+.table.gy-2 th,
+.table.gy-2 td {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+.table.gy-3 th,
+.table.gy-3 td {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+.table.gy-4 th,
+.table.gy-4 td {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+}
+
+.table.gy-5 th,
+.table.gy-5 td {
+    padding-top: 1.25rem !important;
+    padding-bottom: 1.25rem !important;
+}
+
+.table.gy-6 th,
+.table.gy-6 td {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+}
+
+.table.gy-7 th,
+.table.gy-7 td {
+    padding-top: 1.75rem !important;
+    padding-bottom: 1.75rem !important;
+}
+
+.table.gy-8 th,
+.table.gy-8 td {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+}
+
+.table.gy-9 th,
+.table.gy-9 td {
+    padding-top: 2.25rem !important;
+    padding-bottom: 2.25rem !important;
+}
+
+.table.gy-10 th,
+.table.gy-10 td {
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.5rem !important;
+}
+
+.table.gy-11 th,
+.table.gy-11 td {
+    padding-top: 2.75rem !important;
+    padding-bottom: 2.75rem !important;
+}
+
+.table.gy-12 th,
+.table.gy-12 td {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+}
+
+.table.gy-13 th,
+.table.gy-13 td {
+    padding-top: 3.25rem !important;
+    padding-bottom: 3.25rem !important;
+}
+
+.table.gy-14 th,
+.table.gy-14 td {
+    padding-top: 3.5rem !important;
+    padding-bottom: 3.5rem !important;
+}
+
+.table.gy-15 th,
+.table.gy-15 td {
+    padding-top: 3.75rem !important;
+    padding-bottom: 3.75rem !important;
+}
+
+.table.gy-16 th,
+.table.gy-16 td {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+}
+
+.table.gy-17 th,
+.table.gy-17 td {
+    padding-top: 4.25rem !important;
+    padding-bottom: 4.25rem !important;
+}
+
+.table.gy-18 th,
+.table.gy-18 td {
+    padding-top: 4.5rem !important;
+    padding-bottom: 4.5rem !important;
+}
+
+.table.gy-19 th,
+.table.gy-19 td {
+    padding-top: 4.75rem !important;
+    padding-bottom: 4.75rem !important;
+}
+
+.table.gy-20 th,
+.table.gy-20 td {
+    padding-top: 5rem !important;
+    padding-bottom: 5rem !important;
+}
+
+@media (min-width: 576px) {
+    
+    .table.gy-sm-0 th,
+    .table.gy-sm-0 td {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
+    .table.gy-sm-1 th,
+    .table.gy-sm-1 td {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+    }
+    
+    .table.gy-sm-2 th,
+    .table.gy-sm-2 td {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    .table.gy-sm-3 th,
+    .table.gy-sm-3 td {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    
+    .table.gy-sm-4 th,
+    .table.gy-sm-4 td {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    .table.gy-sm-5 th,
+    .table.gy-sm-5 td {
+        padding-top: 1.25rem !important;
+        padding-bottom: 1.25rem !important;
+    }
+    
+    .table.gy-sm-6 th,
+    .table.gy-sm-6 td {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    .table.gy-sm-7 th,
+    .table.gy-sm-7 td {
+        padding-top: 1.75rem !important;
+        padding-bottom: 1.75rem !important;
+    }
+    
+    .table.gy-sm-8 th,
+    .table.gy-sm-8 td {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .table.gy-sm-9 th,
+    .table.gy-sm-9 td {
+        padding-top: 2.25rem !important;
+        padding-bottom: 2.25rem !important;
+    }
+    
+    .table.gy-sm-10 th,
+    .table.gy-sm-10 td {
+        padding-top: 2.5rem !important;
+        padding-bottom: 2.5rem !important;
+    }
+    
+    .table.gy-sm-11 th,
+    .table.gy-sm-11 td {
+        padding-top: 2.75rem !important;
+        padding-bottom: 2.75rem !important;
+    }
+    
+    .table.gy-sm-12 th,
+    .table.gy-sm-12 td {
+        padding-top: 3rem !important;
+        padding-bottom: 3rem !important;
+    }
+    
+    .table.gy-sm-13 th,
+    .table.gy-sm-13 td {
+        padding-top: 3.25rem !important;
+        padding-bottom: 3.25rem !important;
+    }
+    
+    .table.gy-sm-14 th,
+    .table.gy-sm-14 td {
+        padding-top: 3.5rem !important;
+        padding-bottom: 3.5rem !important;
+    }
+    
+    .table.gy-sm-15 th,
+    .table.gy-sm-15 td {
+        padding-top: 3.75rem !important;
+        padding-bottom: 3.75rem !important;
+    }
+    
+    .table.gy-sm-16 th,
+    .table.gy-sm-16 td {
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
+    }
+    
+    .table.gy-sm-17 th,
+    .table.gy-sm-17 td {
+        padding-top: 4.25rem !important;
+        padding-bottom: 4.25rem !important;
+    }
+    
+    .table.gy-sm-18 th,
+    .table.gy-sm-18 td {
+        padding-top: 4.5rem !important;
+        padding-bottom: 4.5rem !important;
+    }
+    
+    .table.gy-sm-19 th,
+    .table.gy-sm-19 td {
+        padding-top: 4.75rem !important;
+        padding-bottom: 4.75rem !important;
+    }
+    
+    .table.gy-sm-20 th,
+    .table.gy-sm-20 td {
+        padding-top: 5rem !important;
+        padding-bottom: 5rem !important;
+    }
+}
+
+@media (min-width: 768px) {
+    
+    .table.gy-0 th,
+    .table.gy-md-0 td {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
+    .table.gy-md-1 th,
+    .table.gy-md-1 td {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+    }
+    
+    .table.gy-md-2 th,
+    .table.gy-md-2 td {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    .table.gy-md-3 th,
+    .table.gy-md-3 td {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    
+    .table.gy-md-4 th,
+    .table.gy-md-4 td {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    .table.gy-md-5 th,
+    .table.gy-md-5 td {
+        padding-top: 1.25rem !important;
+        padding-bottom: 1.25rem !important;
+    }
+    
+    .table.gy-md-6 th,
+    .table.gy-md-6 td {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    .table.gy-md-7 th,
+    .table.gy-md-7 td {
+        padding-top: 1.75rem !important;
+        padding-bottom: 1.75rem !important;
+    }
+    
+    .table.gy-md-8 th,
+    .table.gy-md-8 td {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .table.gy-md-9 th,
+    .table.gy-md-9 td {
+        padding-top: 2.25rem !important;
+        padding-bottom: 2.25rem !important;
+    }
+    
+    .table.gy-md-10 th,
+    .table.gy-md-10 td {
+        padding-top: 2.5rem !important;
+        padding-bottom: 2.5rem !important;
+    }
+    
+    .table.gy-md-11 th,
+    .table.gy-md-11 td {
+        padding-top: 2.75rem !important;
+        padding-bottom: 2.75rem !important;
+    }
+    
+    .table.gy-md-12 th,
+    .table.gy-md-12 td {
+        padding-top: 3rem !important;
+        padding-bottom: 3rem !important;
+    }
+    
+    .table.gy-md-13 th,
+    .table.gy-md-13 td {
+        padding-top: 3.25rem !important;
+        padding-bottom: 3.25rem !important;
+    }
+    
+    .table.gy-md-14 th,
+    .table.gy-md-14 td {
+        padding-top: 3.5rem !important;
+        padding-bottom: 3.5rem !important;
+    }
+    
+    .table.gy-md-15 th,
+    .table.gy-md-15 td {
+        padding-top: 3.75rem !important;
+        padding-bottom: 3.75rem !important;
+    }
+    
+    .table.gy-md-16 th,
+    .table.gy-md-16 td {
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
+    }
+    
+    .table.gy-md-17 th,
+    .table.gy-md-17 td {
+        padding-top: 4.25rem !important;
+        padding-bottom: 4.25rem !important;
+    }
+    
+    .table.gy-md-18 th,
+    .table.gy-md-18 td {
+        padding-top: 4.5rem !important;
+        padding-bottom: 4.5rem !important;
+    }
+    
+    .table.gy-md-19 th,
+    .table.gy-md-19 td {
+        padding-top: 4.75rem !important;
+        padding-bottom: 4.75rem !important;
+    }
+    
+    .table.gy-md-0 th,
+    .table.gy-md-20 td {
+        padding-top: 5rem !important;
+        padding-bottom: 5rem !important;
+    }
+}
+
+@media (min-width: 992px) {
+
+    .table.gy-0 th,
+    .table.gy-lg-0 td {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
+    .table.gy-lg-1 th,
+    .table.gy-lg-1 td {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+    }
+    
+    .table.gy-lg-2 th,
+    .table.gy-lg-2 td {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    .table.gy-lg-3 th,
+    .table.gy-lg-3 td {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    
+    .table.gy-lg-4 th,
+    .table.gy-lg-4 td {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    .table.gy-lg-5 th,
+    .table.gy-lg-5 td {
+        padding-top: 1.25rem !important;
+        padding-bottom: 1.25rem !important;
+    }
+    
+    .table.gy-lg-6 th,
+    .table.gy-lg-6 td {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    .table.gy-lg-7 th,
+    .table.gy-lg-7 td {
+        padding-top: 1.75rem !important;
+        padding-bottom: 1.75rem !important;
+    }
+    
+    .table.gy-lg-8 th,
+    .table.gy-lg-8 td {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .table.gy-lg-9 th,
+    .table.gy-lg-9 td {
+        padding-top: 2.25rem !important;
+        padding-bottom: 2.25rem !important;
+    }
+    
+    .table.gy-lg-10 th,
+    .table.gy-lg-10 td {
+        padding-top: 2.5rem !important;
+        padding-bottom: 2.5rem !important;
+    }
+    
+    .table.gy-lg-11 th,
+    .table.gy-lg-11 td {
+        padding-top: 2.75rem !important;
+        padding-bottom: 2.75rem !important;
+    }
+    
+    .table.gy-lg-12 th,
+    .table.gy-lg-12 td {
+        padding-top: 3rem !important;
+        padding-bottom: 3rem !important;
+    }
+    
+    .table.gy-lg-13 th,
+    .table.gy-lg-13 td {
+        padding-top: 3.25rem !important;
+        padding-bottom: 3.25rem !important;
+    }
+    
+    .table.gy-lg-14 th,
+    .table.gy-lg-14 td {
+        padding-top: 3.5rem !important;
+        padding-bottom: 3.5rem !important;
+    }
+    
+    .table.gy-lg-15 th,
+    .table.gy-lg-15 td {
+        padding-top: 3.75rem !important;
+        padding-bottom: 3.75rem !important;
+    }
+    
+    .table.gy-lg-16 th,
+    .table.gy-lg-16 td {
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
+    }
+    
+    .table.gy-lg-17 th,
+    .table.gy-lg-17 td {
+        padding-top: 4.25rem !important;
+        padding-bottom: 4.25rem !important;
+    }
+    
+    .table.gy-lg-18 th,
+    .table.gy-lg-18 td {
+        padding-top: 4.5rem !important;
+        padding-bottom: 4.5rem !important;
+    }
+    
+    .table.gy-lg-19 th,
+    .table.gy-lg-19 td {
+        padding-top: 4.75rem !important;
+        padding-bottom: 4.75rem !important;
+    }
+    
+    .table.gy-lg-20 th,
+    .table.gy-lg-20 td {
+        padding-top: 5rem !important;
+        padding-bottom: 5rem !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    
+    .table.gy-xl-0 th,
+    .table.gy-xl-0 td {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
+    .table.gy-xl-1 th,
+    .table.gy-xl-1 td {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+    }
+    
+    .table.gy-xl-2 th,
+    .table.gy-xl-2 td {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    .table.gy-xl-3 th,
+    .table.gy-xl-3 td {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    
+    .table.gy-xl-4 th,
+    .table.gy-xl-4 td {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    .table.gy-xl-5 th,
+    .table.gy-xl-5 td {
+        padding-top: 1.25rem !important;
+        padding-bottom: 1.25rem !important;
+    }
+    
+    .table.gy-xl-6 th,
+    .table.gy-xl-6 td {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    .table.gy-xl-7 th,
+    .table.gy-xl-7 td {
+        padding-top: 1.75rem !important;
+        padding-bottom: 1.75rem !important;
+    }
+    
+    .table.gy-xl-8 th,
+    .table.gy-xl-8 td {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .table.gy-xl-9 th,
+    .table.gy-xl-9 td {
+        padding-top: 2.25rem !important;
+        padding-bottom: 2.25rem !important;
+    }
+    
+    .table.gy-xl-10 th,
+    .table.gy-xl-10 td {
+        padding-top: 2.5rem !important;
+        padding-bottom: 2.5rem !important;
+    }
+    
+    .table.gy-xl-11 th,
+    .table.gy-xl-11 td {
+        padding-top: 2.75rem !important;
+        padding-bottom: 2.75rem !important;
+    }
+    
+    .table.gy-xl-12 th,
+    .table.gy-xl-12 td {
+        padding-top: 3rem !important;
+        padding-bottom: 3rem !important;
+    }
+    
+    .table.gy-xl-13 th,
+    .table.gy-xl-13 td {
+        padding-top: 3.25rem !important;
+        padding-bottom: 3.25rem !important;
+    }
+    
+    .table.gy-xl-14 th,
+    .table.gy-xl-14 td {
+        padding-top: 3.5rem !important;
+        padding-bottom: 3.5rem !important;
+    }
+    
+    .table.gy-xl-15 th,
+    .table.gy-xl-15 td {
+        padding-top: 3.75rem !important;
+        padding-bottom: 3.75rem !important;
+    }
+    
+    .table.gy-xl-16 th,
+    .table.gy-xl-16 td {
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
+    }
+    
+    .table.gy-xl-17 th,
+    .table.gy-xl-17 td {
+        padding-top: 4.25rem !important;
+        padding-bottom: 4.25rem !important;
+    }
+    
+    .table.gy-xl-18 th,
+    .table.gy-xl-18 td {
+        padding-top: 4.5rem !important;
+        padding-bottom: 4.5rem !important;
+    }
+    
+    .table.gy-xl-19 th,
+    .table.gy-xl-19 td {
+        padding-top: 4.75rem !important;
+        padding-bottom: 4.75rem !important;
+    }
+    
+    .table.gy-xl-20 th,
+    .table.gy-xl-20 td {
+        padding-top: 5rem !important;
+        padding-bottom: 5rem !important;
+    }
+}
+
+@media (min-width: 1400px) {
+
+    .table.gy-xxl-0 th,
+    .table.gy-xxl-0 td {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
+    .table.gy-xxl-1 th,
+    .table.gy-xxl-1 td {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+    }
+    
+    .table.gy-xxl-2 th,
+    .table.gy-xxl-2 td {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    .table.gy-xxl-3 th,
+    .table.gy-xxl-3 td {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    
+    .table.gy-xxl-4 th,
+    .table.gy-xxl-4 td {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    .table.gy-xxl-5 th,
+    .table.gy-xxl-5 td {
+        padding-top: 1.25rem !important;
+        padding-bottom: 1.25rem !important;
+    }
+    
+    .table.gy-xxl-6 th,
+    .table.gy-xxl-6 td {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    
+    .table.gy-xxl-7 th,
+    .table.gy-xxl-7 td {
+        padding-top: 1.75rem !important;
+        padding-bottom: 1.75rem !important;
+    }
+    
+    .table.gy-xxl-8 th,
+    .table.gy-xxl-8 td {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .table.gy-xxl-9 th,
+    .table.gy-xxl-9 td {
+        padding-top: 2.25rem !important;
+        padding-bottom: 2.25rem !important;
+    }
+    
+    .table.gy-xxl-10 th,
+    .table.gy-xxl-10 td {
+        padding-top: 2.5rem !important;
+        padding-bottom: 2.5rem !important;
+    }
+    
+    .table.gy-xxl-11 th,
+    .table.gy-xxl-11 td {
+        padding-top: 2.75rem !important;
+        padding-bottom: 2.75rem !important;
+    }
+    
+    .table.gy-xxl-12 th,
+    .table.gy-xxl-12 td {
+        padding-top: 3rem !important;
+        padding-bottom: 3rem !important;
+    }
+
+    .table.gy-xxl-13 th,
+    .table.gy-xxl-13 td {
+        padding-top: 3.25rem !important;
+        padding-bottom: 3.25rem !important;
+    }
+    
+    .table.gy-xxl-14 th,
+    .table.gy-xxl-14 td {
+        padding-top: 3.5rem !important;
+        padding-bottom: 3.5rem !important;
+    }
+    
+    .table.gy-xxl-15 th,
+    .table.gy-xxl-15 td {
+        padding-top: 3.75rem !important;
+        padding-bottom: 3.75rem !important;
+    }
+    
+    .table.gy-xxl-16 th,
+    .table.gy-xxl-16 td {
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
+    }
+    
+    .table.gy-xxl-17 th,
+    .table.gy-xxl-17 td {
+        padding-top: 4.25rem !important;
+        padding-bottom: 4.25rem !important;
+    }
+    
+    .table.gy-xxl-18 th,
+    .table.gy-xxl-18 td {
+        padding-top: 4.5rem !important;
+        padding-bottom: 4.5rem !important;
+    }
+    
+    .table.gy-xxl-19 th,
+    .table.gy-xxl-19 td {
+        padding-top: 4.75rem !important;
+        padding-bottom: 4.75rem !important;
+    }
+    
+    .table.gy-xxl-20 th,
+    .table.gy-xxl-20 td {
+        padding-top: 5rem !important;
+        padding-bottom: 5rem !important;
+    }
+}

@@ -1,0 +1,103 @@
+@charset "UTF-8";
+
+/*  */
+
+#mainHeader {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    background-color: var(--header-bg);
+    box-shadow: 0 2px 2px #0000003d, 0 0 2px #0000001f;
+    z-index: var(--header-zIndex);
+    height: calc(var(--header-height) + var(--page-title-box-height));
+}
+
+#mainHeader .page-title-box {
+    height: var(--page-title-box-height);
+}
+
+@media (min-width: 992px){
+
+    #mainHeader {
+        left: var(--sidebar-width);
+    }
+}
+
+#mainHeader .toolbar {
+    min-height: 48px;
+}
+
+#mainHeader .page-title-box > div {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 0.25rem;
+}
+
+@media (min-width: 800px){
+    
+    #mainHeader .page-title-box > div {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: initial;
+    }
+}
+
+@media (min-width: 992px){
+    
+    #mainHeader .page-title-box > div {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+        gap: 0.25rem;
+    }
+}
+
+@media (min-width: 1080px){
+    
+    #mainHeader .page-title-box > div {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: initial;
+    }
+}
+
+#mainHeader .app-title {
+    line-height: 48px;
+}
+
+/*  */
+
+#themeModeToggler,
+#fullscreenModeToggler {
+    border-radius: 50%;
+}
+
+#mainHeader .toolbar .user-menu-dropdown{
+    padding-left: 0.9rem;
+}
+
+#mainHeader .toolbar button:not(.dropdown-item),
+#mainHeader .toolbar button#mainHeaderUserMenuToggler:hover,
+#mainHeader .toolbar button#mainHeaderUserMenuToggler:focus,
+#mainHeader .toolbar button#mainHeaderUserMenuToggler:active {
+    background-color: transparent !important;
+    border: none;
+}
+
+#mainHeader .toolbar button:not(#mainHeaderUserMenuToggler):not(.dropdown-item):hover,
+#mainHeader .toolbar button:not(#mainHeaderUserMenuToggler):not(.dropdown-item):active{
+    background-color: var(--header-item-bg) !important;
+    box-shadow: none !important;
+}
+
+#mainHeader .toolbar > button svg {
+    font-size: 1.5rem;
+}
+
+#mainHeader .toolbar #sidebarToggler svg{
+    font-size: 25px;
+}

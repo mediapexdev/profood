@@ -1,0 +1,7 @@
+@charset "UTF-8";
+
+/*  */
+
+.customer-chip .full-name-wrapper a:not(:hover):not(:active) {
+    color: var(--title-color) !important;
+}

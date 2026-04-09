@@ -1,0 +1,40 @@
+@charset "UTF-8";
+
+/* */
+
+.FAQTopics-list-widget {
+    margin-top: 15px;
+}
+
+.FAQTopics-list-widget ion-col {
+    margin-bottom: 15px;
+}
+
+.FAQTopic-widget {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-radius: 8px !important;
+    contain: layout;
+}
+
+/*  */
+
+.FAQTopic-widget .FAQTopic-image-wrapper {
+    width: 48px;
+    height: 48px;
+}
+
+.FAQTopic-widget .FAQTopic-image-wrapper .FAQTopic-image {
+    display: inline-block;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.FAQTopic-widget .FAQTopic-title {
+    font-family: "Mulish","sans-serif";
+    line-height: 1.5em;
+    margin-bottom: 0.8rem;
+    text-transform: none;
+}

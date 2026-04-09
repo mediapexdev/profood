@@ -1,0 +1,20 @@
+@charset "UTF-8";
+
+/*  */
+
+#btnReturnVerificationCode {
+    background-color: transparent !important;
+    color: #e2963b;
+    border: 0 !important;
+    font-size: 14px;
+    text-decoration: underline;
+    text-underline-offset: 0.25em !important;
+    text-decoration-color: RGBA(226, 150, 59, 0) !important;
+}
+
+#btnReturnVerificationCode:hover,
+#btnReturnVerificationCode:active,
+#btnReturnVerificationCode:focus {
+    color: #c78434;
+    text-decoration-color: RGBA(226, 150, 59, 1) !important;
+}

@@ -1,0 +1,16 @@
+@charset "UTF-8";
+
+/* */
+
+.error-404 {
+    min-height: 100vh;
+}
+
+.error-404 .image-wrapper {
+    max-width: 512px;
+}
+
+.error-404 .image-wrapper img {
+    width: 100%;
+    display: inline-block;
+}

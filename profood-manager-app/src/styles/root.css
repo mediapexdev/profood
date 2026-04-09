@@ -1,0 +1,509 @@
+@charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@100;200;300;400;500;600;700;800;900&family=Mulish:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;0,1000;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900;1,1000&family=Quicksand:wght@300;400;500;600;700&family=Exo:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* */
+
+:root{
+    /* --blue: #007bff;
+    --indigo: #6610f2;
+    --purple: #6f42c1;
+    --pink: #e83e8c;
+    --red: #dc3545;
+    --orange: #fd7e14;
+    --yellow: #ffc107;
+    --green: #28a745;
+    --teal: #20c997;
+    --cyan: #17a2b8;
+    --white: #ffffff;
+    --gray: #7E8299;
+    --gray-dark: #3F4254;
+    --primary: #3699FF;
+    --secondary: #E4E6EF;
+    --success: #1BC5BD;
+    --info: #8950FC;
+    --warning: #FFA800;
+    --danger: #F64E60;
+    --light: #F3F6F9;
+    --dark: #181C32;
+    --white: #ffffff; */
+    --breakpoint-xs: 0;
+    --breakpoint-sm: 576px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 992px;
+    --breakpoint-xl: 1200px;
+    --breakpoint-xxl: 1400px;
+    --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+    --header-height: 50px;
+    --header-zIndex: 1002;
+
+    --page-title-box-height: 54px;
+
+    --footer-height: 70px;
+    --footer-zIndex: 1002;
+
+    --sidebar-width: 215px;
+    --sidebar-width-md: 180px;
+    --sidebar-width-sm: 70px;
+
+    --sidebar-zIndex: 1002;
+    --sidebar-offcanvas-zIndex: 1003;
+}
+
+@media (min-width: 800px){
+
+    :root{
+        --page-title-box-height: 40px;
+    }
+}
+
+@media (min-width: 992px){
+
+    :root{
+        --page-title-box-height: 54px;
+    }
+}
+
+@media (min-width: 1080px){
+
+    :root{
+        --page-title-box-height: 40px;
+    }
+}
+
+@media (min-width: 1170px) {
+    :root{
+        --sidebar-width: 230px;
+    }
+}
+
+@media (min-width: 1400px) {
+    :root{
+        --sidebar-width: 250px;
+    }
+}
+
+/*  */
+
+[data-theme="dark"] {
+
+    --bs-gray-100: #1B1C22;
+    --bs-gray-100-rgb: 27,28,34;
+    --bs-gray-200: #26272F;
+    --bs-gray-200-rgb: 38,39,47;
+    --bs-gray-300: #363843;
+    --bs-gray-300-rgb: 54,56,67;
+    --bs-gray-400: #464852;
+    --bs-gray-400-rgb: 70,72,82;
+    --bs-gray-500: #636674;
+    --bs-gray-500-rgb: 99,102,116;
+    --bs-gray-600: #808290;
+    --bs-gray-600-rgb: 128,130,144;
+    --bs-gray-700: #9A9CAE;
+    --bs-gray-700-rgb: 154,156,174;
+    --bs-gray-800: #B5B7C8;
+    --bs-gray-800-rgb: 181,183,200;
+    --bs-gray-900: #F5F5F5;
+    --bs-gray-900-rgb: 245,245,245;
+    --bs-light: #282b2e;
+    --bs-primary: #006AE6;
+    --bs-secondary: #363843;
+    --bs-success: #00A261;
+    /* --bs-info: #883FFF; */
+    --bs-info2: #299cdb;
+    --bs-tertiary: #883FFF;
+    --bs-warning: #C59A00;
+    --bs-danger: #E42855;
+    --bs-dark: #272A34;
+    --bs-primary-active: #107EFF;
+    --bs-secondary-active: #464852;
+    --bs-light-active: #535659;
+    --bs-success-active: #01BF73;
+    /* --bs-info-active: #9E63FF; */
+    --bs-info2-active: #2385ba;
+    --bs-tertiary-active: #9E63FF;
+    --bs-warning-active: #D9AA00;
+    --bs-danger-active: #FF3767;
+    --bs-dark-active: #2D2F39;
+    --bs-primary-light: #172331;
+    --bs-secondary-light: #363843;
+    --bs-success-light: #1F212A;
+    /* --bs-info-light: #272134; */
+    --bs-tertiary-light: #272134;
+    --bs-warning-light: #242320;
+    --bs-danger-light: #302024;
+    --bs-dark-light: #1E2027;
+    --bs-light-light: #1F212A;
+    --bs-primary-inverse: #ffffff;
+    --bs-secondary-inverse: #ffffff;
+    --bs-light-inverse: #8d8e90;
+    --bs-success-inverse: #ffffff;
+    --bs-info-inverse: #ffffff;
+    --bs-info2-inverse: #ffffff;
+    --bs-tertiary-inverse: #ffffff;
+    --bs-warning-inverse: #ffffff;
+    --bs-danger-inverse: #ffffff;
+    --bs-dark-inverse: #ffffff;
+    --bs-primary-clarity: rgba(0, 106, 230, 0.2);
+    --bs-secondary-clarity: rgba(54, 56, 67, 0.2);
+    --bs-success-clarity: rgba(0, 162, 97, 0.2);
+    --bs-info-clarity: rgba(var(--bs-info-rgb), 0.2);
+    --bs-info2-clarity: rgba(var(--bs-info2-rgb), 0.2);
+    --bs-tertiary-clarity: rgba(136, 63, 255, 0.2);
+    --bs-warning-clarity: rgba(197, 154, 0, 0.2);
+    --bs-danger-clarity: rgba(228, 40, 85, 0.2);
+    --bs-dark-clarity: rgba(39, 42, 52, 0.2);
+    --bs-light-clarity: rgba(31, 33, 42, 0.2);
+    --bs-light-rgb: 40,43,46;
+    --bs-primary-rgb: 0,106,230;
+    --bs-secondary-rgb: 54,56,67;
+    --bs-success-rgb: 0,162,97;
+    /* --bs-info-rgb: 136,63,255; */
+    --bs-info2-rgb: 35,133,186;
+    --bs-tertiary-rgb: 136,63,255;
+    --bs-warning-rgb: 197,154,0;
+    --bs-danger-rgb: 228,40,85;
+    --bs-dark-rgb: 39,42,52;
+    --bs-text-white: #ffffff;
+    --bs-text-primary: #006AE6;
+    --bs-text-secondary: #363843;
+    --bs-text-light: #1B1C22;
+    --bs-text-success: #00A261;
+    /* --bs-text-info: #883FFF; */
+    --bs-text-info2: #299cdb;
+    --bs-text-tertiary: #883FFF;
+    --bs-text-warning: #C59A00;
+    --bs-text-danger: #E42855;
+    --bs-text-dark: #272A34;
+    --bs-text-muted: #808290;
+    --bs-text-gray-100: #1B1C22;
+    --bs-text-gray-200: #26272F;
+    --bs-text-gray-300: #363843;
+    --bs-text-gray-400: #464852;
+    --bs-text-gray-500: #636674;
+    --bs-text-gray-600: #808290;
+    --bs-text-gray-700: #9A9CAE;
+    --bs-text-gray-800: #B5B7C8;
+    --bs-text-gray-900: #F5F5F5;
+    --bs-light-bg-subtle: #25282c;
+    --bs-light-border-subtle: #35383c;
+    --bs-border-color: #26272F;
+    --bs-border-dashed-color: #363843;
+    --bs-component-active-color: #ffffff;
+    --bs-component-active-bg: #006AE6;
+    --bs-component-hover-color: #006AE6;
+    --bs-component-hover-bg: #1B1C22;
+    --bs-component-checked-color: #ffffff;
+    --bs-component-checked-bg: #006AE6;
+    --bs-box-shadow-xs: 0 0.1rem 0.75rem 0.25rem rgba(0, 0, 0, 0.05);
+    --bs-box-shadow-sm: 0 0.1rem 1rem 0.25rem rgba(0, 0, 0, 0.05);
+    --bs-box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+    --bs-box-shadow-lg: 0 1rem 2rem 1rem rgba(0, 0, 0, 0.1);
+    --bs-input-color: var(--bs-gray-700);
+    --bs-input-bg: var(--bs-body-bg);
+    --bs-input-solid-color: var(--bs-gray-700);
+    --bs-input-solid-bg: var(--bs-gray-100);
+    --bs-input-solid-bg-focus: var(--bs-gray-200);
+    --bs-input-solid-placeholder-color: var(--bs-gray-500);
+    --bs-tooltip-box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.15);
+    --bs-root-card-box-shadow: none;
+    --bs-root-card-border-color: #1E2027;
+    --bs-table-striped-bg: rgba(27, 28, 34, 0.75);
+    --bs-table-loading-message-box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.3);
+    --bs-dropdown-bg: #1C1D22;
+    --bs-dropdown-box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.3);
+    --bs-code-bg: #2b2b40;
+    --bs-code-shadow: rgba(0, 0, 0, 0.08) 0px 3px 9px 0px;
+    --bs-code-border-color: transparent;
+    --bs-code-color: #b93993;
+    --bs-symbol-label-color: #B5B7C8;
+    --bs-symbol-label-bg: #1B1C22;
+    --bs-symbol-border-color: rgba(255, 255, 255, 0.5);
+    --bs-bullet-bg-color: #464852;
+    --bs-scrolltop-opacity: 0;
+    --bs-scrolltop-opacity-on: 0.3;
+    --bs-scrolltop-opacity-hover: 1;
+    --bs-scrolltop-box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+    --bs-scrolltop-bg-color: #1B84FF;
+    --bs-scrolltop-bg-color-hover: #1B84FF;
+    --bs-scrolltop-icon-color: #ffffff;
+    --bs-scrolltop-icon-color-hover: #ffffff;
+    --bs-drawer-box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.1);
+    --bs-drawer-bg-color: #1C1D22;
+    --bs-drawer-overlay-bg-color: rgba(0, 0, 0, 0.4);
+    --bs-menu-dropdown-box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.3);
+    --bs-menu-dropdown-bg-color: #1C1D22;
+    --bs-menu-heading-color: #636674;
+    --bs-menu-link-color-hover: #006AE6;
+    --bs-menu-link-color-show: #006AE6;
+    --bs-menu-link-color-here: #006AE6;
+    --bs-menu-link-color-active: #006AE6;
+    --bs-menu-link-bg-color-hover: #1B1C22;
+    --bs-menu-link-bg-color-show: #1B1C22;
+    --bs-menu-link-bg-color-here: #1B1C22;
+    --bs-menu-link-bg-color-active: #1B1C22;
+    --bs-scrollbar-color: #26272F;
+    --bs-scrollbar-hover-color: #363843;
+    --bs-overlay-bg: rgba(255, 255, 255, 0.05);
+    --bs-blockui-overlay-bg: rgba(255, 255, 255, 0.05);
+    --bs-rating-color-default: #464852;
+    --bs-rating-color-active: #FFAD0F;
+    --bs-ribbon-label-box-shadow: 0px -1px 5px 0px rgba(255, 255, 255, 0.1);
+    --bs-ribbon-label-bg: #1B84FF;
+    --bs-ribbon-label-border-color: #0053b4;
+    --bs-ribbon-clip-bg: #F9F9F9;
+    --bs-engage-btn-bg: #26272F;
+    --bs-engage-btn-box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.3);
+    --bs-engage-btn-border-color: #26272F;
+    --bs-engage-btn-color: #B5B7C8;
+    --bs-engage-btn-icon-color: #808290;
+    --bs-engage-btn-color-active: #B5B7C8;
+
+    --bs-form-invalid-color:#ff5f7f;
+    --bs-form-invalid-border-color:#ff5f7f;
+
+    /* --body-bg: #101011; */
+    --body-bg: #15171C;
+    --body-bg-rgb: 21, 23, 28;
+    /* --body-bg: #1a1d21; */
+    /* --body-color: #ced4da; */
+    --body-color: #b7b7bd;
+    --body-color-rgb: 183, 183, 189;
+
+    --title-color: #d2d5d7;
+    --title-color-rgb: 210, 213, 215;
+
+    --content-color: #b7b7bd;
+    --content-color-rgb: 183, 183, 189;
+
+    --header-bg: #212529;
+    --header-bg-rgb: 33, 37, 41;
+    --header-item-bg: #31363c;
+    --header-item-bg-rgb: 49, 54, 60;
+
+    --footer-bg: #212529;
+    --footer-bg-rgb: 33, 37, 41;
+    /* --card-bg: #15171C; */
+    /* --card-bg: #1b1b1b; */
+    --card-bg: #212529;
+    --card-bg-rgb: 33, 37, 41;
+
+    --modal-bg: #212529;
+    --modal-bg-rgb: 33, 37, 41;
+
+    --dropdown-bg: #212529;
+    --dropdown-bg-rgb: 33, 37, 41;
+    --dropdown-box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.3);
+    --dropdown-link-hover-color: var(--body-color);
+    --dropdown-link-hover-bg: var(--header-item-bg);
+}
+
+/*  */
+
+[data-theme="light"] {
+    
+    --bs-gray-100: #F9F9F9;
+    --bs-gray-100-rgb: 249,249,249;
+    --bs-gray-200: #F1F1F4;
+    --bs-gray-200-rgb: 241,241,244;
+    --bs-gray-300: #DBDFE9;
+    --bs-gray-300-rgb: 219,223,233;
+    --bs-gray-400: #C4CADA;
+    --bs-gray-400-rgb: 196,202,218;
+    --bs-gray-500: #99A1B7;
+    --bs-gray-500-rgb: 153,161,183;
+    --bs-gray-600: #78829D;
+    --bs-gray-600-rgb: 120,130,157;
+    --bs-gray-700: #4B5675;
+    --bs-gray-700-rgb: 75,86,117;
+    --bs-gray-800: #252F4A;
+    --bs-gray-800-rgb: 37,47,74;
+    --bs-gray-900: #071437;
+    --bs-gray-900-rgb: 7,20,55;
+    --bs-light: #F9F9F9;
+    --bs-primary: #1B84FF;
+    --bs-secondary: #F9F9F9;
+    --bs-success: #45CB85;
+    /* --bs-info: #7239EA; */
+    --bs-info2: #299cdb;
+    --bs-tertiary: #7239EA;
+    --bs-warning: #F6C000;
+    --bs-danger: #F8285A;
+    --bs-dark: #1E2129;
+    --bs-primary-active: #056EE9;
+    --bs-secondary-active: #DBDFE9;
+    --bs-light-active: #DCDCDC;
+    --bs-success-active: #37a26a;
+    /* --bs-info-active: #5014D0; */
+    --bs-info2-active: #2385ba;
+    --bs-tertiary-active: #5014D0;
+    --bs-warning-active: #DEAD00;
+    --bs-danger-active: #D81A48;
+    --bs-dark-active: #111318;
+    --bs-primary-light: #E9F3FF;
+    --bs-secondary-light: #F9F9F9;
+    --bs-success-light: #DFFFEA;
+    /* --bs-info-light: #F8F5FF; */
+    /* --bs-info2-light: #F8F5FF; */
+    --bs-tertiary-light: #F8F5FF;
+    --bs-warning-light: #FFF8DD;
+    --bs-danger-light: #FFEEF3;
+    --bs-dark-light: #F9F9F9;
+    --bs-light-light: #ffffff;
+    --bs-primary-inverse: #ffffff;
+    --bs-secondary-inverse: #252F4A;
+    --bs-light-inverse: #252F4A;
+    --bs-success-inverse: #ffffff;
+    --bs-info-inverse: #ffffff;
+    --bs-info2-inverse: #ffffff;
+    --bs-tertiary-inverse: #ffffff;
+    --bs-warning-inverse: #ffffff;
+    --bs-danger-inverse: #ffffff;
+    --bs-dark-inverse: #ffffff;
+    --bs-primary-clarity: rgba(27, 132, 255, 0.2);
+    --bs-secondary-clarity: rgba(249, 249, 249, 0.2);
+    --bs-success-clarity: rgba(269, 203, 133, 0.2);
+    --bs-info-clarity: rgba(var(--bs-info-rgb), 0.2);
+    --bs-info2-clarity: rgba(var(--bs-info2-rgb), 0.2);
+    --bs-tertiary-clarity: rgba(114, 57, 234, 0.2);
+    --bs-warning-clarity: rgba(246, 192, 0, 0.2);
+    --bs-danger-clarity: rgba(248, 40, 90, 0.2);
+    --bs-dark-clarity: rgba(30, 33, 41, 0.2);
+    --bs-light-clarity: rgba(255, 255, 255, 0.2);
+    --bs-light-rgb: 249,249,249;
+    --bs-primary-rgb: 27,132,255;
+    --bs-secondary-rgb: 249,249,249;
+    --bs-success-rgb: 69, 203, 133;
+    /* --bs-info-rgb: 114,57,234; */
+    --bs-info2-rgb: 35,133,186;
+    --bs-tertiary-rgb: 114,57,234;
+    --bs-warning-rgb: 246,192,0;
+    --bs-danger-rgb: 248,40,90;
+    --bs-dark-rgb: 30,33,41;
+    --bs-text-white: #ffffff;
+    --bs-text-primary: #1B84FF;
+    --bs-text-secondary: #F9F9F9;
+    --bs-text-light: #F9F9F9;
+    --bs-text-success: #37a26a;
+    /* --bs-text-info: #7239EA; */
+    --bs-text-info2: #299cdb;
+    --bs-text-tertiary: #7239EA;
+    --bs-text-warning: #F6C000;
+    --bs-text-danger: #F8285A;
+    --bs-text-dark: #1E2129;
+    --bs-text-muted: #99A1B7;
+    --bs-text-gray-100: #F9F9F9;
+    --bs-text-gray-200: #F1F1F4;
+    --bs-text-gray-300: #DBDFE9;
+    --bs-text-gray-400: #C4CADA;
+    --bs-text-gray-500: #99A1B7;
+    --bs-text-gray-600: #78829D;
+    --bs-text-gray-700: #4B5675;
+    --bs-text-gray-800: #252F4A;
+    --bs-text-gray-900: #071437;
+    --bs-border-color: #F1F1F4;
+    --bs-border-dashed-color: #DBDFE9;
+    --bs-component-active-color: #ffffff;
+    --bs-component-active-bg: #1B84FF;
+    --bs-component-hover-color: #1B84FF;
+    --bs-component-hover-bg: #F9F9F9;
+    --bs-component-checked-color: #ffffff;
+    --bs-component-checked-bg: #1B84FF;
+    --bs-box-shadow-xs: 0 0.1rem 0.75rem 0.25rem rgba(0, 0, 0, 0.05);
+    --bs-box-shadow-sm: 0 0.1rem 1rem 0.25rem rgba(0, 0, 0, 0.05);
+    --bs-box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+    --bs-box-shadow-lg: 0 1rem 2rem 1rem rgba(0, 0, 0, 0.1);
+    --bs-input-bg: var(--bs-body-bg);
+    --bs-input-color: var(--bs-gray-700);
+    --bs-input-solid-color: var(--bs-gray-700);
+    --bs-input-solid-bg: var(--bs-gray-100);
+    --bs-input-solid-bg-focus: var(--bs-gray-200);
+    --bs-input-solid-placeholder-color: var(--bs-gray-500);
+    --bs-root-card-box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, 0.03);
+    --bs-root-card-border-color: #F1F1F4;
+    --bs-tooltip-box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.15);
+    --bs-table-striped-bg: rgba(var(--bs-gray-100-rgb), 0.75);
+    --bs-table-loading-message-box-shadow: 0px 0px 50px 0px rgba(82, 63, 105, 0.15);
+    --bs-dropdown-bg: var(--bs-body-bg);
+    --bs-dropdown-box-shadow: 0px 0px 50px 0px rgba(82, 63, 105, 0.15);
+    --bs-code-bg: #f1f3f8;
+    --bs-code-shadow: 0px 3px 9px rgba(0, 0, 0, 0.08);
+    --bs-code-border-color: transparent;
+    --bs-code-color: #b93993;
+    --bs-symbol-label-color: var(--bs-gray-800);
+    --bs-symbol-label-bg: var(--bs-gray-100);
+    --bs-symbol-border-color: rgba(var(--bs-body-bg), 0.5);
+    --bs-bullet-bg-color: var(--bs-gray-400);
+    --bs-scrolltop-opacity: 0;
+    --bs-scrolltop-opacity-on: 0.3;
+    --bs-scrolltop-opacity-hover: 1;
+    --bs-scrolltop-box-shadow: var(--bs-box-shadow);
+    --bs-scrolltop-bg-color: var(--bs-primary);
+    --bs-scrolltop-bg-color-hover: var(--bs-primary);
+    --bs-scrolltop-icon-color: var(--bs-primary-inverse);
+    --bs-scrolltop-icon-color-hover: var(--bs-primary-inverse);
+    --bs-drawer-box-shadow: 0px 1px 9px -3px rgba(0, 0, 0, 0.05);
+    --bs-drawer-bg-color: #ffffff;
+    --bs-drawer-overlay-bg-color: rgba(0, 0, 0, 0.2);
+    --bs-menu-dropdown-box-shadow: 0px 0px 50px 0px rgba(82, 63, 105, 0.15);
+    --bs-menu-dropdown-bg-color: var(--bs-body-bg);
+    --bs-menu-heading-color: #99A1B7;
+    --bs-menu-link-color-hover: #1B84FF;
+    --bs-menu-link-color-show: #1B84FF;
+    --bs-menu-link-color-here: #1B84FF;
+    --bs-menu-link-color-active: #1B84FF;
+    --bs-menu-link-bg-color-hover: #F9F9F9;
+    --bs-menu-link-bg-color-show: #F9F9F9;
+    --bs-menu-link-bg-color-here: #F9F9F9;
+    --bs-menu-link-bg-color-active: #F9F9F9;
+    --bs-scrollbar-color: #F1F1F4;
+    --bs-scrollbar-hover-color: #DBDFE9;
+    --bs-overlay-bg: rgba(0, 0, 0, 0.05);
+    --bs-blockui-overlay-bg: rgba(0, 0, 0, 0.05);
+    --bs-rating-color-default: #C4CADA;
+    --bs-rating-color-active: #FFAD0F;
+    --bs-ribbon-label-box-shadow: 0px -1px 5px 0px rgba(30, 33, 41, 0.1);
+    --bs-ribbon-label-bg: #1B84FF;
+    --bs-ribbon-label-border-color: #0053b4;
+    --bs-ribbon-clip-bg: #1E2129;
+    --bs-engage-btn-bg: #ffffff;
+    --bs-engage-btn-box-shadow: 0px 0px 22px #E0E0E0;
+    --bs-engage-btn-border-color: #E8E8E8;
+    --bs-engage-btn-color: #252F4A;
+    --bs-engage-btn-icon-color: #78829D;
+    --bs-engage-btn-color-active: #252F4A;
+
+    --body-bg: #f2f2f7;
+    --body-bg-rgb: 242, 242, 247;
+    --body-color: var(--bs-body-color);
+    --body-color-rgb: var(--bs-body-color-rgb);
+
+    --title-color: var(--bs-gray-800);
+    --title-color-rgb: var(--bs-gray-800-rgb);
+
+    --content-color: var(--bs-body-color);
+    --content-color: var(--bs-body-color-rgb);
+
+    --header-bg: #fff;
+    --header-bg-rgb: 255, 255, 255;
+    --header-item-bg: #f2f2f7;
+    --header-item-bg-rgb: 242, 242, 247;
+
+    --footer-bg: #fff;
+    --footer-bg-rgb: 255, 255, 255;
+    
+    --card-bg: #fff;
+    --card-bg-rgb: 255, 255, 255;
+
+    --modal-bg: #fff;
+    --modal-bg-rgb: 255, 255, 255;
+
+    --dropdown-bg: #fff;
+    --dropdown-bg-rgb: 255, 255, 255;
+    /* --dropdown-box-shadow: 0px 0px 50px 0px rgba(82, 63, 105, 0.15); */
+    --dropdown-box-shadow: 0 5px 10px rgba(30,32,37,0.15);
+    --dropdown-link-hover-color: var(--body-color);
+    --dropdown-link-hover-bg: var(--body-bg);
+}

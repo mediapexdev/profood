@@ -1,0 +1,175 @@
+@charset "UTF-8";
+
+/*  */
+
+#dashboardPageContent .menu-item-card {
+    box-shadow: 0 1px 8px rgb(0 0 0 / 30%),
+                0 1px 2px rgb(0 0 0 / 5%),
+                0 0 0 1px rgb(0 0 0 / 10%) !important;
+}
+
+/*  */
+
+#dashboardPageContent .btn-apply,
+#dashboardPageContent .btn-reload,
+#dashboardPageContent .react-datepicker-wrapper {
+    height: 38px;
+}
+
+#dashboardPageContent .react-datepicker-wrapper .react-datepicker__input-container {
+    height: 100%;
+}
+
+#dashboardPageContent #dateInput,
+/* #dashboardPageContent .btn-apply, */
+#dashboardPageContent .btn-reload {
+    border-radius: 0.25rem !important;
+}
+
+/*  */
+
+@media (min-width: 992px){
+
+    .react-datepicker-popper {
+        z-index: 1003 !important;
+    }
+}
+
+@media (max-width: 1139.98px){
+
+    #dashboardPageContent .react-datepicker{
+        max-width: 275px;
+    }
+}
+
+/* #dashboardPageContent .react-datepicker-popper > div:first-child{
+    display: flex !important;
+} */
+
+/*  */
+
+#dashboardPageContent .dropdown,
+/* #dashboardPageContent .btn-apply-wrapper, */
+#dashboardPageContent .react-datepicker-wrapper,
+#dashboardPageContent .react-datepicker-popper .ranges {
+    min-width: 275px;
+    max-width: 275px;
+}
+
+#dashboardPageContent .dropdown-menu {
+    box-shadow: var(--dropdown-box-shadow);
+}
+
+#dashboardPageContent #dateInput {
+    width: 100%;
+}
+
+#dashboardPageContent #dateInput,
+#dashboardPageContent .menu-toggler {
+    background-color: var(--card-bg) !important;
+    /* background-color: var(--body-bg) !important; */
+    color: var(--title-color) !important;
+}
+
+[data-theme="dark"] #dashboardPageContent #dateInput:hover,
+[data-theme="dark"] #dashboardPageContent #dateInput:active {
+    background-color: rgba(27, 197, 189, 0.36) !important;
+    color: #fff !important;
+}
+
+[data-theme="light"] #dashboardPageContent #dateInput:hover,
+[data-theme="light"] #dashboardPageContent #dateInput:active {
+    background-color: rgba(27, 197, 189, 0.9) !important;
+    color: #fff !important;
+}
+
+/*  */
+
+[data-theme="dark"] #dashboardPageContent .btn-apply,
+[data-theme="dark"] #dashboardPageContent .btn-reload {
+    background-color: rgba(41, 156, 219, 0.22) !important;
+    color: var(--bs-info2) !important;
+}
+
+[data-theme="dark"] #dashboardPageContent .btn-apply:hover,
+[data-theme="dark"] #dashboardPageContent .btn-apply:active,
+[data-theme="dark"] #dashboardPageContent .btn-reload:hover,
+[data-theme="dark"] #dashboardPageContent .btn-reload:active {
+    background-color: var(--bs-info2) !important;
+    color: var(--bs-info2-inverse) !important;
+}
+
+[data-theme="light"] #dashboardPageContent .btn-apply,
+[data-theme="light"] #dashboardPageContent .btn-reload {
+    background-color: #dff0fa !important;
+    color: var(--bs-info2) !important;
+}
+
+[data-theme="light"] #dashboardPageContent .btn-apply:hover,
+[data-theme="light"] #dashboardPageContent .btn-apply:active,
+[data-theme="light"] #dashboardPageContent .btn-reload:hover,
+[data-theme="light"] #dashboardPageContent .btn-reload:active {
+    background-color: var(--bs-info2) !important;
+    color: var(--bs-info2-inverse) !important;
+}
+
+/*  */
+
+#dashboardPageContent .react-datepicker {
+    border-radius: 0;
+    border-left: 1px solid var(--bs-border-color) !important;
+}
+
+#dashboardPageContent .react-datepicker__header {
+    border-radius: 0 !important;
+}
+
+#dashboardPageContent .ranges .list-group-item {
+    border: none !important;
+}
+
+#dashboardPageContent .ranges .list-group-item-btn {
+    width: 100%;
+    height: 100%;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background-color: transparent;
+    color: var(--body-color);
+    border: none !important;
+    border-radius: 0 !important;
+    text-align: start;
+}
+
+[data-theme="dark"] #dashboardPageContent .ranges .list-group-item-btn:hover,
+[data-theme="dark"] #dashboardPageContent .ranges .list-group-item-btn:active,
+[data-theme="dark"] #dashboardPageContent .dropdown-menu .dropdown-item:hover,
+[data-theme="dark"] #dashboardPageContent .dropdown-menu .dropdown-item:active {
+    background-color: rgba(27, 197, 189, 0.08) !important;
+    color: #1BC5BD !important;
+}
+
+[data-theme="dark"] #dashboardPageContent .ranges .list-group-item-btn.active,
+[data-theme="dark"] #dashboardPageContent .dropdown-menu .dropdown-item.active {
+    background-color: rgba(27, 197, 189, 0.36) !important;
+    color: #fff !important;
+}
+
+[data-theme="light"] #dashboardPageContent .ranges .list-group-item-btn:hover,
+[data-theme="light"] #dashboardPageContent .ranges .list-group-item-btn:active,
+[data-theme="light"] #dashboardPageContent .dropdown-menu .dropdown-item:hover,
+[data-theme="light"] #dashboardPageContent .dropdown-menu .dropdown-item:active {
+    background-color: rgba(27, 197, 189, 0.18) !important;
+    color: var(--body-color);
+}
+
+[data-theme="light"] #dashboardPageContent .ranges .list-group-item-btn.active,
+[data-theme="light"] #dashboardPageContent .dropdown-menu .dropdown-item.active {
+    background-color: rgba(27, 197, 189, 0.76) !important;
+    color: #fff !important;
+}
+
+#dashboardPageContent .calendar-buttons-wrapper {
+    border-top: 1px solid var(--bs-border-color) !important;
+}

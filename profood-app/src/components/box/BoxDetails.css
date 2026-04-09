@@ -1,0 +1,113 @@
+@charset "UTF-8";
+
+/* */
+
+.order-box-type-details {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    margin: 0 !important;
+    padding: calc(0.8rem * 0.5) calc(1rem * 0.5) calc(0.8rem * 0.5) calc(1rem * 0.1);
+    background: transparent !important;
+    contain: layout;
+    overflow: visible;
+    -webkit-transition: all 400ms ease;
+    transition: all 400ms ease;
+}
+
+.order-box-type-details.card {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.order-box-type-details .box-type-image-wrapper {
+    position: relative;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.order-box-type-details .box-type-image-wrapper img {
+    width: 64px;
+    height: 64px;
+    max-width: 64px;
+    max-height: 64px;
+    -o-object-fit: contain;
+    object-fit: contain;
+    margin: auto;
+    border-radius: 50%;
+    text-align: center;
+    z-index: 10;
+}
+
+@media (min-width: 576px){
+
+    .order-box-type-details .box-type-image-wrapper img {
+        width: 72px;
+        height: 72px;
+        max-width: 72px;
+        max-height: 72px;
+    }
+}
+
+@media (min-width: 768px){
+
+    .order-box-type-details .box-type-image-wrapper img {
+        width: 76px;
+        height: 76px;
+        max-width: 76px;
+        max-height: 76px;
+    }
+}
+
+@media (min-width: 992px){
+
+    .order-box-type-details .box-type-image-wrapper img {
+        width: 80px;
+        height: 80px;
+        max-width: 80px;
+        max-height: 80px;
+    }
+}
+
+@media (min-width: 1200px){
+
+    .order-box-type-details .box-type-image-wrapper img {
+        width: 88px;
+        height: 88px;
+        max-width: 88px;
+        max-height: 88px;
+    }
+}
+
+/* */
+
+.order-box-type-details .order-box-type-details-content {
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-right: 0;
+    -webkit-padding-start: 12px;
+    padding-inline-start: 12px;
+}
+
+.order-box-type-details .box-type-title-wrapper {
+    margin-bottom: 0.5rem;
+}
+
+.order-box-type-details .box-type-title {
+    font-family: "Quicksand","sans-serif";
+    font-weight: 600;
+}
+
+.order-box-type-details .choice-infos,
+.order-box-type-details .box-type-slices-number {
+    font-family: "Mulish","sans-serif";
+}
+
+.order-box-type-details .box-type-slices-number {
+    font-weight: 600;
+}
+
+.order-box-type-details .box-type-price {
+    color: var(--ion-color-primary-shade);
+}

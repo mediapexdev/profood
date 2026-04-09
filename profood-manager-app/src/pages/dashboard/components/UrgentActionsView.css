@@ -1,0 +1,10 @@
+@charset "UTF-8";
+
+.urgent-actions-view .urgent-badge {
+    border-radius: 0.35rem;
+    font-weight: 500;
+}
+
+.urgent-actions-view .urgent-order-item:last-child {
+    border-bottom: none !important;
+}

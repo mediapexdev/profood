@@ -1,0 +1,12 @@
+{
+  "deliveriesTotal": 24,
+  "deliveriesGrouped": 8,
+  "deliveriesIndividual": 16,
+  "deliveriesCompleted": 5,
+  "deliveriesInProgress": 1,
+  "deliveriesPending": 3,
+  "deliveriesWithIssues": 1,
+  "totalDistance": "12.4 km",
+  "averageTime": "14 min",
+  "totalAmount": 175000
+}

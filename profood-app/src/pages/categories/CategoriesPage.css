@@ -1,0 +1,66 @@
+@charset "UTF-8";
+
+/* Position the category filter footer above the mobile bottom nav */
+@media (max-width: 991px) {
+    #categoriesPageFooter {
+        position: fixed;
+        bottom: calc(56px + env(safe-area-inset-bottom));
+        left: 0;
+        right: 0;
+        z-index: 9998;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    #categoriesPageFooter ion-toolbar {
+        --background: transparent;
+        --padding-top: 6px;
+        --padding-bottom: 6px;
+        --min-height: auto;
+    }
+
+    /* Add padding to content to account for both footers */
+    .categories-page ion-content {
+        --padding-bottom: 130px;
+    }
+}
+
+/* Desktop: normal positioning */
+@media (min-width: 992px) {
+    #categoriesPageFooter {
+        position: relative;
+        bottom: auto;
+        background: var(--ion-background-color);
+    }
+}
+
+/* Dark mode for filter footer */
+@media (max-width: 991px) {
+    @media (prefers-color-scheme: dark) {
+        #categoriesPageFooter {
+            background: rgba(30, 30, 30, 0.85);
+            border-top-color: rgba(255, 255, 255, 0.08);
+            border-bottom-color: rgba(255, 255, 255, 0.08);
+        }
+    }
+
+    body.dark #categoriesPageFooter,
+    .ion-palette-dark #categoriesPageFooter {
+        background: rgba(30, 30, 30, 0.85);
+        border-top-color: rgba(255, 255, 255, 0.08);
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+}
+
+/* Products wrapper */
+.categories-products-wrapper {
+    padding: 16px 0;
+}
+
+/* Slice list adjustments */
+.categories-page .slice-list-widget {
+    padding: 0;
+}

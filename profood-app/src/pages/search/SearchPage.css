@@ -1,0 +1,34 @@
+#searchPage {
+    --ion-background-color: var(--ion-color-light);
+}
+
+#searchPage .search-input {
+    --background: var(--ion-color-light);
+    --border-radius: 12px;
+    --box-shadow: none;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+#searchPage .segment-toolbar {
+    --background: var(--ion-toolbar-background);
+    padding: 0 8px 8px 8px;
+}
+
+#searchPage .search-segment {
+    --background: var(--ion-color-light);
+}
+
+#searchPage .search-segment ion-segment-button {
+    --indicator-color: var(--ion-color-primary);
+    --color: var(--ion-color-medium);
+    --color-checked: var(--ion-color-primary);
+    text-transform: none;
+    font-size: 0.85rem;
+    min-height: 36px;
+}
+
+#searchPage ion-content {
+    --padding-top: 16px;
+    --padding-bottom: 32px;
+}

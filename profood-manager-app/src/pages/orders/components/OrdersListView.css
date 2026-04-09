@@ -1,0 +1,8 @@
+@charset "UTF-8";
+
+/* */
+
+.new-complaints-list-view .card {
+    border-radius: 6px !important;   
+    /* box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.15) !important; */
+}

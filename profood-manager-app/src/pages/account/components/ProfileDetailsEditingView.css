@@ -1,0 +1,15 @@
+@charset "UTF-8";
+
+/*  */
+
+.label-gender .icon-wrapper svg {
+    color: var(--body-bg);
+}
+
+.btn-check:checked + .label-gender.btn-active-light-primary .icon-wrapper svg {
+    color: var(--bs-primary);
+}
+
+.btn-check:checked + .label-gender.btn-active-light-success .icon-wrapper svg {
+    color: var(--bs-success);
+}

@@ -1,0 +1,223 @@
+@charset "UTF-8";
+
+/*  */
+
+#orderStatusesViewSteps{
+    flex-grow: 2;
+}
+
+/*  */
+
+#orderStatusesView .stepper-step-wrapper {
+    flex-grow: 1;
+    flex-shrink: 1;
+    height: 100%;
+}
+
+@media (min-width: 768px) {
+
+    #orderStatusesView .stepper-step-wrapper:not(:last-child) {
+        width: 40%;
+    }
+}
+
+#orderStatusesView .stepper-step {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: none;
+    color: hsl(0, 0%, 50%);
+    cursor: default !important;
+}
+
+#orderStatusesView .stepper-step.active {
+    color: #068C94;
+}
+
+/* icons */
+
+#orderStatusesView .stepper-step-icon {
+    display: flex;
+    flex-grow: 0;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(var(--bs-body-color-rgb), 0.10);
+    color: #fff;
+}
+
+#orderStatusesView .stepper-step.active .stepper-step-icon {
+    background-color: rgba(27, 197, 189, 0.76);
+}
+
+#orderStatusesView .stepper-step.cancelled.active .stepper-step-icon {
+    background-color: rgba(var(--bs-danger-rgb), 0.76);
+}
+
+[data-theme="dark"] #orderStatusesView .stepper-step.active .stepper-step-icon {
+    background-color: rgba(27, 197, 189, 0.36);
+}
+
+[data-theme="dark"] #orderStatusesView .stepper-step.cancelled.active .stepper-step-icon {
+    background-color: rgba(var(--bs-danger-rgb), 0.36);
+}
+
+#orderStatusesView .stepper-step.passed .stepper-step-icon {
+    color: #068C94;
+    background-color: rgba(27, 197, 189, 0.3);
+}
+
+#orderStatusesView .stepper-step.cancelled.passed .stepper-step-icon {
+    color: var(--bs-danger);
+    background-color: rgba(var(--bs-danger-rgb), 0.3);
+}
+
+[data-theme="dark"] #orderStatusesView .stepper-step.passed .stepper-step-icon { 
+    background-color: rgba(27, 197, 189, 0.18);
+    color: #1BC5BD;
+}
+
+[data-theme="dark"] #orderStatusesView .stepper-step.cancelled.passed .stepper-step-icon { 
+    background-color: rgba(var(--bs-danger-rgb), 0.18);
+    color: var(--bs-danger);
+}
+
+/* title and date */
+
+#orderStatusesView .stepper-step-title,
+#orderStatusesView .stepper-step-date {
+    margin: 0;
+    padding: 0;
+}
+
+@media (min-width: 768px){
+    
+    #orderStatusesView .stepper-step-title-and-date-wrapper {
+        width: 120px;
+    }
+}
+
+@media (min-width: 992px){
+    
+    #orderStatusesView .stepper-step-title {
+        display: block;
+    }
+}
+
+#orderStatusesView .stepper-step-date {
+    font-size: 12px;
+}
+
+/*  */
+
+#orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step::after {
+    display: none;
+    flex-grow: 1;
+    min-width: 0;
+    border: none;
+    border-bottom: 1px dashed rgba(var(--body-color-rgb), 0.36);
+    margin: auto 4px;
+}
+
+#orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step.passed::after {
+    border-bottom-style: solid;
+}
+
+@media (min-width: 768px){
+    
+    #orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step::after {
+        display: block;
+    }
+}
+
+@media (min-width: 320px){
+
+    #orderStatusesView .stepper-step::after {
+        min-width: 16px;
+    }
+}
+
+/*  */
+
+#orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step-line {
+    justify-content: center;
+    align-items: center;
+    border-left: 1px dashed rgba(var(--body-color-rgb), 0.39);
+    min-height: 48px;
+    width: 1px;
+    margin: 4px 16px;
+}
+
+#orderStatusesView .stepper-step-wrapper:not(:last-child) + .stepper-step-line.passed {
+    border-left-style: solid;
+}
+
+#orderStatusesView .stepper-step-wrapper:last-child .stepper-step-line {
+    display: none !important;
+}
+
+/*  */
+
+#orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step::after,
+#orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step-line {
+    content: "";
+    background: none;
+}
+
+#orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step.active::after,
+#orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step-line.active {
+    border-color: rgba(27, 197, 189, 0.76);
+}
+
+#orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step.passed::after,
+#orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step-line.passed {
+    border-color: rgba(27, 197, 189, 0.56);
+}
+
+[data-theme="dark"] #orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step.active::after,
+[data-theme="dark"] #orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step-line.active {
+    border-color: rgba(27, 197, 189, 0.56);
+}
+
+[data-theme="dark"] #orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step.passed::after,
+[data-theme="dark"] #orderStatusesView .stepper-step-wrapper:not(:last-child) .stepper-step-line.passed {
+    border-color: rgba(27, 197, 189, 0.36);
+}
+
+/*  */
+
+#btnStatusHandler {
+    background-color: rgba(27, 197, 189, 0.18);
+    color: #068C94;
+}
+
+#btnStatusHandler:hover,
+#btnStatusHandler:active {
+    background-color: rgba(27, 197, 189, 1);
+    color: #fff;
+    box-shadow: 0 1px 8px rgb(255 255 255 / 30%),
+                0 1px 2px rgb(255 255 255 / 5%),
+                0 0 0 1px rgb(255 255 255 / 10%) !important;
+}
+
+[data-theme="dark"] #btnStatusHandler {
+    background-color: rgba(27, 197, 189, 0.10);
+    color: rgba(27, 197, 189, 0.88);
+}
+
+[data-theme="dark"] #btnStatusHandler:hover,
+[data-theme="dark"] #btnStatusHandler:active {
+    background-color: rgba(27, 197, 189, 0.18);
+    color: rgba(27, 197, 189, 1);
+    box-shadow: 0 1px 8px rgb(0 0 0 / 30%),
+                0 1px 2px rgb(0 0 0 / 5%),
+                0 0 0 1px rgb(0 0 0 / 10%) !important;
+}

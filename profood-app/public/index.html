@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html
+    lang="fr"
+    data-theme="light"
+>
+    <head>
+        <meta charset="utf-8" />
+        <title>Profood</title>
+
+        <base href="/" />
+
+        <meta name="color-scheme" content="light dark" />
+        <meta
+            name="viewport"
+            content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+
+        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+        <!-- <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/assets/icon/favicon.png" /> -->
+        <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/assets/icon/logo-32x32.png" />
+
+        <!-- add to homescreen for ios -->
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="Profood" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+        <link rel="stylesheet" href="%PUBLIC_URL%/loading-spinner.css" />
+        <!-- <link rel="stylesheet" href="https://paytech.sn/cdn/paytech.min.css" /> -->
+
+        <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script> -->
+        <!-- <script src="https://paytech.sn/cdn/paytech.min.js"></script> -->
+        <script src="https://static.elfsight.com/platform/platform.js" data-use-service-core defer></script>
+    </head>
+    <body>
+        <!-- begin::Body backgroud-overlay -->
+        <div class="background-overlay"></div>
+        <!-- end::Body backgroud-overlay -->
+        <div id="root"></div>
+        <div id="spinnerWrapper" class="show" style="display: none;">
+            <div class="loading-spinner-wrapper">
+                <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            </div>
+        </div>
+    </body>
+</html>

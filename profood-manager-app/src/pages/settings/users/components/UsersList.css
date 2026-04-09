@@ -1,0 +1,44 @@
+@charset "UTF-8";
+
+/*  */
+
+.users-list .users-table thead th.user,
+.users-list .users-table thead th.email {
+    min-width: 225px !important;
+}
+
+.users-list .users-table thead th.role {
+    min-width: 115px !important;
+}
+
+.users-list .users-table thead th.phone-number,
+.users-list .users-table thead th.status,
+.users-list .users-table thead th.date-added {
+    min-width: 150px !important;
+}
+
+/*  */
+
+.users-list .users-table .badge {
+    color: var(--body-color);
+}
+
+[data-theme="dark"] .users-list .users-table .badge {
+    color: #bfbfbd;
+}
+
+.users-list .users-table .badge-role {
+    min-width: 64px;
+}
+
+.users-list .users-table .badge-status {
+    min-width: 88px;
+}
+
+/* [data-theme="dark"] .users-list .users-table .action-cell .btn:hover {
+    background-color: rgba(83, 86, 89, 0.5) !important;
+}
+
+[data-theme="light"] .users-list .users-table .action-cell .btn:hover {
+    background-color: rgba(220, 220, 220, 0.5) !important;
+} */

@@ -1,0 +1,47 @@
+@charset "UTF-8";
+
+/* Base content padding */
+#homePageContent {
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+}
+
+/* Home section base class */
+.home-section {
+    padding: 0 16px;
+    margin-bottom: 8px;
+}
+
+/* First section needs top margin */
+.home-section:first-of-type {
+    margin-top: 8px;
+}
+
+/* Two-column layout container for Categories and Popular Slices */
+.home-two-column {
+    display: block;
+}
+
+/* Desktop: Side-by-side layout for categories and popular slices */
+@media (min-width: 992px) {
+    .home-two-column {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+    }
+
+    /* Equal width columns */
+    .home-two-column > * {
+        flex: 1;
+        min-width: 0; /* Prevents flex items from overflowing */
+    }
+}
+
+/* App container for desktop centering and max width */
+.app-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}

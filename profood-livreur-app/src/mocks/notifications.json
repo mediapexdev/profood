@@ -1,0 +1,46 @@
+[
+  {
+    "id": "notif-001",
+    "type": "delivery",
+    "title": "Nouvelle livraison assignée",
+    "body": "Commande PF-4533 pour Amadou Konaté — 14 Rue Félix Faure, Dakar Plateau.",
+    "time": "Il y a 3 min",
+    "read": false,
+    "actions": [
+      { "label": "Accepter", "variant": "primary" },
+      { "label": "Détails", "variant": "secondary" }
+    ]
+  },
+  {
+    "id": "notif-002",
+    "type": "schedule",
+    "title": "Rappel de tournée",
+    "body": "Votre tournée du matin démarre dans 30 minutes. 4 livraisons prévues.",
+    "time": "Il y a 25 min",
+    "read": false
+  },
+  {
+    "id": "notif-003",
+    "type": "message",
+    "title": "Message du gestionnaire",
+    "body": "Attention : circulation dense sur l'Avenue Bourguiba. Prévoir 10 min de délai supplémentaire.",
+    "time": "Il y a 1 h",
+    "read": true
+  },
+  {
+    "id": "notif-004",
+    "type": "payment",
+    "title": "Paiement confirmé",
+    "body": "Le paiement de la commande PF-4525 (30 000 FCFA) a été validé avec succès.",
+    "time": "Il y a 2 h",
+    "read": true
+  },
+  {
+    "id": "notif-005",
+    "type": "alert",
+    "title": "Problème signalé",
+    "body": "La commande PF-4520 est marquée comme non livrée. Veuillez contacter le support.",
+    "time": "Il y a 3 h",
+    "read": true
+  }
+]

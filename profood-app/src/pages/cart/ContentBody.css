@@ -1,0 +1,46 @@
+@charset "UTF-8";
+
+/**
+ * Cart Content Body Styles
+ * Simple layout with items list and summary
+ */
+
+.cart-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Items section */
+.cart-items-section {
+    flex: 1;
+}
+
+/* Summary section */
+.cart-summary-section {
+    background: var(--ion-card-background, #fff);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Desktop styles */
+@media (min-width: 992px) {
+    .cart-content {
+        gap: 32px;
+    }
+
+    .cart-summary-section {
+        padding: 24px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Override OrderSummary inner styles */
+    .cart-summary-section .order-summary-widget {
+        max-width: 100%;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+        border-radius: 0;
+    }
+}

@@ -1,0 +1,35 @@
+@charset "UTF-8";
+
+/* */
+
+.FAQTopic-page-title {
+    font-family: "Mulish", "sans-serif";
+    font-weight: 600;
+}
+
+[data-theme="dark"] .FAQTopic-page-title {
+    font-weight: 500;
+}
+
+/* */
+
+ion-accordion-group.questions-answers-accordion-group ion-accordion ion-item {
+    --background: transparent;
+}
+
+ion-accordion-group.questions-answers-accordion-group ion-accordion ion-label,
+ion-accordion-group.questions-answers-accordion-group ion-accordion ion-text {
+    line-height: 1.6em;
+}
+
+[data-theme="dark"] ion-accordion-group.questions-answers-accordion-group ion-accordion ion-label {
+    font-weight: 400;
+}
+
+[data-theme="light"] ion-accordion-group.questions-answers-accordion-group ion-accordion ion-label {
+    font-weight: 600;
+}
+
+ion-accordion-group.questions-answers-accordion-group ion-accordion .ion-accordion-toggle-icon {
+    margin-inline-start: 12px !important;
+}

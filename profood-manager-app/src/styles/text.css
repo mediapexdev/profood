@@ -1,0 +1,275 @@
+@charset "UTF-8";
+
+/* Case format */
+
+.text-transform-none {
+    text-transform: none !important;
+}
+
+.text-capitalize {
+    text-transform: capitalize !important;
+}
+
+.text-lowercase {
+    text-transform: lowercase !important;
+}
+
+.text-uppercase {
+    text-transform: uppercase !important;
+}
+
+@media (min-width: 576px) {
+
+    .text-sm-transform-none {
+        text-transform: none !important;
+    }
+    
+    .text-sm-capitalize {
+        text-transform: capitalize !important;
+    }
+    
+    .text-sm-lowercase {
+        text-transform: lowercase !important;
+    }
+    
+    .text-sm-uppercase {
+        text-transform: uppercase !important;
+    }
+}
+
+@media (min-width: 768px) {
+
+    .text-md-transform-none {
+        text-transform: none !important;
+    }
+    
+    .text-md-capitalize {
+        text-transform: capitalize !important;
+    }
+    
+    .text-md-lowercase {
+        text-transform: lowercase !important;
+    }
+    
+    .text-md-uppercase {
+        text-transform: uppercase !important;
+    }
+}
+
+@media (min-width: 992px) {
+
+    .text-lg-transform-none {
+        text-transform: none !important;
+    }
+    
+    .text-lg-capitalize {
+        text-transform: capitalize !important;
+    }
+    
+    .text-lg-lowercase {
+        text-transform: lowercase !important;
+    }
+    
+    .text-lg-uppercase {
+        text-transform: uppercase !important;
+    }
+}
+
+@media (min-width: 1200px) {
+
+    .text-xl-transform-none {
+        text-transform: none !important;
+    }
+    
+    .text-xl-capitalize {
+        text-transform: capitalize !important;
+    }
+    
+    .text-xl-lowercase {
+        text-transform: lowercase !important;
+    }
+    
+    .text-xl-uppercase {
+        text-transform: uppercase !important;
+    }
+}
+
+@media (min-width: 1400px) {
+
+    .text-xxl-transform-none {
+        text-transform: none !important;
+    }
+    
+    .text-xxl-capitalize {
+        text-transform: capitalize !important;
+    }
+    
+    .text-xxl-lowercase {
+        text-transform: lowercase !important;
+    }
+    
+    .text-xxl-uppercase {
+        text-transform: uppercase !important;
+    }
+}
+
+/* Alignment */
+
+.text-center {
+    text-align: center !important;
+}
+
+.text-end {
+    text-align: end !important;
+}
+
+.text-justify {
+    text-align: justify !important;
+}
+
+.text-left {
+    text-align: left !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.text-start {
+    text-align: start !important;
+}
+
+@media (min-width: 576px) {
+    
+    .text-sm-center {
+        text-align: center !important;
+    }
+    
+    .text-sm-end {
+        text-align: end !important;
+    }
+    
+    .text-sm-justify {
+        text-align: justify !important;
+    }
+    
+    .text-sm-left {
+        text-align: left !important;
+    }
+    
+    .text-sm-right {
+        text-align: right !important;
+    }
+    
+    .text-sm-start {
+        text-align: start !important;
+    }
+}
+
+@media (min-width: 768px) {
+    
+    .text-md-center {
+        text-align: center !important;
+    }
+    
+    .text-md-end {
+        text-align: end !important;
+    }
+    
+    .text-md-justify {
+        text-align: justify !important;
+    }
+    
+    .text-md-left {
+        text-align: left !important;
+    }
+    
+    .text-md-right {
+        text-align: right !important;
+    }
+    
+    .text-md-start {
+        text-align: start !important;
+    }
+}
+
+@media (min-width: 992px) {
+    
+    .text-lg-center {
+        text-align: center !important;
+    }
+    
+    .text-lg-end {
+        text-align: end !important;
+    }
+    
+    .text-lg-justify {
+        text-align: justify !important;
+    }
+    
+    .text-lg-left {
+        text-align: left !important;
+    }
+    
+    .text-lg-right {
+        text-align: right !important;
+    }
+    
+    .text-lg-start {
+        text-align: start !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    
+    .text-xl-center {
+        text-align: center !important;
+    }
+    
+    .text-xl-end {
+        text-align: end !important;
+    }
+    
+    .text-xl-justify {
+        text-align: justify !important;
+    }
+    
+    .text-xl-left {
+        text-align: left !important;
+    }
+    
+    .text-xl-right {
+        text-align: right !important;
+    }
+    
+    .text-xl-start {
+        text-align: start !important;
+    }
+}
+
+@media (min-width: 1400px) {
+    
+    .text-xxl-center {
+        text-align: center !important;
+    }
+    
+    .text-xxl-end {
+        text-align: end !important;
+    }
+    
+    .text-xxl-justify {
+        text-align: justify !important;
+    }
+    
+    .text-xxl-left {
+        text-align: left !important;
+    }
+    
+    .text-xxl-right {
+        text-align: right !important;
+    }
+    
+    .text-xxl-start {
+        text-align: start !important;
+    }
+}

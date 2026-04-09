@@ -1,0 +1,11 @@
+@charset "UTF-8";
+
+/*  */
+
+.order-payment-details-widget {
+    max-width: 275px;
+}
+
+.order-payment-details-widget .order-amount-label {
+    color: #e2963b !important;
+}

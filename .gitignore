@@ -1,24 +1,90 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# =============================================================================
+# ProFood monorepo .gitignore
+# =============================================================================
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-package
-# testing
-/coverage
-
-# production
-/build
-
-# misc
+# --- OS / IDE ---
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
 
+# --- Secrets / environment ---
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.key
+*.pem
+serviceAccount*.json
+auth.json
+
+# --- Node / JavaScript ---
+node_modules/
+.pnp/
+.pnp.js
+coverage/
+.eslintcache
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.tsbuildinfo
+
+# --- Build output ---
+build/
+dist/
+dist-ssr/
+.next/
+out/
+.cache/
+.parcel-cache/
+
+# --- PHP / Laravel ---
+/api-profood/vendor/
+/api-profood/public/build/
+/api-profood/public/hot/
+/api-profood/public/storage/
+/api-profood/storage/*.key
+/api-profood/storage/logs/*
+!/api-profood/storage/logs/.gitkeep
+/api-profood/storage/framework/cache/data/*
+/api-profood/storage/framework/sessions/*
+/api-profood/storage/framework/views/*
+/api-profood/bootstrap/cache/*.php
+/api-profood/.phpunit.result.cache
+/api-profood/.phpunit.cache
+/api-profood/Homestead.json
+/api-profood/Homestead.yaml
+
+# --- Capacitor / iOS / Android native build artifacts ---
+# Keep source config, ignore generated build output
+ios/App/Pods/
+ios/DerivedData/
+ios/App/output/
+android/.gradle/
+android/build/
+android/app/build/
+android/captures/
+android/local.properties
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# --- Logs & tmp ---
+*.log
+logs/
+tmp/
+debug.log
+
+# --- Claude / AI tooling local state ---
+.claude/settings.local.json
+.claude/cache/
+.claude-mem/
+
+# --- Root-level session screenshots (temp) ---
+screen_*.png

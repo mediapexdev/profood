@@ -1,0 +1,33 @@
+@charset "UTF-8";
+
+/* */
+
+/* Default color */
+
+/* .CircularProgressbar .CircularProgressbar-path {
+    stroke: #3e98c7;
+} */
+
+.CircularProgressbar .CircularProgressbar-text {
+    fill: var(--ion-color-dark);
+    dominant-baseline: middle;
+    text-anchor: middle;
+}
+
+[data-theme="dark"] .CircularProgressbar .CircularProgressbar-trail {
+    stroke: #121212;
+}
+
+[data-theme="light"] .CircularProgressbar .CircularProgressbar-trail {
+    stroke: #f2f2f2;
+}
+
+/* [data-theme="dark"] .CircularProgressbar .CircularProgressbar-path {
+    stroke: var(--ion-color-primary);
+    stroke: yellowgreen;
+} */
+
+/* [data-theme="light"] .CircularProgressbar .CircularProgressbar-path {
+    stroke: var(--ion-color-primary);
+    stroke: #aaa;
+} */

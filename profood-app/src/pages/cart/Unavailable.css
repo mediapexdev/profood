@@ -1,0 +1,16 @@
+@charset "UTF-8";
+
+/* */
+
+.unavailable-cart,
+.unavailable-cart ion-button {
+    font-family: "Mulish", "sans-serif";
+}
+
+.unavailable-cart .unavailable-cart-text {
+    line-height: 1.6rem;
+}
+
+[data-theme='light'] .unavailable-cart .unavailable-cart-text {
+    font-weight: 500;
+}

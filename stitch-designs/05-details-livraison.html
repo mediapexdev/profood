@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Détails de la Livraison - Profood</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e67e22",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#201212",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
+<!-- Top Navigation -->
+<div class="flex items-center bg-white dark:bg-zinc-900 p-4 border-b border-primary/10 justify-between sticky top-0 z-10">
+<div class="text-primary flex size-10 shrink-0 items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">Détails de la livraison</h2>
+</div>
+<div class="flex flex-col gap-6 p-4">
+<!-- Customer Info Section -->
+<div class="bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-sm border border-primary/5">
+<div class="flex items-center gap-4 mb-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-16 w-16 border-2 border-primary/20" data-alt="Portrait photo of customer Jean Dupont" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB0yuSdS4R4p911cQFJg3BzaYsVDG66r8gHhRPo2HZgG8xFmbkcTFH81EwpbmRrx31X5AuWMWu_qRer8ltgAcgbopKFd9puy0gMbF2Vs3QHd5eIhQwb6pE6GCZXKGOTQcVdgYZwszxS8UE2VJKK4VcUq0kSbSsdPA5vN-e-8eeU_Xhe-6dYM2IMU6c3AqzYfP-eUpbuFcIbIIFpV69JLjR_hc8afJKK8rIjYLvv7FaEoZJB2evlauIiiuyLlvPb8XpK1RWQLJQdGfMi");'></div>
+<div class="flex flex-col flex-1">
+<p class="text-slate-900 dark:text-slate-100 text-xl font-bold">Jean Dupont</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">+33 6 12 34 56 78</p>
+</div>
+<button class="flex size-12 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 transition-colors" style="background-color: #e67e22;">
+<span class="material-symbols-outlined">call</span>
+</button>
+</div>
+<div class="flex items-start gap-4 p-3 bg-background-light dark:bg-background-dark rounded-lg">
+<div class="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-10">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold">123 Rue de la Boucherie, Paris</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Appartement 4B, 2ème étage</p>
+</div>
+<button class="flex h-9 px-4 cursor-pointer items-center justify-center rounded-lg bg-primary text-white text-xs font-bold whitespace-nowrap" style="background-color: #e67e22;">
+                        NAVIGUER
+                    </button>
+</div>
+</div>
+<!-- Order Details -->
+<div class="flex flex-col gap-3">
+<h3 class="text-slate-900 dark:text-slate-100 text-base font-bold px-1">Articles de la commande (2)</h3>
+<div class="bg-white dark:bg-zinc-900 rounded-xl overflow-hidden shadow-sm border border-primary/5">
+<!-- Item 1 -->
+<div class="flex gap-4 p-4 border-b border-primary/5">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-16 shrink-0" data-alt="Premium ribeye beef steak cut" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA2pyLG8HgO8wKbsWsnGzbhc0CpCcb9_v5W9kLPEL8gcahSEqnCSHN9_Lsq8bdSqtObD2zbYI9Ds8-f2ScOStJ6Oxm6mr0wmABUgaJtMhC25JiGrmu2dt3wbe08hDrX0dgjDm2sRkg55TQrZLNRfCiUHghopWqSKt1r0v_7Veg9msrYOFcsxp-uWWaSvyJXPlCSS77NXJg1bfdWMZDRzW5NHIwH19n1pjlIkTJnaRMY2m6z7EHwtWsNQFahPxXXM2m6qak06T5SutJQ");'></div>
+<div class="flex flex-1 flex-col justify-center">
+<div class="flex justify-between items-start">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-bold">Entrecôte de Bœuf</p>
+<p class="text-primary text-sm font-bold" style="color: #e67e22;">x2</p>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Poids: 1.5kg • Charolais</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Coupe: Tranches épaisses</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex gap-4 p-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-16 shrink-0" data-alt="Fresh raw lamb chops" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuABfdkT1M4ATwxXdAkedezue6rGbfx5uIsUoA_yzi25FpHNzoZIH1-lcgpxl4C8R_xikoDNY7wtxUWbK0vZ3vDOcLqJKR5dloU8_1Up2D7uAvP2PhIYtafNG-OPq0ysQ0MrqVMQlmoymtNd9qkkzvNNkTQEy3i7rdzHsMdPw0H_5mGj8s1plNucg9gFRMSdpcL3QEztTKSR7gptUEXiq3XL1z5SLGsB5i7dq51NMlUYpCCIyDnkjtm7hxIa7ORazZ4chr3mOmz5rmOq");'></div>
+<div class="flex flex-1 flex-col justify-center">
+<div class="flex justify-between items-start">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-bold">Côtes d'Agneau</p>
+<p class="text-primary text-sm font-bold" style="color: #e67e22;">x1</p>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Poids: 0.8kg • Label Rouge</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Coupe: Simple</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Special Instructions -->
+<div class="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/50 rounded-xl p-4">
+<div class="flex items-center gap-2 mb-2 text-orange-700 dark:text-orange-400">
+<span class="material-symbols-outlined text-xl">info</span>
+<h3 class="text-sm font-bold">Instructions spéciales</h3>
+</div>
+<ul class="space-y-2">
+<li class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+<span class="size-1.5 rounded-full bg-orange-500"></span>
+                        Découpe spéciale demandée
+                    </li>
+<li class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+<span class="size-1.5 rounded-full bg-orange-500"></span>
+<span class="font-bold">LIVRER AVANT 10H</span>
+</li>
+</ul>
+</div>
+<!-- Proof of Delivery -->
+<div class="bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-sm border border-primary/5">
+<h3 class="text-slate-900 dark:text-slate-100 text-sm font-bold mb-3 uppercase tracking-wider">Preuve de livraison</h3>
+<div class="flex flex-col items-center justify-center border-2 border-dashed border-primary/20 rounded-xl py-6 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-primary text-4xl mb-2" style="color: #e67e22;">add_a_photo</span>
+<p class="text-primary text-sm font-semibold" style="color: #e67e22;">Prendre une photo</p>
+<p class="text-slate-400 text-xs mt-1">Obligatoire pour confirmer la livraison</p>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-3 pb-8">
+<button class="w-full flex items-center justify-center gap-2 h-14 bg-primary/10 text-primary rounded-xl font-bold hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined">location_away</span>
+                    ARRIVÉ CHEZ LE CLIENT
+                </button>
+<button class="w-full flex items-center justify-center gap-2 h-14 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors" style="background-color: #e67e22;">
+<span class="material-symbols-outlined">task_alt</span>
+                    LIVRAISON CONFIRMÉE
+                </button>
+<button class="w-full flex items-center justify-center gap-2 h-12 text-slate-500 dark:text-slate-400 rounded-xl font-semibold text-sm hover:text-red-600 transition-colors mt-2">
+<span class="material-symbols-outlined">report_problem</span>
+                    Signaler un problème
+                </button>
+</div>
+</div>
+<!-- Progress/Status Badge Float -->
+<div class="fixed bottom-6 right-6 z-50">
+<div class="bg-primary text-white px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold animate-pulse" style="background-color: #e67e22;">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-white border border-primary"></span>
+</span>
+                EN COURS
+            </div>
+</div>
+</div>
+</body></html>

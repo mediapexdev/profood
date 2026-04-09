@@ -1,0 +1,57 @@
+.orders-kanban-view {
+    padding: 0.5rem 0;
+    /* Allow horizontal scrolling on small viewports without breaking the layout */
+    overflow-x: auto;
+}
+
+.kanban-board {
+    /* Enforce a minimum width so columns do not collapse below their readable
+       minimum on narrow screens before the horizontal scrollbar kicks in. */
+    min-width: 800px;
+}
+
+.kanban-column {
+    flex: 1;
+    min-width: 220px;
+    max-width: 320px;
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    transition: background-color 0.15s ease;
+}
+
+/* Subtle blue tint signals to the user that the column is a valid drop target */
+.kanban-column.is-over {
+    background: rgba(13, 110, 253, 0.06);
+}
+
+.kanban-column-body {
+    min-height: 200px;
+    /* Cap height so very tall columns do not push the page footer off screen */
+    max-height: calc(100vh - 380px);
+    overflow-y: auto;
+}
+
+/* Thin scrollbar so it does not eat into the card width */
+.kanban-column-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.kanban-column-body::-webkit-scrollbar-thumb {
+    background: var(--bs-border-color, #dee2e6);
+    border-radius: 2px;
+}
+
+.kanban-empty {
+    border: 2px dashed var(--bs-border-color, #dee2e6);
+    border-radius: 0.5rem;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] .kanban-column {
+    background: var(--bs-dark-bg-subtle, #1a1d20);
+}
+
+[data-theme="dark"] .kanban-column.is-over {
+    background: rgba(13, 110, 253, 0.1);
+}

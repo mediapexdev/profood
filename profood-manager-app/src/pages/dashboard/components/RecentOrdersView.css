@@ -1,0 +1,16 @@
+@charset "UTF-8";
+
+.recent-orders-view .recent-orders-table th {
+    border-bottom-width: 1px;
+    padding-bottom: 0.75rem;
+}
+
+.recent-orders-view .recent-orders-table td {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+    vertical-align: middle;
+}
+
+.recent-orders-view .recent-orders-table tr.cursor-pointer:hover {
+    background-color: var(--bs-table-hover-bg, rgba(0, 0, 0, 0.03));
+}

@@ -1,0 +1,129 @@
+@charset "UTF-8";
+
+/* */
+
+.category-widget {
+    position: relative;
+    margin-right: calc(1.3rem * 2.2);
+    contain: layout;
+    overflow: visible;
+    -webkit-transition: all 400ms ease;
+    transition: all 400ms ease;;
+}
+
+@media (min-width: 768px){
+
+    .category-widget {
+        margin-right: calc(1.5rem * 2.2);
+    }
+}
+
+.category-widget img {
+    width: 100px;
+    height: 100px;
+    -o-object-fit: contain;
+    object-fit: contain;
+    -o-object-position: bottom;
+    object-position: bottom;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    text-align: center;
+    z-index: 10;
+    right: -40px;
+    border-radius: 50%;
+}
+
+@media (min-width: 768px){
+
+    .category-widget img {
+        width: 110px;
+        height: 110px;
+        max-width: 110px;
+        max-height: 110px;
+    }
+}
+
+@media (min-width: 992px){
+
+    .category-widget img {
+        width: 115px;
+        height: 115px;
+        max-width: 115px;
+        max-height: 115px;
+    }
+}
+
+@media (min-width: 1200px){
+
+    .category-widget img {
+        width: 120px;
+        height: 120px;
+        max-width: 120px;
+        max-height: 120px;
+        right: -60px;
+    }
+}
+
+.category-widget .category-image:hover {
+    /* -webkit-animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
+    /* animation: 14s cubic-bezier(0.26, 0.26, 1, 1) 0s infinite normal none running rotateSmooth; */
+
+    -webkit-animation-duration: 14s;
+    -webkit-animation-timing-function: cubic-bezier(0.26, 0.26, 1, 1);
+    -webkit-animation-delay: 0s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-direction: normal;
+    -webkit-animation-fill-mode: none;
+    -webkit-animation-play-state: running;
+    /* -webkit-animation: rotateSmooth; */
+
+    animation-duration: 14s;
+    animation-timing-function: cubic-bezier(0.26, 0.26, 1, 1);
+    animation-delay: 0s;
+    animation-iteration-count: infinite;
+    animation-direction: normal;
+    animation-fill-mode: none;
+    animation-play-state: running;
+    animation-name: rotateSmooth;
+}
+
+.category-widget .category-widget-content {
+    padding: 1.3rem 1.15rem;
+}
+
+.category-widget .category-infos {
+    margin-bottom: 1rem;
+}
+
+.category-widget .category-title-wrapper {
+    margin-bottom: 0.5rem;
+}
+
+.category-widget .category-title {
+    font-family: "Quicksand","sans-serif";
+    font-weight: 700;
+}
+
+[data-theme="dark"] .category-widget .category-title {
+    font-weight: 600;
+}
+
+.category-widget .category-products-number {
+    font-family: "Mulish","sans-serif";
+}
+
+.category-widget .category-products-number {
+    font-weight: 600;
+}
+
+[data-theme="dark"] .category-widget .category-products-number {
+    font-weight: 500;
+}
+
+.category-widget .category-widget-button .btn-text {
+    color: #fff;
+    text-transform: none;
+}

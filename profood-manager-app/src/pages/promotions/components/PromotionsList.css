@@ -1,0 +1,14 @@
+/* Minimum column widths keep the table readable on intermediate viewport sizes
+   before the responsive wrapper kicks in and enables horizontal scrolling. */
+
+.promotions-table .code-cell {
+    min-width: 180px;
+}
+
+.promotions-table .type-cell {
+    min-width: 120px;
+}
+
+.promotions-table .period-cell {
+    min-width: 160px;
+}

@@ -1,0 +1,139 @@
+[
+  {
+    "id": "del-001",
+    "orderRef": "PF-4529",
+    "status": "in_progress",
+    "customer": {
+      "name": "Fatou Sow",
+      "phone": "+221 77 234 56 78",
+      "avatar": null
+    },
+    "address": {
+      "street": "23 Rue Carnot",
+      "city": "Dakar Plateau",
+      "coordinates": [14.6937, -17.4441]
+    },
+    "items": [
+      { "name": "Côtelettes d'agneau", "quantity": 2, "weight": "1.5 kg" },
+      { "name": "Merguez", "quantity": 1, "weight": "500 g" }
+    ],
+    "scheduledTime": "10:30",
+    "estimatedDuration": "12 min",
+    "amount": 25000,
+    "stopNumber": 1
+  },
+  {
+    "id": "del-002",
+    "orderRef": "PF-4530",
+    "status": "pending",
+    "customer": {
+      "name": "Ibrahima Ndiaye",
+      "phone": "+221 76 345 67 89",
+      "avatar": null
+    },
+    "address": {
+      "street": "45 Avenue Bourguiba",
+      "city": "Dakar Médina",
+      "coordinates": [14.6873, -17.4523]
+    },
+    "items": [
+      { "name": "Gigot d'agneau", "quantity": 1, "weight": "2.2 kg" }
+    ],
+    "scheduledTime": "11:00",
+    "estimatedDuration": "18 min",
+    "amount": 35000,
+    "stopNumber": 2
+  },
+  {
+    "id": "del-003",
+    "orderRef": "PF-4531",
+    "status": "pending",
+    "customer": {
+      "name": "Aïssatou Ba",
+      "phone": "+221 78 456 78 90",
+      "avatar": null
+    },
+    "address": {
+      "street": "12 Rue de Thiès",
+      "city": "Dakar Fann",
+      "coordinates": [14.6952, -17.4625]
+    },
+    "items": [
+      { "name": "Poulet fermier", "quantity": 1, "weight": "1.8 kg" },
+      { "name": "Saucisses", "quantity": 1, "weight": "400 g" }
+    ],
+    "scheduledTime": "11:30",
+    "estimatedDuration": "10 min",
+    "amount": 22000,
+    "stopNumber": 3
+  },
+  {
+    "id": "del-004",
+    "orderRef": "PF-4532",
+    "status": "pending",
+    "customer": {
+      "name": "Ousmane Fall",
+      "phone": "+221 70 567 89 01",
+      "avatar": null
+    },
+    "address": {
+      "street": "8 Boulevard de la République",
+      "city": "Dakar",
+      "coordinates": [14.6928, -17.4467]
+    },
+    "items": [
+      { "name": "Épaule d'agneau", "quantity": 1, "weight": "3.0 kg" }
+    ],
+    "scheduledTime": "12:00",
+    "estimatedDuration": "15 min",
+    "amount": 45000,
+    "stopNumber": 4
+  },
+  {
+    "id": "del-005",
+    "orderRef": "PF-4525",
+    "status": "delivered",
+    "customer": {
+      "name": "Marie Diouf",
+      "phone": "+221 77 678 90 12",
+      "avatar": null
+    },
+    "address": {
+      "street": "56 Rue Vincens",
+      "city": "Dakar Plateau",
+      "coordinates": [14.6915, -17.4382]
+    },
+    "items": [
+      { "name": "Bœuf haché", "quantity": 1, "weight": "1.2 kg" }
+    ],
+    "scheduledTime": "09:00",
+    "estimatedDuration": "11 min",
+    "amount": 30000,
+    "stopNumber": 5
+  },
+  {
+    "id": "del-006",
+    "orderRef": "PF-4520",
+    "status": "issue",
+    "customer": {
+      "name": "Cheikh Mbaye",
+      "phone": "+221 76 789 01 23",
+      "avatar": null
+    },
+    "address": {
+      "street": "3 Avenue Lamine Guèye",
+      "city": "Dakar",
+      "coordinates": [14.6941, -17.4411]
+    },
+    "items": [
+      { "name": "Côtes de bœuf", "quantity": 2, "weight": "2.0 kg" },
+      { "name": "Foie d'agneau", "quantity": 1, "weight": "600 g" },
+      { "name": "Tripes", "quantity": 1, "weight": "800 g" }
+    ],
+    "scheduledTime": "08:30",
+    "estimatedDuration": "9 min",
+    "amount": 18000,
+    "notes": "Client absent",
+    "stopNumber": 6
+  }
+]

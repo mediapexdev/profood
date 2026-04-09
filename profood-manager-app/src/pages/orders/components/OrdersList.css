@@ -1,0 +1,54 @@
+@charset "UTF-8";
+
+/*  */
+
+.orders-table thead th.id,
+.orders-table thead th.payment-method,
+.orders-table thead th.date-added {
+    min-width: 150px !important;
+}
+
+.orders-table thead th.customer {
+    min-width: 225px !important;
+}
+
+.orders-table thead th.address {
+    min-width: 250px !important;
+}
+
+.orders-table thead th.amount {
+    min-width: 125px !important;
+}
+
+.orders-table thead th.payment-status {
+    min-width: 130px !important;
+}
+
+.orders-table thead th.status {
+    min-width: 200px !important;
+}
+
+/*  */
+
+.orders-table .id-cell a:not(:hover):not(:active) {
+    color: inherit !important;
+}
+
+/* .orders-table .status-cell button,
+.orders-table .payment-status-cell button {
+    width: 26px;
+    height: 26px;
+    box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+}
+
+.orders-table .status-cell button:not(:hover),
+.orders-table .payment-status-cell button:not(:hover) {
+    background-color: var(--card-bg);
+    color: var(--body-color);
+}
+
+[data-theme="dark"] .orders-table .status-cell button:not(:hover),
+[data-theme="dark"] .orders-table .payment-status-cell button:not(:hover) {
+    background-color: var(--body-bg);
+    color: var(--body-color);
+} */

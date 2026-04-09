@@ -1,0 +1,40 @@
+@charset "UTF-8";
+
+/*  */
+
+[data-theme='light'] #signinForm input.form-control:not(.input-group-password-password-input),
+[data-theme='light'] #signinForm .form-group-password-wrapper .input-group {
+    background-color: #f2f2f7 !important;
+    color: #212529 !important;
+}
+
+[data-theme='light'] #signinForm input.form-control:not(.input-group-password-password-input):focus,
+[data-theme='light'] #signinForm input.form-control:not(.input-group-password-password-input):active,
+[data-theme='light'] #signinForm .form-group-password-wrapper.focus .input-group,
+[data-theme='light'] #signinForm .form-group-password-wrapper.active .input-group {
+    background-color: #f0f0f5 !important;
+    color: #212529 !important;
+}
+
+#btnLogin {
+    background-color: #e2963b;
+}
+
+#btnLogin:hover,
+#btnLogin:active {
+    background-color: #c78434;
+}
+
+#passwordResetLink {
+    color: #e2963b;
+    font-size: 14px;
+    text-underline-offset: 0.25em !important;
+    text-decoration-color: RGBA(226, 150, 59, 0) !important;
+}
+
+#passwordResetLink:hover,
+#passwordResetLink:active,
+#passwordResetLink:focus {
+    color: #c78434;
+    text-decoration-color: RGBA(226, 150, 59, 1) !important;
+}
