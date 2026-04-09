@@ -53,7 +53,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "set CI=false&&react-scripts build",
+    "build": "cross-env CI=false react-scripts build",
     "test": "react-scripts test --transformIgnorePatterns 'node_modules/(?!(@ionic/react|@ionic/react-router|@ionic/core|@stencil/core|ionicons)/)'",
     "eject": "react-scripts eject"
   },
@@ -80,6 +80,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^5.0.0",
+    "cross-env": "^10.1.0",
     "ini": "^6.0.0",
     "react-scripts": "^5.0.1"
   },
