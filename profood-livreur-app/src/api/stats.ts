@@ -2,64 +2,61 @@ import apiClient from './client'
 import type { DailyStats } from '../types'
 
 /**
- * Shape returned by GET /get-orders-statistics-details.
- * Only the top-level fields we use for deriving DailyStats are typed here.
+ * Shape returned by GET /get-livreur-stats.
+ *
+ * The backend sends camelCase keys so the mapping below is straightforward.
+ * Fields that are not provided by this endpoint (totalDistance, averageTime)
+ * remain as '– ' placeholders in the returned DailyStats object.
  */
-interface ApiOrderStatistics {
-  all: { number: number }
-  awaitingProcessing: { number: number }
-  beingProcessed: { number: number }
-  inTheProcessOfDelivery: { number: number }
-  delivered: { number: number }
-  cancelled: { number: number }
+interface ApiLivreurStats {
+  total: number
+  completed: number
+  inProgress: number
+  pending: number
+  cancelled: number
+  totalAmount: number
+  deliveriesGrouped: number
+  deliveriesIndividual: number
 }
 
 /**
- * Fetches today's delivery statistics by querying the global order statistics
- * endpoint with today's date as both start and end.
+ * Fetches the authenticated livreur's statistics for a given calendar day.
  *
- * BACKEND GAP (MEDIUM):
- * GET /get-orders-statistics-details is a manager-facing endpoint that returns
- * aggregate statistics across ALL orders, not just those assigned to the
- * current livreur.  The fields deliveriesGrouped, deliveriesIndividual,
- * totalDistance, and averageTime have no equivalent in the API.
+ * @param date - Optional date in Y-m-d format (e.g. "2026-05-08").
+ *               When omitted the backend defaults to today in Africa/Dakar tz.
  *
- * Until a livreur-specific statistics endpoint exists (suggested:
- * GET /livreur/stats?date=YYYY-MM-DD), this function derives a best-effort
- * DailyStats from the available global data.
- *
- * See TODO_BACKEND_GAPS.md — Item 7.
+ * Maps the API response to the DailyStats shape consumed by the UI.
+ * Fields that the new endpoint does not provide are left as placeholder
+ * strings rather than fabricated values:
+ *   - totalDistance  → '– km'   (no GPS tracking in the backend)
+ *   - averageTime    → '– min'  (no delivery-time tracking in the backend)
  */
-export async function fetchDailyStats(): Promise<DailyStats> {
-  const today = new Date().toISOString().split('T')[0]
+export async function fetchDailyStats(date?: string): Promise<DailyStats> {
+  const params: Record<string, string> = {}
+  if (date) {
+    params['date'] = date
+  }
 
-  const response = await apiClient.get<ApiOrderStatistics>(
-    '/get-orders-statistics-details',
-    { params: { start_date: today, end_date: today } }
+  const response = await apiClient.get<ApiLivreurStats>(
+    '/get-livreur-stats',
+    { params }
   )
 
   const d = response.data
 
-  const total = d.all.number
-  const delivered = d.delivered.number
-  const inProgress = d.inTheProcessOfDelivery.number
-  const pending = d.awaitingProcessing.number + d.beingProcessed.number
-  const issues = d.cancelled.number
-
   return {
-    deliveriesTotal: total,
-    // Grouped / Individual split is not in the API — return total as a fallback.
-    // TODO: Backend gap — no split between grouped and individual deliveries.
-    deliveriesGrouped: 0,
-    deliveriesIndividual: total,
-    deliveriesCompleted: delivered,
-    deliveriesInProgress: inProgress,
-    deliveriesPending: pending,
-    deliveriesWithIssues: issues,
-    // Distance and time are not available from the API.
-    // TODO: Backend gap — no route distance or average time tracking.
-    totalDistance: '– km',
-    averageTime: '– min',
-    totalAmount: 0, // Not returned by the statistics endpoint.
+    deliveriesTotal:      d.total,
+    deliveriesGrouped:    d.deliveriesGrouped,
+    deliveriesIndividual: d.deliveriesIndividual,
+    deliveriesCompleted:  d.completed,
+    deliveriesInProgress: d.inProgress,
+    deliveriesPending:    d.pending,
+    // cancelled maps to "issues" in the UI vocabulary
+    deliveriesWithIssues: d.cancelled,
+    totalAmount:          d.totalAmount,
+    // totalDistance is not tracked by the backend — render '–' in the UI
+    totalDistance:        '– km',
+    // averageTime is not tracked by the backend — render '–' in the UI
+    averageTime:          '– min',
   }
 }

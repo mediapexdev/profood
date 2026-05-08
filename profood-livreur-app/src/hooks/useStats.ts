@@ -17,15 +17,12 @@ export interface UseStatsReturn {
  * Returns today's delivery statistics for the current driver session.
  *
  * Data source strategy:
- *   1. On mount, fetch from GET /get-orders-statistics-details.
- *   2. On success, use real aggregate data (note: not livreur-specific yet).
+ *   1. On mount, fetch from GET /get-livreur-stats?date=YYYY-MM-DD.
+ *   2. On success, use real per-livreur data for the requested day.
  *   3. On failure, fall back to mock stats so the dashboard remains usable.
  *
- * BACKEND GAP: The statistics endpoint returns aggregate data for ALL orders,
- * not per-livreur. Some fields (deliveriesGrouped, deliveriesIndividual,
- * totalDistance, averageTime, totalAmount) have no equivalent in the current
- * API and are set to placeholder values.
- * See src/api/stats.ts and TODO_BACKEND_GAPS.md — Item 7.
+ * Fields not provided by the endpoint (totalDistance, averageTime) are
+ * rendered as '–' placeholders. See src/api/stats.ts for details.
  */
 export function useStats(): UseStatsReturn {
   const [stats, setStats] = useState<DailyStats>(MOCK_STATS)
@@ -35,8 +32,12 @@ export function useStats(): UseStatsReturn {
   const loadStats = useCallback(async () => {
     setLoading(true)
     setError(null)
+    // Pass today's date so the request is explicit; the backend defaults to
+    // today in Africa/Dakar tz when no date is supplied, but being explicit
+    // prevents any ambiguity around midnight in different timezones.
+    const today = new Date().toISOString().split('T')[0]
     try {
-      const data = await fetchDailyStats()
+      const data = await fetchDailyStats(today)
       setStats(data)
     } catch (err: unknown) {
       const axiosError = err as {
@@ -44,8 +45,8 @@ export function useStats(): UseStatsReturn {
         message?: string
       }
 
-      // 403/401 mean the endpoint is not accessible to this role.
-      // Fall back to mock data silently so the dashboard renders.
+      // Network errors or 4xx/5xx fall back to mock data so the dashboard
+      // remains usable when the API is unreachable (e.g. offline field use).
       console.warn(
         '[useStats] API unavailable, falling back to mock data.',
         err
