@@ -1341,10 +1341,12 @@ class UserController extends Controller
             $app_key = $request['app_key'];
             $profood_app_key = env('PROFOOD_APP_KEY');
             $profood_app_manager_key = env('PROFOOD_APP_MANAGER_KEY');
+            $profood_app_livreur_key = env('PROFOOD_APP_LIVREUR_KEY');
 
             if((0 == \strcmp($app_key, $profood_app_key) && $user->role->code == Role::CUSTOMER) ||
                 (0 == \strcmp($app_key, $profood_app_manager_key) && ($user->role->code == Role::ADMIN ||
-                    $user->role->code == Role::MANAGER || $user->role->code == Role::SUPER_ADMIN))){
+                    $user->role->code == Role::MANAGER || $user->role->code == Role::SUPER_ADMIN)) ||
+                (0 == \strcmp($app_key, $profood_app_livreur_key) && $user->role->code == Role::LIVREUR)){
 
                 // if($user->logged){
                 //     return response()->json(['message' => 'Vous êtes déjà connecté à votre compte sur un appareil.'], 403);

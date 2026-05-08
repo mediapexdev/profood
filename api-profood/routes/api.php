@@ -4,6 +4,7 @@ use App\Http\Controllers\BoxTypeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\LivreurController;
 use App\Http\Controllers\LocaliteController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PromotionController;
@@ -173,6 +174,14 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     /**
      * 
      */
+    Route::get('/livreur', [LivreurController::class, 'show']);
+    Route::get('get-livreur-deliveries', [LivreurController::class, 'getDeliveries']);
+    Route::get('get-livreur-delivery/{id}', [LivreurController::class, 'getDelivery']);
+    Route::post('livreur-update-order-status', [LivreurController::class, 'updateDeliveryStatus']);
+
+    Route::get('get-livreurs', [LivreurController::class, 'index']);
+    Route::post('assign-livreur-to-order', [LivreurController::class, 'assignToOrder']);
+
     Route::get('/manager', function () {
         if (null !== ($user = Auth::user())) {
             switch ($user->role->code) {
