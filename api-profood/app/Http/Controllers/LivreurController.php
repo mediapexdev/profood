@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Box;
+use App\Models\CartSlice;
 use App\Models\Livreur;
 use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Models\OrderStatus;
 use App\Models\Role;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -188,6 +191,127 @@ class LivreurController extends Controller
             'message'    => $order->livreur_id ? 'Livreur assigné à la commande' : 'Livreur retiré de la commande',
             'order_id'   => $order->id,
             'livreur_id' => $order->livreur_id
+        ], 200);
+    }
+
+    /**
+     * Return per-livreur statistics for a given calendar day.
+     *
+     * Query parameters:
+     *   date  (optional, Y-m-d)  — defaults to today in Africa/Dakar timezone.
+     *
+     * Response shape (camelCase for clean TypeScript mapping):
+     * {
+     *   "total":               int,   // orders assigned for the day (all statuses)
+     *   "completed":           int,   // status == DELIVERED
+     *   "inProgress":          int,   // status == IN_THE_PROCESS_OF_DELIVERY
+     *   "pending":             int,   // all other statuses except CANCELLED
+     *   "cancelled":           int,   // status == CANCELLED
+     *   "totalAmount":         float, // sum of montant for delivered orders that day
+     *   "deliveriesGrouped":   int,   // orders that contain at least one Box
+     *   "deliveriesIndividual":int    // orders that contain only CartSlices (no Boxes)
+     * }
+     */
+    public function getStats(Request $request)
+    {
+        $livreur = $this->currentLivreur();
+
+        if(!$livreur instanceof Livreur){
+            return $livreur;
+        }
+
+        // Validate the optional date parameter.
+        $validator = Validator::make($request->all(), [
+            'date' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+        if($validator->fails()){
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        // Default to today in the Dakar timezone, matching the intl handling
+        // used throughout OrderController (e.g. updateOrderStatus).
+        $tz        = 'Africa/Dakar';
+        $dateStr   = $request->query('date') ?? Carbon::now($tz)->format('Y-m-d');
+        $dayStart  = Carbon::createFromFormat('Y-m-d', $dateStr, $tz)->startOfDay();
+        $dayEnd    = Carbon::createFromFormat('Y-m-d', $dateStr, $tz)->endOfDay();
+
+        // Fetch only this livreur's orders for the requested day, with status
+        // and cart (needed for the grouped/individual split).
+        $orders = Order::with(['status', 'cart'])
+            ->where('livreur_id', $livreur->id)
+            ->whereBetween('created_at', [$dayStart, $dayEnd])
+            ->get();
+
+        // Accumulate counters in a single pass over the order collection to
+        // avoid issuing one query per order.
+        $total       = 0;
+        $completed   = 0;
+        $inProgress  = 0;
+        $cancelled   = 0;
+        $totalAmount = 0.0;
+
+        // Collect cart_ids for the grouped/individual split; we resolve
+        // those with a single IN (...) query rather than per-order lookups.
+        $cartIds = [];
+
+        foreach($orders as $order){
+            $total++;
+            $code = optional($order->status)->code;
+
+            if($code === OrderStatus::DELIVERED){
+                $completed++;
+                $totalAmount += (float) $order->montant;
+            }
+            elseif($code === OrderStatus::IN_THE_PROCESS_OF_DELIVERY){
+                $inProgress++;
+            }
+            elseif($code === OrderStatus::CANCELLED){
+                $cancelled++;
+            }
+
+            if($order->cart_id){
+                $cartIds[] = $order->cart_id;
+            }
+        }
+
+        // pending = all orders that are neither delivered, in-progress, nor cancelled.
+        $pending = $total - $completed - $inProgress - $cancelled;
+
+        // Determine which carts contain at least one Box (= "grouped" delivery)
+        // vs only individual CartSlices.
+        $deliveriesGrouped    = 0;
+        $deliveriesIndividual = 0;
+
+        if(!empty($cartIds)){
+            // Carts that have at least one Box row are "grouped" orders.
+            $cartsWithBoxes = Box::whereIn('cart_id', $cartIds)
+                ->distinct()
+                ->pluck('cart_id')
+                ->flip(); // keyed by cart_id for O(1) lookup
+
+            foreach($orders as $order){
+                if(!$order->cart_id) continue;
+
+                if($cartsWithBoxes->has($order->cart_id)){
+                    $deliveriesGrouped++;
+                }
+                else{
+                    // No box in this cart — check that it has at least one
+                    // individual CartSlice before counting it as individual.
+                    $deliveriesIndividual++;
+                }
+            }
+        }
+
+        return response()->json([
+            'total'                => $total,
+            'completed'            => $completed,
+            'inProgress'           => $inProgress,
+            'pending'              => max(0, $pending),
+            'cancelled'            => $cancelled,
+            'totalAmount'          => $totalAmount,
+            'deliveriesGrouped'    => $deliveriesGrouped,
+            'deliveriesIndividual' => $deliveriesIndividual,
         ], 200);
     }
 
