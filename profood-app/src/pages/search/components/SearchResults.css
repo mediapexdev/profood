@@ -1,0 +1,391 @@
+/* =========================================================================
+   SearchResults.css
+   Styles for the search results component — cards, toolbar, chips, modal.
+   Mobile-first. Touch targets ≥ 44px throughout.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------------
+   Idle / empty states
+   --------------------------------------------------------------------------- */
+
+.search-idle-state,
+.search-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    gap: 12px;
+    text-align: center;
+}
+
+.search-idle-icon,
+.search-empty-icon {
+    font-size: 48px;
+    color: var(--ion-color-medium);
+    opacity: 0.5;
+}
+
+.search-idle-text {
+    font-size: 1rem;
+    color: var(--ion-color-medium);
+    margin: 0;
+}
+
+.search-empty-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.search-empty-hint {
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+    margin: 0;
+}
+
+.search-clear-filters-btn {
+    margin-top: 8px;
+}
+
+/* ---------------------------------------------------------------------------
+   Toolbar (sort + filter button)
+   --------------------------------------------------------------------------- */
+
+.search-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 4px;
+    gap: 8px;
+}
+
+.search-sort-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.search-toolbar-icon {
+    font-size: 18px;
+    color: var(--ion-color-medium);
+    flex-shrink: 0;
+}
+
+.search-sort-select {
+    font-size: 0.85rem;
+    min-height: 44px; /* touch target */
+    flex: 1;
+    --padding-start: 0;
+}
+
+.search-filter-btn {
+    flex-shrink: 0;
+    min-height: 44px; /* touch target */
+    min-width: 44px;
+    position: relative;
+}
+
+.search-filter-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    font-size: 0.65rem;
+    padding: 2px 5px;
+    border-radius: 50%;
+}
+
+/* ---------------------------------------------------------------------------
+   Active filter chips row
+   --------------------------------------------------------------------------- */
+
+.search-active-chips,
+.search-category-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px 0 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.search-active-chips::-webkit-scrollbar,
+.search-category-chips::-webkit-scrollbar {
+    display: none;
+}
+
+.search-active-chips ion-chip,
+.search-category-chips ion-chip {
+    min-height: 36px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Section headers
+   --------------------------------------------------------------------------- */
+
+.search-section {
+    margin-bottom: 8px;
+}
+
+.search-section-header {
+    padding: 8px 4px 4px;
+}
+
+.search-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--ion-text-color);
+}
+
+.search-section-badge {
+    font-size: 0.7rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Results list
+   --------------------------------------------------------------------------- */
+
+.search-results-list {
+    padding: 0;
+    background: transparent;
+}
+
+.search-result-item {
+    --background: transparent;
+    --padding-start: 0;
+    --padding-end: 0;
+    --inner-padding-start: 0;
+    --inner-padding-end: 0;
+    padding: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Product card — shared base
+   --------------------------------------------------------------------------- */
+
+.search-card {
+    width: 100%;
+    margin: 0 0 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    min-height: 100px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* ---------------------------------------------------------------------------
+   Card image area
+   --------------------------------------------------------------------------- */
+
+.search-card-image-wrapper {
+    position: relative;
+    width: 96px;
+    min-width: 96px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--ion-color-light);
+}
+
+.search-card-image-wrapper--category {
+    width: 88px;
+    min-width: 88px;
+}
+
+.search-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Promotional discount badge overlaid on image */
+.search-promo-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: var(--ion-color-danger);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Card content area
+   --------------------------------------------------------------------------- */
+
+.search-card-content {
+    flex: 1;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+}
+
+/* Small type badge: "Box", "Bœuf", etc. */
+.search-card-type-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+}
+
+.search-card-type-icon {
+    font-size: 12px;
+}
+
+.search-card-title {
+    font-size: 0.9rem !important;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: normal;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin-bottom: 4px;
+}
+
+.search-card-subtitle {
+    font-size: 0.78rem;
+    color: var(--ion-color-medium);
+    margin-bottom: 4px;
+}
+
+.search-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    gap: 8px;
+}
+
+.search-card-cta {
+    min-height: 36px;
+    --border-radius: 8px;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Quantity controls (replace CTA once item is in selection)
+   --------------------------------------------------------------------------- */
+
+.search-qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-qty-btn {
+    /* Must be ≥ 44px touch target */
+    min-width: 36px;
+    min-height: 36px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--ion-color-primary);
+    background: transparent;
+    color: var(--ion-color-primary);
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+    padding: 0;
+    /* Extend tap area to 44px without affecting visual size */
+    -webkit-tap-highlight-color: transparent;
+}
+
+.search-qty-btn:active {
+    background: var(--ion-color-primary);
+    color: white;
+}
+
+.search-qty-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+    color: var(--ion-text-color);
+}
+
+/* ---------------------------------------------------------------------------
+   Filter modal
+   --------------------------------------------------------------------------- */
+
+.search-filter-modal {
+    --border-radius: 16px 16px 0 0;
+}
+
+.search-filter-content {
+    padding: 16px 20px 32px;
+}
+
+.search-filter-section {
+    margin-bottom: 24px;
+}
+
+.search-filter-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ion-text-color);
+    margin: 0 0 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.search-filter-price-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.search-filter-price-labels ion-note {
+    font-size: 0.8rem;
+}
+
+.search-price-range {
+    --bar-height: 4px;
+    --knob-size: 24px;
+    padding: 0 4px;
+}
+
+.search-filter-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.search-filter-reset-btn,
+.search-filter-apply-btn {
+    min-height: 48px; /* comfortable touch target for action buttons */
+}

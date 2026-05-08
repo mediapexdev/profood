@@ -10,13 +10,16 @@ import {
     IonSegment,
     IonSegmentButton,
     IonToolbar,
-    IonLabel
+    IonLabel,
+    useIonViewDidEnter,
+    useIonViewDidLeave
 } from '@ionic/react';
 
 import { useTranslation } from 'react-i18next';
 
 import { useDataContext } from '../../contexts/DataProvider';
 import { normalizeString } from '../../helpers/AssetHelpers';
+import { useUIStateContext } from '../../contexts/UIStateProvider';
 import SearchResults from './components/SearchResults';
 import useToggleTabBar from '../../components/hooks/useToggleTabBar';
 
@@ -42,11 +45,29 @@ const SearchPage: React.FC = () => {
     const toggleTabBar = useToggleTabBar();
 
     /**
+     * UIState context — used to enable slice price display while on this page,
+     * consistent with how CategorySlicesPage shows prices during search.
+     */
+    const { setShowSlicePrice } = useUIStateContext();
+
+    /**
      * Show tab bar when entering search page
      */
     React.useEffect(() => {
         toggleTabBar(true);
     }, [toggleTabBar]);
+
+    /**
+     * Enable slice prices when this page is active; restore default on leave.
+     * This ensures prices are shown in search results without affecting other pages.
+     */
+    useIonViewDidEnter(() => {
+        setShowSlicePrice(true);
+    });
+
+    useIonViewDidLeave(() => {
+        setShowSlicePrice(false);
+    });
 
     /**
      * Search input state
