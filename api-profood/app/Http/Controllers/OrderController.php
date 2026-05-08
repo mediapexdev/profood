@@ -26,10 +26,12 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 use Twilio\Rest\Client as TwilioClient;
 
 /**
@@ -1592,5 +1594,115 @@ class OrderController extends Controller
                 'action' => 'redirectPayment'
             ]);
         }
+    }
+
+    /**
+     * Convert a guest order into a registered customer account.
+     *
+     * Public endpoint (no auth) — the user is creating their first account
+     * from a successful guest order. The phone number is taken from the
+     * order's guest_phone_number field rather than the request body so a
+     * caller cannot claim someone else's order with a different phone.
+     *
+     * Side effects: creates User + Customer rows, links the guest order to
+     * the new customer, and back-fills any other guest orders that share
+     * the same phone so the new account starts with the full history.
+     */
+    public function convertGuestOrder(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_string_id'       => ['required', 'string', 'exists:orders,string_id'],
+            'first_name'            => ['nullable', 'string', 'max:255'],
+            'last_name'             => ['nullable', 'string', 'max:255'],
+            'email'                 => ['nullable', 'string', 'email'],
+            'password'              => ['required', 'string', 'confirmed', Password::min(8)],
+            'app_key'               => ['required', 'string']
+        ]);
+        if($validator->fails()){
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+        $app_key = Str::of($request['app_key'])->stripTags()->trim();
+        $profood_app_key = env('PROFOOD_APP_KEY');
+
+        if(0 != \strcmp($app_key, $profood_app_key)){
+            Log::warning('Unauthorized convertGuestOrder attempt - invalid app key', [
+                'ip' => request()->ip(),
+                'action' => 'convertGuestOrder'
+            ]);
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 401);
+        }
+        $order = Order::where('string_id', $request->order_string_id)->first();
+
+        if(!$order || !$order->isGuestOrder()){
+            return response()->json(['message' => 'Cette commande ne peut pas être convertie'], 422);
+        }
+        $phone = $order->guest_phone_number;
+
+        if(empty($phone)){
+            return response()->json(['message' => 'Numéro de téléphone manquant sur la commande'], 422);
+        }
+        if(User::where('phone_number', $phone)->exists()){
+            return response()->json([
+                'message' => 'Un compte existe déjà avec ce numéro. Veuillez vous connecter.'
+            ], 409);
+        }
+        $customer_role = Role::where('code', Role::CUSTOMER)->first();
+
+        if(!isset($customer_role)){
+            return response()->json(['message' => "Une erreur est survenue ! Veuillez réessayer ou contacter Profood"], 500);
+        }
+        $first_name = Str::of($request->first_name ?: $order->guest_first_name)->stripTags()->trim();
+        $last_name  = Str::of($request->last_name  ?: $order->guest_last_name)->stripTags()->trim();
+        $email      = $request->email
+            ? Str::of($request->email)->stripTags()->trim()
+            : ($order->guest_email ?: null);
+
+        $user = User::create([
+            'first_name'    => $first_name,
+            'last_name'     => $last_name,
+            'phone_number'  => $phone,
+            'email'         => $email,
+            'password'      => Hash::make(Str::of($request->password)->stripTags()->trim()),
+            'role_id'       => $customer_role->id,
+            'active'        => true,
+            'logged'        => false,
+            'session_count' => 0
+        ]);
+        $customer = Customer::create(['user_id' => $user->id]);
+
+        // Link this order plus every other guest order with the same phone
+        // so the new account starts with the full purchase history.
+        $linkedCount = Order::where('is_guest_order', true)
+            ->where('guest_phone_number', $phone)
+            ->update([
+                'customer_id'    => $customer->id,
+                'is_guest_order' => false
+            ]);
+
+        // Issue a Sanctum-style token so the client can finish signed-in
+        // without forcing the customer through the signin form right after.
+        $now = Carbon::now('UTC');
+        $token = Hash::make("{$user->id}{$user->first_name}{$user->last_name}{$user->phone_number}{$user->created_at}{$now}");
+        $user->api_token = $token;
+        $expirationMinutes = (int) env('API_TOKEN_EXPIRATION_MINUTES', 43200);
+        $user->api_token_expires_at = $expirationMinutes > 0 ? $now->copy()->addMinutes($expirationMinutes) : null;
+        $user->session_count = 1;
+        $user->logged = true;
+        $user->save();
+
+        Log::info('Guest order converted to registered account', [
+            'user_id'       => $user->id,
+            'customer_id'   => $customer->id,
+            'order_id'      => $order->id,
+            'linked_orders' => $linkedCount,
+            'action'        => 'convertGuestOrder'
+        ]);
+
+        return response()->json([
+            'message'       => 'Compte créé et commande liée à votre profil',
+            'user'          => $user,
+            'token'         => $token,
+            'linked_orders' => $linkedCount
+        ], 200);
     }
 }

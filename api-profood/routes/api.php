@@ -53,6 +53,7 @@ Route::get('get-localites-with-full-info', [LocaliteController::class, 'getLocal
 
 Route::post('guest-order', [OrderController::class, 'addGuestOrder']);
 Route::post('guest-order-with-payment', [OrderController::class, 'addGuestOrderWithPayment']);
+Route::post('convert-guest-order', [OrderController::class, 'convertGuestOrder']);
 Route::post('redirect-payment', [OrderController::class, 'redirectPayment']);
 
 // Public promotion endpoints
