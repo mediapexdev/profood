@@ -41,6 +41,9 @@ export interface SliceProps {
     is_on_promotion?: boolean;
     effective_price?: number;
     discount_percentage?: number | null;
+    // Eloquent timestamps surfaced by /get-slices
+    created_at?: string;
+    updated_at?: string;
 }
 
 /**

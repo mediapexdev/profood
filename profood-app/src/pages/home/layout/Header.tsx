@@ -1,36 +1,38 @@
 import React from 'react';
 
-import { IonButtons, IonHeader, IonMenuButton, IonToolbar } from '@ionic/react';
+import { IonButton, IonButtons, IonHeader, IonIcon, IonMenuButton, IonToolbar } from '@ionic/react';
+import { searchOutline } from 'ionicons/icons';
 
 import Logo from '../../../components/Logo';
+import useGoTo from '../../../components/hooks/useGoTo';
 
 import './Header.css';
 
-/**
- * 
- * @returns 
- */
 const Header: React.FC = () => {
-    /**
-     * 
-     */
+    const goTo = useGoTo();
+
     return (
         <IonHeader
             translucent={true}
             className='translucent-style'
         >
             <IonToolbar>
-                {/* begin::Button toggle menu */}
                 <IonButtons slot="start">
                     <IonMenuButton />
                 </IonButtons>
-                {/* end::Button toggle menu */}
 
-                {/* begin::Logo */}
                 <div className='logo-wrapper d-flex flex-center'>
                     <Logo />
                 </div>
-                {/* end::Logo */}
+
+                <IonButtons slot="end">
+                    <IonButton
+                        aria-label="Rechercher"
+                        onClick={() => goTo('/search')}
+                    >
+                        <IonIcon slot="icon-only" icon={searchOutline} />
+                    </IonButton>
+                </IonButtons>
             </IonToolbar>
         </IonHeader>
     );

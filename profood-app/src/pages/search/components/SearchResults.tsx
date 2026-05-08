@@ -55,8 +55,7 @@ import './SearchResults.css';
 
 /**
  * Possible sort orders for search results.
- * Note: 'newest' sorts by ID descending as a proxy because neither BoxTypeProps
- * nor SliceProps expose a created_at field from the API — see data shape gap.
+ * 'newest' uses created_at when present and falls back to ID desc.
  */
 export type SortOrder =
     | 'default'
@@ -103,6 +102,17 @@ const getEffectivePrice = (item: BoxTypeProps | SliceProps): number => {
         return item.effective_price;
     }
     return item.price;
+};
+
+// ---------------------------------------------------------------------------
+// Newest-first comparator — uses created_at when present, falls back to id desc
+// ---------------------------------------------------------------------------
+
+const compareNewest = <T extends { id: number; created_at?: string }>(a: T, b: T): number => {
+    const aTime = a.created_at ? new Date(a.created_at).getTime() : NaN;
+    const bTime = b.created_at ? new Date(b.created_at).getTime() : NaN;
+    if (!isNaN(aTime) && !isNaN(bTime)) return bTime - aTime;
+    return b.id - a.id;
 };
 
 // ---------------------------------------------------------------------------
@@ -195,9 +205,7 @@ const SearchResultsInner: React.FC<SearchResultsProps> = ({
                 switch (sortOrder) {
                     case 'price_asc': return getEffectivePrice(a) - getEffectivePrice(b);
                     case 'price_desc': return getEffectivePrice(b) - getEffectivePrice(a);
-                    // 'newest': sort by ID descending — a proxy for insertion order
-                    // because BoxTypeProps has no created_at field exposed by the API
-                    case 'newest': return b.id - a.id;
+                    case 'newest': return compareNewest(a, b);
                     default: return 0;
                 }
             });
@@ -219,9 +227,7 @@ const SearchResultsInner: React.FC<SearchResultsProps> = ({
                 switch (sortOrder) {
                     case 'price_asc': return getEffectivePrice(a) - getEffectivePrice(b);
                     case 'price_desc': return getEffectivePrice(b) - getEffectivePrice(a);
-                    // 'newest': sort by ID descending — a proxy for insertion order
-                    // because SliceProps has no created_at field exposed by the API
-                    case 'newest': return b.id - a.id;
+                    case 'newest': return compareNewest(a, b);
                     default: return 0;
                 }
             });
@@ -230,7 +236,7 @@ const SearchResultsInner: React.FC<SearchResultsProps> = ({
     const filteredCategories = useMemo(() => {
         // Categories are not price-filterable; only sort is relevant
         return [...results.categories].sort((a, b) => {
-            if (sortOrder === 'newest') return b.id - a.id;
+            if (sortOrder === 'newest') return compareNewest(a, b);
             return 0;
         });
     }, [results.categories, sortOrder]);

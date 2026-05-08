@@ -35,6 +35,9 @@ export interface BoxTypeProps {
     is_on_promotion?: boolean;
     effective_price?: number;
     discount_percentage?: number | null;
+    // Eloquent timestamps surfaced by /get-box-types
+    created_at?: string;
+    updated_at?: string;
 }
 
 /**
