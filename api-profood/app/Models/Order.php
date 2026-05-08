@@ -40,7 +40,8 @@ class Order extends Model
         'is_guest_order',
         'promotion_id',
         'discount_amount',
-        'promotion_code'
+        'promotion_code',
+        'livreur_id'
     ];
 
     /**
@@ -82,6 +83,11 @@ class Order extends Model
     public function status()
     {
         return $this->hasOne(OrderStatus::class, 'id', 'order_status_id');
+    }
+
+    public function livreur()
+    {
+        return $this->hasOne(Livreur::class, 'id', 'livreur_id')->with('user');
     }
 
     /**

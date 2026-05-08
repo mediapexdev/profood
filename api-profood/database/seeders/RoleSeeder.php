@@ -22,6 +22,7 @@ class RoleSeeder extends Seeder
         $roles = [
             ["Admin", Role::ADMIN],
             ["Customer", Role::CUSTOMER],
+            ["Livreur", Role::LIVREUR],
             ["Manager", Role::MANAGER],
             ["Super Admin", Role::SUPER_ADMIN]
         ];

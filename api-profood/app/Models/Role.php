@@ -18,6 +18,7 @@ class Role extends Model
      */
     const ADMIN         = 32;
     const CUSTOMER      = 8;
+    const LIVREUR       = 4;
     const MANAGER       = 16;
     const SUPER_ADMIN   = 64;
 

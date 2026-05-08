@@ -134,6 +134,18 @@ class User extends Authenticatable
     }
 
     /**
+     * Checks if this user is a livreur.
+     *
+     * Note : This method must be called as a method with the () because it is different from the methods of Eloquent.
+     *
+     * @return boolean
+     */
+    public function isLivreur() : bool
+    {
+        return (Role::LIVREUR == $this->role->code);
+    }
+
+    /**
      * Get the Role associated with the User.
      * 
      * @return \App\Models\Role
