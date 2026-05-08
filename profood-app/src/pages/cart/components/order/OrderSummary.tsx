@@ -9,7 +9,8 @@ import {
     IonCol,
     IonGrid,
     IonRow,
-    useIonModal
+    useIonModal,
+    useIonRouter
 } from "@ionic/react";
 import { OverlayEventDetail } from "@ionic/react/dist/types/components/react-component-lib/interfaces";
 
@@ -46,9 +47,14 @@ const OrderSummary: React.FC = () => {
     const { totalBoxes, totalSlices } = useCartContext();
 
     /**
-     * 
+     *
      */
-    const { id } = useUserInfosContext();
+    const { id, logged } = useUserInfosContext();
+
+    /**
+     * Ionic router used to navigate guests to the guest checkout page.
+     */
+    const router = useIonRouter();
 
     /**
      * 
@@ -252,7 +258,7 @@ const OrderSummary: React.FC = () => {
     };
 
     /**
-     * 
+     * Opens the locality selection modal (authenticated flow only).
      */
     const openLocalityModal = () => {
 
@@ -270,6 +276,21 @@ const OrderSummary: React.FC = () => {
                 }
             }
         });
+    };
+
+    /**
+     * Entry point for the checkout button.
+     *
+     * Logged-in users follow the existing locality → order-finalization modal
+     * flow.  Unauthenticated users are routed to the dedicated guest checkout
+     * page so they can place an order without creating an account.
+     */
+    const handleCheckout = () => {
+        if (logged) {
+            openLocalityModal();
+        } else {
+            router.push('/guest-checkout', 'forward', 'push');
+        }
     };
 
     if(isEmpty){
@@ -355,7 +376,7 @@ const OrderSummary: React.FC = () => {
                                 className="cart-checkout-button mx-0"
                                 disabled={isEmpty}
                                 // disabled={isEmpty || selectedLocalityInfo === undefined || selectedLocalityInfo === null || !selectedLocalityInfo.wording.length}
-                                onClick={openLocalityModal}
+                                onClick={handleCheckout}
                             >
                                 <span className='btn-text font-md'>{t('Commander')}</span>
                             </IonButton>
