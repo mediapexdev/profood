@@ -103,6 +103,7 @@ const OrderPaymentStatusUpdateModal: React.FC<OrderPaymentStatusUpdateModalProps
             }
         }, 0)
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []);
 
     /**

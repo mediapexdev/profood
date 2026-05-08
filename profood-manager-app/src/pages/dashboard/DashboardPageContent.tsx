@@ -54,6 +54,7 @@ const DashboardPageContent: React.FC = () => {
         statisticsEndDate,
         statisticsStartDate,
         statisticsCustomDateRange,
+        fetchOrders,
         fetchOrdersStatisticsDetails,
         setStatisticsEndDate,
         setStatisticsStartDate,
@@ -69,6 +70,9 @@ const DashboardPageContent: React.FC = () => {
      *
      */
     const reload = () => {
+        // Refresh both the raw orders list (used by chart/table components) and
+        // the aggregated statistics (used by BoxTypesPercentageChart / OrdersStatisticsChart).
+        fetchOrders(false);
         fetchOrdersStatisticsDetails(statisticsStartDate, statisticsEndDate, true);
     };
 
@@ -128,7 +132,6 @@ const DashboardPageContent: React.FC = () => {
         setStatisticsCustomDateRange(range);
 
         if(range !== 'custom_date_range'){
-            console.log(range)
             onChange([start_date, end_date]);
             fetchOrdersStatisticsDetails(start_date, end_date, true);
             setIsOpen(false);

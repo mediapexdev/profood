@@ -109,7 +109,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      * 
@@ -142,7 +142,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      * 
@@ -175,7 +175,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      * 
@@ -207,7 +207,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      * 
@@ -240,7 +240,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      * 
@@ -295,7 +295,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      * 
@@ -328,7 +328,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      *
@@ -361,7 +361,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      *
@@ -394,7 +394,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      * 
@@ -426,7 +426,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      * 
@@ -459,7 +459,7 @@ const DataProvider = ({ children }: Props) => {
                 console.log(error);
             });
         }
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      *

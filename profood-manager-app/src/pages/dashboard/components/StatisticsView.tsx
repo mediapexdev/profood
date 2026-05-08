@@ -93,7 +93,7 @@ const StatisticsView: React.FC<Props> = ({ items, colSizes }) => {
             color: 'rgba(255,192,203,0.85)'
         },
         {
-            id: 'customers',
+            id: 'orders',
             title: t('Commandes'),
             number : orders.length,
             icon: <CartFill size={32} />,

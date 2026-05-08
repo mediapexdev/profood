@@ -127,7 +127,7 @@ const UserInfosProvider = ({ children }: Props) => {
             showToast(error.response.data.message ? t(error.response.data.message) : `${t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur")}.`, 'error');
             console.dir(error);
         });
-    }, [setShowSpinner, showToast]);
+    }, [setShowSpinner, showToast, t]);
 
     /**
      * Define the context value

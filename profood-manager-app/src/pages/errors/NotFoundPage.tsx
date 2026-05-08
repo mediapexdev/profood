@@ -20,12 +20,15 @@ const NotFoundPage: React.FC = () => {
     /**
      * 
      */
+    // setShowSpinner is stable (dispatch reference) — only needs to run once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
 
         setTimeout(() => {
             setShowSpinner(false)
         }, 1000)
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []);
 
     return (

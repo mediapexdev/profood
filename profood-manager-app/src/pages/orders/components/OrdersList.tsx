@@ -114,9 +114,11 @@ const OrdersList: React.FC<OrdersListProps> = ({
     /**
      * 
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [orderToEdit, setOrderToEdit] = useState<OrderProps|null>(null);
     const [orderToUpdatePaymentStatus, setOrderToUpdatePaymentStatus] = useState<OrderProps|null>(null);
     const [orderToUpdateStatus, setOrderToUpdateStatus] = useState<OrderProps|null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [orderToDelete, setOrderToDelete] = useState<OrderProps|null>(null);
     const [showOrderEditModal, setShowOrderEditModal] = useState<boolean>(false);
     const [showOrderPaymentStatusUpdateModal, setShowOrderPaymentStatusUpdateModal] = useState<boolean>(false);
@@ -127,6 +129,7 @@ const OrdersList: React.FC<OrdersListProps> = ({
      * 
      * @returns 
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const toggleOrderEditModal = () => setShowOrderEditModal(!showOrderEditModal);
 
     /**
@@ -145,12 +148,14 @@ const OrdersList: React.FC<OrdersListProps> = ({
      * 
      * @returns 
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const toggleOrderDeleteModal = () => setShowOrderDeleteModal(!showOrderDeleteModal);
 
     /**
      * 
      * @returns 
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const onClosedOrderEditModal = () => setOrderToEdit(null);
 
     /**
@@ -169,6 +174,7 @@ const OrdersList: React.FC<OrdersListProps> = ({
      * 
      * @returns 
      */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const onClosedOrderDeleteModal = () => setOrderToDelete(null);
 
     /**

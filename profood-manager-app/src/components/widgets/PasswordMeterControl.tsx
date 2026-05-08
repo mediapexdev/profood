@@ -91,6 +91,8 @@ const PasswordMeterControl: React.FC<PasswordMeterControlProps> = (props: Passwo
             }
         }
         setStrength(_strength);
+    // The helper functions close over props.inputValue — it is the only real dep.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.inputValue]);
 
     /**
