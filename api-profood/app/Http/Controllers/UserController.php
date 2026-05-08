@@ -11,6 +11,7 @@ use App\Http\Requests\UpdateCustomerProfileRequest;
 use App\Http\Requests\UpdateProfileDetailsRequest;
 use App\Models\Admin;
 use App\Models\Customer;
+use App\Models\Livreur;
 use App\Models\Manager;
 use App\Models\Role;
 use App\Models\User;
@@ -250,6 +251,11 @@ class UserController extends Controller
                 break;
             case Role::CUSTOMER:
                 Customer::create([
+                    'user_id' => $user->id
+                ]);
+                break;
+            case Role::LIVREUR:
+                Livreur::create([
                     'user_id' => $user->id
                 ]);
                 break;
