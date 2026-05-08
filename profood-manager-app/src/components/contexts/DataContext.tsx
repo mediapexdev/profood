@@ -5,6 +5,7 @@ import {
     CategoryProps,
     CustomDateRange,
     CustomerProps,
+    Livreur,
     OrderPaymentStatus,
     OrderProps,
     OrdersStatisticsDetails,
@@ -22,6 +23,7 @@ export interface DataContextType {
     boxTypes: BoxTypeProps[];
     categories: CategoryProps[];
     customers: CustomerProps[];
+    livreurs: Livreur[];
     orders: OrderProps[];
     orderPaymentStatuses: OrderPaymentStatus[];
     ordersStatisticsDetails?: OrdersStatisticsDetails;
@@ -37,6 +39,7 @@ export interface DataContextType {
     fetchCategories: (showSpinner?: boolean, spinnerTime?: number) => void;
     fetchCustomers: (showSpinner?: boolean, spinnerTime?: number) => void;
     fetchData: () => void;
+    fetchLivreurs: (showSpinner?: boolean, spinnerTime?: number) => void;
     fetchOrders: (showSpinner?: boolean, spinnerTime?: number) => void;
     fetchOrderPaymentStatuses: (showSpinner?: boolean, spinnerTime?: number) => void;
     fetchOrdersStatisticsDetails: (startDate: Date|null, endDate: Date|null, showSpinner?: boolean, spinnerTime?: number) => void;
@@ -48,6 +51,7 @@ export interface DataContextType {
     setBoxTypes: (boxTypes: BoxTypeProps[]) => void;
     setCategories: (categories: CategoryProps[]) => void;
     setCustomers: (customers: CustomerProps[]) => void;
+    setLivreurs: (livreurs: Livreur[]) => void;
     setOrders: (orders: OrderProps[]) => void;
     setOrderPaymentStatuses: (statuses: OrderPaymentStatus[]) => void;
     setOrdersStatisticsDetails: (statisticsDetails?: OrdersStatisticsDetails) => void;
@@ -68,6 +72,7 @@ const DataContext = createContext<DataContextType>({
     boxTypes: [],
     categories: [],
     customers: [],
+    livreurs: [],
     orders: [],
     orderPaymentStatuses: [],
     ordersStatisticsDetails: undefined,
@@ -83,6 +88,7 @@ const DataContext = createContext<DataContextType>({
     fetchCategories:() => {/* */},
     fetchCustomers: () => {/* */},
     fetchData:() => {/* */},
+    fetchLivreurs: () => {/* */},
     fetchOrders: () => {/* */},
     fetchOrderPaymentStatuses: () => {/* */},
     fetchOrdersStatisticsDetails: () => {/* */},
@@ -94,6 +100,7 @@ const DataContext = createContext<DataContextType>({
     setBoxTypes: () => {/* */},
     setCategories: () => {/* */},
     setCustomers: () => {/* */},
+    setLivreurs: () => {/* */},
     setOrders: () => {/* */},
     setOrderPaymentStatuses: () => {/* */},
     setOrdersStatisticsDetails : () => {/* */},

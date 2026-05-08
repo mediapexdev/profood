@@ -280,7 +280,7 @@ export interface OrderHistory {
 }
 
 /**
- * 
+ *
  */
 export interface OrderProps {
     id: number;
@@ -301,6 +301,8 @@ export interface OrderProps {
     discount_amount: number | null;
     promotion_code: string | null;
     created_at: string;
+    /** Assigned delivery person — null when unassigned. Eager-loaded by the API. */
+    livreur: Livreur | null;
 }
 
 /**
@@ -398,4 +400,17 @@ export interface PromotionUsageProps {
     order_id: number;
     discount_applied: number;
     created_at: string;
+}
+
+/**
+ * Livreur (delivery person) — mirrors the shape of Manager / Admin.
+ * The API returns `{id, user_id, deleted_at?, created_at, updated_at, user: {...}}`.
+ */
+export interface Livreur {
+    id: number;
+    user_id: number;
+    user: UserProps;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
 }

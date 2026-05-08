@@ -224,6 +224,7 @@ const OrdersList: React.FC<OrdersListProps> = ({
                         {/* <th className='payment-method'>{t('Mode de paiement')}</th> */}
                         {/* <th className='address'>{t('Adresse')}</th> */}
                         <th className='status'>{t('Statut')}</th>
+                        <th className='livreur'>{t('Livreur')}</th>
                         <th className='date-added'>{t("Date")}</th>
                         <th className='action pe-4'>{t('Action')}</th>
                     </tr>
@@ -322,6 +323,21 @@ const OrdersList: React.FC<OrdersListProps> = ({
                                             <FontAwesomeIcon icon={faPen} />
                                         </Button> */}
                                     {/* </div> */}
+                                </td>
+                                <td className='livreur-cell'>
+                                    {order.livreur ? (
+                                        <span
+                                            className='fw-medium text-truncate d-inline-block'
+                                            style={{ maxWidth: '90px' }}
+                                            title={`${order.livreur.user.first_name} ${order.livreur.user.last_name} — ${order.livreur.user.phone_number}`}
+                                        >
+                                            {order.livreur.user.first_name}
+                                        </span>
+                                    ) : (
+                                        <Badge className='bg-light-secondary text-secondary fw-medium fs-9'>
+                                            {t('À assigner')}
+                                        </Badge>
+                                    )}
                                 </td>
                                 <td className='date-cell'>{formatDate(new Date(order.created_at), 'long', '-', false)}</td>
                                 <td className='action-cell pe-4'>

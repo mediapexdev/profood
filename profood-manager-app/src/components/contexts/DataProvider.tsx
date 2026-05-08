@@ -9,6 +9,7 @@ import {
     CategoryProps,
     CustomDateRange,
     CustomerProps,
+    Livreur,
     OrderPaymentStatus,
     OrderProps,
     OrderStatus,
@@ -42,11 +43,12 @@ export const useDataContext = () => useContext(DataContext);
  */
 const DataProvider = ({ children }: Props) => {
     /**
-     * 
+     *
      */
     const [boxTypes, setBoxTypes] = useState<BoxTypeProps[]>([]);
     const [categories, setCategories] = useState<CategoryProps[]>([]);
     const [customers, setCustomers] = useState<CustomerProps[]>([]);
+    const [livreurs, setLivreurs] = useState<Livreur[]>([]);
     const [orders, setOrders] = useState<OrderProps[]>([]);
     const [orderPaymentStatuses, setOrderPaymentStatuses] = useState<OrderPaymentStatus[]>([]);
     const [ordersStatisticsDetails, setOrdersStatisticsDetails] = useState<OrdersStatisticsDetails|undefined>(undefined);
@@ -178,9 +180,42 @@ const DataProvider = ({ children }: Props) => {
     }, [setShowSpinner, showToast, t]);
 
     /**
-     * 
-     * @param showSpinner 
-     * @param spinnerTime 
+     * Fetch all livreurs from the API. Mirrors the fetchCustomers pattern exactly.
+     *
+     * @param showSpinner
+     * @param spinnerTime
+     */
+    const fetchLivreurs = useCallback((showSpinner: boolean = true, spinnerTime: number = 300) => {
+
+        const token = localStorage.getItem('token');
+
+        if(token !== null){
+            if(showSpinner){
+                setShowSpinner(true);
+            }
+            api.get('/get-livreurs', {
+                headers:{
+                  Authorization:`Bearer ${token}`,
+                }
+            }).then((res) => {
+                setLivreurs(res.data.data ?? res.data);
+                setTimeout(() => {
+                    if(showSpinner){
+                        setShowSpinner(false);
+                    }
+                }, spinnerTime);
+            }).catch((error) => {
+                setShowSpinner(false);
+                showToast(t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur"), 'error');
+                console.log(error);
+            });
+        }
+    }, [setShowSpinner, showToast, t]);
+
+    /**
+     *
+     * @param showSpinner
+     * @param spinnerTime
      */
     const fetchOrders = useCallback((showSpinner: boolean = true, spinnerTime: number = 300) => {
 
@@ -470,6 +505,7 @@ const DataProvider = ({ children }: Props) => {
             fetchCategories(false);
             fetchSlices(false);
             fetchCustomers(false);
+            fetchLivreurs(false);
             fetchOrders(false);
             fetchOrderPaymentStatuses(false);
             fetchOrdersStatisticsDetails(null, null, false);
@@ -478,7 +514,7 @@ const DataProvider = ({ children }: Props) => {
             fetchUserRoles(false);
             fetchUsers(true, 300);
         }
-    }, [fetchBoxTypes, fetchCategories, fetchCustomers, fetchOrderPaymentStatuses, fetchOrderStatuses, fetchOrders, fetchOrdersStatisticsDetails, fetchPromotions, fetchSlices, fetchUserRoles, fetchUsers]);
+    }, [fetchBoxTypes, fetchCategories, fetchCustomers, fetchLivreurs, fetchOrderPaymentStatuses, fetchOrderStatuses, fetchOrders, fetchOrdersStatisticsDetails, fetchPromotions, fetchSlices, fetchUserRoles, fetchUsers]);
 
     /**
      * 
@@ -494,6 +530,7 @@ const DataProvider = ({ children }: Props) => {
         boxTypes,
         categories,
         customers,
+        livreurs,
         orders,
         orderPaymentStatuses,
         ordersStatisticsDetails,
@@ -509,6 +546,7 @@ const DataProvider = ({ children }: Props) => {
         fetchCategories,
         fetchCustomers,
         fetchData,
+        fetchLivreurs,
         fetchOrders,
         fetchOrderPaymentStatuses,
         fetchOrdersStatisticsDetails,
@@ -520,6 +558,7 @@ const DataProvider = ({ children }: Props) => {
         setBoxTypes,
         setCategories,
         setCustomers,
+        setLivreurs,
         setOrders,
         setOrderPaymentStatuses,
         setOrdersStatisticsDetails,

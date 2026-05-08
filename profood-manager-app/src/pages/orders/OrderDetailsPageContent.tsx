@@ -15,15 +15,17 @@ import {
     Row
 } from "reactstrap";
 
+import Select from "react-select";
+
 import { ArrowLeft } from "react-bootstrap-icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faFileInvoice, faLocationDot, faPhone, faPrint, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faFileInvoice, faLocationDot, faPhone, faPrint, faTruck, faUser } from "@fortawesome/free-solid-svg-icons";
 import { faCreditCard } from "@fortawesome/free-solid-svg-icons";
 
 import { useTranslation } from "react-i18next";
 
-import { OrderProps } from "../../types";
+import { Livreur, OrderProps } from "../../types";
 import { formatDate, formatPhoneNumber } from "../../helpers/AssetHelpers";
 import useGoTo from "../../components/hooks/useGoTo";
 import OrderBoxDetails from "./components/OrderBoxDetails";
@@ -37,6 +39,17 @@ import { useLoadingSpinnerContext } from "../../components/contexts/LoadingSpinn
 import { useUserInfosContext } from "../account/components/contexts/UserInfosProvider";
 import useToast from "../../components/hooks/useToast";
 import api from "../../api/api";
+import {
+    customSelectClearIndicator,
+    customSelectControl,
+    customSelectDropdownIndicator,
+    customSelectMenu,
+    customSelectMenuList,
+    customSelectOption,
+    customSelectPlaceholder,
+    customSelectStyles,
+    customSelectValueConatiner
+} from "../../components/others/select-customizer";
 
 import './OrderDetailsPageContent.css';
 
@@ -57,24 +70,73 @@ const OrderDetailsPageContent: React.FC<OrderProps> = (order: OrderProps) => {
     const goTo = useGoTo();
 
     /**
-     * 
+     *
      */
-    const { fetchOrders, orderPaymentStatuses, orderStatuses } = useDataContext();
+    const { fetchOrders, orderPaymentStatuses, orderStatuses, livreurs } = useDataContext();
 
     /**
-     * 
+     *
      */
     const showToast = useToast();
 
     /**
-     * 
+     *
      */
     const { setShowSpinner } = useLoadingSpinnerContext();
 
     /**
-     * 
+     *
      */
-    const { userPhoneNumber } = useUserInfosContext();
+    const { userPhoneNumber, userRole } = useUserInfosContext();
+
+    /**
+     * Whether the current user may assign / unassign livreurs.
+     * Managers (16), Admins (32) and Super Admins (64) are allowed.
+     */
+    const canAssignLivreur = userRole !== undefined && (
+        userRole.code === 16 || userRole.code === 32 || userRole.code === 64
+    );
+
+    /**
+     * Assign or unassign a livreur for the current order.
+     *
+     * @param livreurId  The id of the Livreur to assign, or null to unassign.
+     */
+    const assignLivreur = (livreurId: number | null) => {
+        const token = localStorage.getItem('token');
+        setShowSpinner(true);
+        api.post(
+            '/assign-livreur-to-order',
+            { order_id: order.id, livreur_id: livreurId },
+            { headers: { Authorization: `Bearer ${token}` } }
+        ).then((res) => {
+            if (res.status === 200) {
+                const msg = livreurId === null
+                    ? t('Livreur désassigné avec succès')
+                    : t('Livreur assigné avec succès');
+                showToast(msg, 'success', { autoClose: 2000 });
+                // Reload orders so the livreur field reflects the new assignment
+                fetchOrders(true, 1500);
+            } else {
+                setShowSpinner(false);
+                showToast(
+                    res.data.message
+                        ? t(res.data.message)
+                        : `${t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur")}.`,
+                    'error'
+                );
+            }
+        }).catch((error) => {
+            setShowSpinner(false);
+            showToast(
+                error.response?.data?.message
+                    ? t(error.response.data.message)
+                    : `${t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur")}.`,
+                'error'
+            );
+            console.dir(error);
+        });
+    };
 
     /**
      * 
@@ -479,6 +541,111 @@ const OrderDetailsPageContent: React.FC<OrderProps> = (order: OrderProps) => {
                                 </Card>
                             </Col>
                             {/* end::Order delivery address */}
+                            {/* begin::Order livreur */}
+                            <Col xs={12}>
+                                <Card className='order-livreur-details-view rounded-1'>
+                                    <CardHeader className='pt-4 pb-3'>
+                                        <div className='d-flex align-items-center'>
+                                            <span className="icon-wrapper text-gray-600 me-3">
+                                                <FontAwesomeIcon
+                                                    icon={faTruck}
+                                                    fontSize={16}
+                                                />
+                                            </span>
+                                            <CardTitle
+                                                tag='h3'
+                                                className='fw-semibold mb-0'
+                                            >
+                                                <span>{t('Livraison')}</span>
+                                            </CardTitle>
+                                        </div>
+                                    </CardHeader>
+                                    <CardBody>
+                                        {/* Current assignment display — visible to all roles */}
+                                        <div className='mb-4'>
+                                            {order.livreur ? (
+                                                <div className='d-flex flex-column gap-2'>
+                                                    <span className='fw-semibold'>
+                                                        {order.livreur.user.first_name} {order.livreur.user.last_name}
+                                                    </span>
+                                                    <div className='d-flex align-items-center'>
+                                                        <span className='icon-wrapper text-gray-600 me-2'>
+                                                            <FontAwesomeIcon icon={faPhone} fontSize={14} />
+                                                        </span>
+                                                        <span className='fw-medium'>
+                                                            {formatPhoneNumber(order.livreur.user.phone_number)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <Badge className='bg-light-secondary text-secondary fw-medium'>
+                                                    {t('Aucun livreur assigné')}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        {/* Assignment controls — only for MANAGER / ADMIN / SUPER_ADMIN */}
+                                        {canAssignLivreur && (
+                                            <div className='d-flex flex-column gap-3'>
+                                                {/*
+                                                 * The shared custom-select components use generic `unknown` typings,
+                                                 * so we intentionally pass them without a typed generic and handle
+                                                 * the typed value via a cast in onChange — consistent with the
+                                                 * pattern used throughout the codebase (e.g. NewUserFormView).
+                                                 */}
+                                                <Select
+                                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                                    components={{
+                                                        Control: customSelectControl,
+                                                        ClearIndicator: customSelectClearIndicator,
+                                                        DropdownIndicator: customSelectDropdownIndicator,
+                                                        Menu: customSelectMenu,
+                                                        MenuList: customSelectMenuList,
+                                                        Option: customSelectOption,
+                                                        Placeholder: customSelectPlaceholder,
+                                                        ValueContainer: customSelectValueConatiner
+                                                    } as any}
+                                                    isClearable={false}
+                                                    isSearchable={true}
+                                                    menuPlacement='auto'
+                                                    menuPortalTarget={document.body}
+                                                    name='livreur'
+                                                    options={livreurs}
+                                                    getOptionLabel={(l: Livreur) =>
+                                                        `${l.user.first_name} ${l.user.last_name} (${formatPhoneNumber(l.user.phone_number)})`
+                                                    }
+                                                    getOptionValue={(l: Livreur) => String(l.id)}
+                                                    value={
+                                                        order.livreur
+                                                            ? livreurs.find(l => l.id === order.livreur!.id) ?? null
+                                                            : null
+                                                    }
+                                                    placeholder={t('Assigner un livreur')}
+                                                    styles={customSelectStyles}
+                                                    onChange={(selected: Livreur | null) => {
+                                                        if (selected) {
+                                                            assignLivreur(selected.id);
+                                                        }
+                                                    }}
+                                                />
+                                                {order.livreur && (
+                                                    <Button
+                                                        tag='button'
+                                                        type='button'
+                                                        color='none'
+                                                        outline={true}
+                                                        size='sm'
+                                                        className='border rounded-1 text-danger border-danger align-self-start'
+                                                        onClick={() => assignLivreur(null)}
+                                                    >
+                                                        <span>{t('Désassigner')}</span>
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </CardBody>
+                                </Card>
+                            </Col>
+                            {/* end::Order livreur */}
                         </Row>
                     </Col>
                     {/*  */}
