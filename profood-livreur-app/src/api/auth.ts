@@ -31,18 +31,11 @@ interface UserResponse {
 }
 
 /**
- * The Profood app key is required by the /signin endpoint to gate access
- * by application.
- *
- * IMPORTANT — BACKEND GAP:
- * There is currently no LIVREUR role in the API (see Role.php: CUSTOMER=8,
- * MANAGER=16, ADMIN=32, SUPER_ADMIN=64).  Until a LIVREUR role and its
- * corresponding app key are added, driver accounts must be created with the
- * MANAGER role and authenticated via PROFOOD_APP_MANAGER_KEY.
- * See: TODO_BACKEND_GAPS.md for the full list of required backend changes.
+ * The livreur-specific app key sent to /signin. Must match the
+ * PROFOOD_APP_LIVREUR_KEY env var on the Laravel backend, which gates
+ * access for users with Role::LIVREUR (code 4).
  */
-const APP_KEY =
-  import.meta.env.VITE_PROFOOD_APP_KEY ?? ''
+const APP_KEY = import.meta.env.VITE_PROFOOD_APP_LIVREUR_KEY ?? ''
 
 /**
  * Signs the driver in using phone number + password.
@@ -50,12 +43,9 @@ const APP_KEY =
  * POST /signin expects:
  *   { phone_number: string, password: string, app_key: string }
  *
- * The livreur app uses a 4-digit PIN as the password field. The backend
- * has a minimum-length of 8 characters for passwords, so the PIN must be
- * padded or the backend must be adjusted for livreur accounts.
- *
- * BACKEND GAP: The current password validation enforces `min(8)`.
- * See TODO_BACKEND_GAPS.md — Item 4.
+ * The signup-side password validator enforces `min(8)` on creation, so a
+ * 4-digit PIN cannot be used as a livreur password — drivers authenticate
+ * with a regular password.
  *
  * @returns The Sanctum bearer token on success.
  * @throws AxiosError with response.status 401 when credentials are wrong.

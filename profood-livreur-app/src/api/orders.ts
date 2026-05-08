@@ -1,24 +1,31 @@
 import apiClient from './client'
 import type { Delivery, DeliveryStatus } from '../types'
 
-/**
- * Raw order shape returned by GET /get-orders from the Laravel API.
- * Only the fields we actually consume in the livreur app are listed.
- * The API may include many additional fields that we discard.
- */
+interface ApiOrderStatus {
+  id: number
+  code: number
+  wording: string
+}
+
+interface ApiOrderPaymentStatus {
+  id: number
+  code?: number
+  wording: string
+}
+
 interface ApiOrder {
   id: number
   string_id: string
-  // Order status object returned by the API
-  order_status: {
-    id: number
-    wording: string // e.g. "En attente", "En cours de livraison", "Livré"
-  } | null
-  order_payment_status: {
-    id: number
-    wording: string
-  } | null
-  // Customer info — may be null for guest orders
+  address: string
+  montant: number | string
+  payment_method: string | null
+  is_guest_order: boolean
+  guest_first_name: string | null
+  guest_last_name: string | null
+  guest_phone_number: string | null
+  guest_email: string | null
+  status: ApiOrderStatus | null
+  payment_status: ApiOrderPaymentStatus | null
   customer: {
     id: number
     user: {
@@ -28,201 +35,165 @@ interface ApiOrder {
       avatar: string | null
     }
   } | null
-  // Guest order fields — populated when customer is null
-  guest_name: string | null
-  guest_phone: string | null
-  // Delivery address stored as free-text or structured object
-  delivery_address: string | null
-  delivery_commune: string | null
-  delivery_localite: string | null
-  // Boxes in the order (each box contains multiple items)
-  boxes: ApiBox[]
-  total_amount: number
-  // ISO 8601 string
+  cart: {
+    id: number
+    boxesData?: ApiBox[]
+    slicesData?: ApiCartSlice[]
+  } | null
   created_at: string
-  // Planned delivery time if set by manager
-  scheduled_at: string | null
-  notes: string | null
 }
 
 interface ApiBox {
   id: number
-  box_type: {
+  type: { id: number; name: string } | null
+  box_slices: Array<{
     id: number
-    name: string
-  } | null
-  box_slices: ApiBoxSlice[]
-  quantity: number
+    quantity: number
+    slice?: { id: number; name: string; weight_in_grams: number | null } | null
+  }>
 }
 
-interface ApiBoxSlice {
+interface ApiCartSlice {
   id: number
-  slice: {
-    id: number
-    name: string
-    weight_in_grams: number | null
-  } | null
   quantity: number
+  slice: { id: number; name: string; weight_in_grams: number | null } | null
 }
 
-/**
- * Maps the order status wording from the API to the DeliveryStatus union
- * used throughout the livreur app UI.
- *
- * BACKEND GAP: There is no dedicated "livreur-facing" status — the mapping
- * below is a best-effort interpretation of the existing OrderStatus wordings.
- * The backend should expose a LIVREUR-specific status field or delivery
- * assignment model so the mapping is unambiguous.
- * See TODO_BACKEND_GAPS.md — Item 2.
- */
-function mapOrderStatusToDeliveryStatus(
-  statusWording: string | null | undefined
-): DeliveryStatus {
-  if (!statusWording) return 'pending'
-  const w = statusWording.toLowerCase()
-  if (w.includes('cours') || w.includes('livraison')) return 'in_progress'
-  if (w.includes('livré') || w.includes('livre') || w.includes('complet')) return 'delivered'
-  if (w.includes('problème') || w.includes('annul') || w.includes('refus')) return 'issue'
-  return 'pending'
+// OrderStatus.code constants from app/Models/OrderStatus.php
+const ORDER_STATUS_CODE = {
+  AWAITING_PROCESSING: 8,
+  BEING_PROCESSED: 16,
+  IN_THE_PROCESS_OF_DELIVERY: 32,
+  DELIVERED: 64,
+  CANCELLED: 80,
+} as const
+
+// DeliveryStatus → OrderStatus.code (NOT id — id is fetched dynamically)
+const DELIVERY_STATUS_TO_CODE: Record<DeliveryStatus, number> = {
+  pending: ORDER_STATUS_CODE.AWAITING_PROCESSING,
+  in_progress: ORDER_STATUS_CODE.IN_THE_PROCESS_OF_DELIVERY,
+  delivered: ORDER_STATUS_CODE.DELIVERED,
+  issue: ORDER_STATUS_CODE.CANCELLED,
 }
 
+let statusIdCache: Map<number, number> | null = null
+
 /**
- * Formats a weight in grams as a human-readable string (e.g. "1.5 kg", "500 g").
+ * Fetch the OrderStatus rows once and build a code->id lookup.
+ * Refreshes if a status code is requested but missing from the cache.
  */
+async function getStatusCodeToIdMap(): Promise<Map<number, number>> {
+  if (statusIdCache) return statusIdCache
+  const res = await apiClient.get<ApiOrderStatus[]>('/get-order-statuses')
+  statusIdCache = new Map(res.data.map((s) => [s.code, s.id]))
+  return statusIdCache
+}
+
+function mapStatusCodeToDeliveryStatus(code: number | null | undefined): DeliveryStatus {
+  switch (code) {
+    case ORDER_STATUS_CODE.IN_THE_PROCESS_OF_DELIVERY:
+      return 'in_progress'
+    case ORDER_STATUS_CODE.DELIVERED:
+      return 'delivered'
+    case ORDER_STATUS_CODE.CANCELLED:
+      return 'issue'
+    default:
+      return 'pending'
+  }
+}
+
 function formatWeight(grams: number | null | undefined): string | undefined {
   if (grams == null) return undefined
   return grams >= 1000 ? `${(grams / 1000).toFixed(1)} kg` : `${grams} g`
 }
 
-/**
- * Converts a raw API order to the Delivery shape expected by the UI.
- *
- * The API order model does not have a direct address.street / address.city
- * breakdown — we reconstruct it from the flat delivery_address and
- * delivery_localite fields.
- */
 function mapApiOrderToDelivery(order: ApiOrder, stopNumber: number): Delivery {
-  // Resolve customer name and phone — handle both registered and guest orders.
-  const customerName = order.customer
-    ? `${order.customer.user.first_name} ${order.customer.user.last_name}`.trim()
-    : (order.guest_name ?? 'Client inconnu')
+  const customerName = order.is_guest_order
+    ? `${order.guest_first_name ?? ''} ${order.guest_last_name ?? ''}`.trim() || 'Client invité'
+    : order.customer
+      ? `${order.customer.user.first_name} ${order.customer.user.last_name}`.trim()
+      : 'Client inconnu'
 
-  const customerPhone = order.customer
-    ? order.customer.user.phone_number
-    : (order.guest_phone ?? '')
+  const customerPhone = order.is_guest_order
+    ? order.guest_phone_number ?? ''
+    : order.customer?.user.phone_number ?? ''
 
   const customerAvatar = order.customer?.user.avatar ?? undefined
 
-  // Build a flat address string from available fields.
-  const street = order.delivery_address ?? ''
-  const city = [order.delivery_commune, order.delivery_localite]
-    .filter(Boolean)
-    .join(', ')
+  const boxes = order.cart?.boxesData ?? []
+  const slices = order.cart?.slicesData ?? []
 
-  // Flatten boxes → items for the UI's simplified items list.
-  const items = order.boxes.flatMap((box) =>
-    box.box_slices.map((bs) => ({
-      name: bs.slice?.name ?? (box.box_type?.name ?? 'Article'),
+  const boxItems = boxes.flatMap((b) =>
+    b.box_slices.map((bs) => ({
+      name: bs.slice?.name ?? b.type?.name ?? 'Article',
       quantity: bs.quantity,
       weight: formatWeight(bs.slice?.weight_in_grams),
     }))
   )
 
-  // Scheduled time — fall back to order creation time when no schedule set.
-  const scheduledTime = order.scheduled_at
-    ? new Date(order.scheduled_at).toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : new Date(order.created_at).toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+  const sliceItems = slices.map((s) => ({
+    name: s.slice?.name ?? 'Article',
+    quantity: s.quantity,
+    weight: formatWeight(s.slice?.weight_in_grams),
+  }))
+
+  const scheduledTime = new Date(order.created_at).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 
   return {
     id: String(order.id),
-    orderRef: `PF-${order.id}`,
-    status: mapOrderStatusToDeliveryStatus(order.order_status?.wording),
-    customer: {
-      name: customerName,
-      phone: customerPhone,
-      avatar: customerAvatar,
-    },
-    address: { street, city },
-    items,
+    orderRef: order.string_id ? order.string_id : `PF-${order.id}`,
+    status: mapStatusCodeToDeliveryStatus(order.status?.code),
+    customer: { name: customerName, phone: customerPhone, avatar: customerAvatar },
+    address: { street: order.address ?? '', city: '' },
+    items: [...boxItems, ...sliceItems],
     scheduledTime,
-    // Estimated duration is not available from the API.
-    // BACKEND GAP: See TODO_BACKEND_GAPS.md — Item 3.
     estimatedDuration: '–',
-    amount: order.total_amount,
-    notes: order.notes ?? undefined,
+    amount: typeof order.montant === 'string' ? Number(order.montant) : order.montant,
+    notes: undefined,
     stopNumber,
   }
 }
 
 /**
- * Fetches all orders from GET /get-orders.
- *
- * This returns ALL orders accessible to the authenticated user.
- *
- * BACKEND GAP (HIGH PRIORITY): There is no endpoint that returns only the
- * orders assigned to the current livreur.  Until GET /livreur/deliveries
- * exists, we fetch all orders and filter by status on the client side.
- * This is not scalable — a busy day might have hundreds of orders.
- * See TODO_BACKEND_GAPS.md — Item 1.
+ * Fetch all orders assigned to the authenticated livreur.
  */
 export async function fetchDeliveries(): Promise<Delivery[]> {
-  const response = await apiClient.get<ApiOrder[]>('/get-orders')
-  const orders = response.data
-
-  return orders.map((order, index) =>
-    mapApiOrderToDelivery(order, index + 1)
-  )
+  const response = await apiClient.get<ApiOrder[]>('/get-livreur-deliveries')
+  return response.data.map((order, index) => mapApiOrderToDelivery(order, index + 1))
 }
 
 /**
- * Fetches a single order by id from GET /get-order/:id.
- *
- * BACKEND GAP: There is no single-order endpoint exposed in routes/api.php.
- * We fall back to fetching all orders and finding the one with the matching id.
- * See TODO_BACKEND_GAPS.md — Item 5.
+ * Fetch a single delivery assigned to the authenticated livreur.
  */
 export async function fetchDelivery(id: string): Promise<Delivery | undefined> {
-  const all = await fetchDeliveries()
-  return all.find((d) => d.id === id)
+  try {
+    const response = await apiClient.get<ApiOrder>(`/get-livreur-delivery/${id}`)
+    return mapApiOrderToDelivery(response.data, 1)
+  } catch (e) {
+    return undefined
+  }
 }
 
 /**
- * Updates the delivery status for an order by calling POST /update-order-status.
- *
- * The API expects:
- *   { order_id: number, order_status_id: number }
- *
- * BACKEND GAP: The mapping from DeliveryStatus to order_status_id is
- * hardcoded here because there is no status-listing endpoint exposed for
- * livreur use.  If the OrderStatus table ids change this mapping breaks.
- * See TODO_BACKEND_GAPS.md — Item 6.
- *
- * Known status ids (based on the seeder data visible in the manager app):
- *   1 = En attente
- *   2 = Confirmée
- *   3 = En cours de livraison
- *   4 = Livrée
- *   5 = Problème / Annulée  (may vary)
+ * Update the status of a delivery via POST /livreur-update-order-status.
+ * The OrderStatus id is resolved from /get-order-statuses (cached).
  */
-const STATUS_ID_MAP: Record<DeliveryStatus, number> = {
-  pending: 1,
-  in_progress: 3,
-  delivered: 4,
-  issue: 5,
-}
-
 export async function updateDeliveryStatus(
   orderId: string,
   status: DeliveryStatus
 ): Promise<void> {
-  await apiClient.post('/update-order-status', {
+  const code = DELIVERY_STATUS_TO_CODE[status]
+  const map = await getStatusCodeToIdMap()
+  const statusId = map.get(code)
+
+  if (statusId == null) {
+    throw new Error(`OrderStatus with code ${code} not found on the server`)
+  }
+  await apiClient.post('/livreur-update-order-status', {
     order_id: Number(orderId),
-    order_status_id: STATUS_ID_MAP[status],
+    status_id: statusId,
   })
 }
