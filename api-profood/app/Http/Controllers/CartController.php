@@ -253,6 +253,51 @@ class CartController extends Controller
         return $response;
     }
 
+    public function incrementCartSlice(Request $request)
+    {
+        $customer = $this->getCustomer();
+        $response = $this->CheckCustomer($customer);
+
+        if(!isset($response)){
+            $cart_slice = CartSlice::with('cart')->find($request->cart_slice_id);
+
+            if(!isset($cart_slice)){
+                return response()->json(['message' => 'Produit inexistant !'], 404);
+            }
+            if($cart_slice->cart->customer_id != $customer->id){
+                return response()->json(['message' => 'Interdite !'], 403);
+            }
+            $cart_slice->quantity = $cart_slice->quantity + 1;
+            $cart_slice->save();
+            return response()->json(['message' => 'Quantité augmentée', 'quantity' => $cart_slice->quantity], 200);
+        }
+        return $response;
+    }
+
+    public function decrementCartSlice(Request $request)
+    {
+        $customer = $this->getCustomer();
+        $response = $this->CheckCustomer($customer);
+
+        if(!isset($response)){
+            $cart_slice = CartSlice::with('cart')->find($request->cart_slice_id);
+
+            if(!isset($cart_slice)){
+                return response()->json(['message' => 'Produit inexistant !'], 404);
+            }
+            if($cart_slice->cart->customer_id != $customer->id){
+                return response()->json(['message' => 'Interdite !'], 403);
+            }
+            if($cart_slice->quantity <= 1){
+                return response()->json(['message' => 'Quantité minimale atteinte'], 422);
+            }
+            $cart_slice->quantity = $cart_slice->quantity - 1;
+            $cart_slice->save();
+            return response()->json(['message' => 'Quantité diminuée', 'quantity' => $cart_slice->quantity], 200);
+        }
+        return $response;
+    }
+
     /**
      * Check if the variable is an object of the Customer class.
      *

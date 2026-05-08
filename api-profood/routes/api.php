@@ -227,6 +227,9 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     Route::post('delete-box-from-cart', [CartController::class, 'deleteBoxFromCart']);
     Route::post('delete-slice-from-cart', [CartController::class, 'deleteSliceFromCart']);
 
+    Route::post('increment-cart-slice', [CartController::class, 'incrementCartSlice']);
+    Route::post('decrement-cart-slice', [CartController::class, 'decrementCartSlice']);
+
     Route::get('get-cart', [CartController::class, 'getCart']);
     Route::get('get-cart-boxes', [CartController::class, 'getCartBoxes']);
     Route::get('get-cart-slices', [CartController::class, 'getCartSlices']);
