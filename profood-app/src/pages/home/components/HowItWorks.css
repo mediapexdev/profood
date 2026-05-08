@@ -1,0 +1,185 @@
+@charset "UTF-8";
+
+/* ============================================================
+   HowItWorks — three-step flow cards
+   ============================================================ */
+
+.hiw-section {
+    padding-top: 24px;
+    padding-bottom: 8px;
+}
+
+.hiw-heading {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin: 0 0 16px;
+    /* Inherits title-color from Ionic theme variables */
+    color: var(--ion-text-color, #2C3E50);
+}
+
+/* Row of steps with arrows between them */
+.hiw-steps {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+    /* Hide scrollbar on mobile while keeping scroll-ability */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.hiw-steps::-webkit-scrollbar {
+    display: none;
+}
+
+/* === Individual step card === */
+.hiw-card {
+    flex: 1 0 0;
+    /* Ensures each card is at least touchable width */
+    min-width: 90px;
+    max-width: 140px;
+    margin: 0;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.hiw-card-body {
+    padding: 12px 8px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Step number — small top-left badge within card */
+.hiw-step-number {
+    align-self: flex-start;
+    background: #E74C3C;
+    color: #ffffff;
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    font-size: 0.65rem;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+/* Icon circle background */
+.hiw-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(231, 76, 60, 0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    color: #E74C3C;
+    flex-shrink: 0;
+}
+
+.hiw-icon-svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Step title — bold */
+.hiw-step-title {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin: 0 0 4px;
+    color: var(--ion-text-color, #2C3E50);
+    line-height: 1.3;
+}
+
+/* Step subtitle */
+.hiw-step-sub {
+    font-family: "Mulish", sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin: 0 0 2px;
+    color: var(--ion-color-medium, #8C8C8C);
+    line-height: 1.4;
+}
+
+/* Detail line */
+.hiw-step-detail {
+    font-family: "Mulish", sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    margin: 2px 0 0;
+    color: #27AE60;
+    line-height: 1.4;
+}
+
+.hiw-step-detail-sub {
+    font-weight: 400;
+    color: var(--ion-color-medium, #8C8C8C);
+}
+
+/* Arrow connector */
+.hiw-arrow {
+    flex-shrink: 0;
+    color: var(--ion-color-medium, #B0B0B0);
+    display: flex;
+    align-items: center;
+}
+
+.hiw-arrow-svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* === Responsive === */
+
+@media (min-width: 480px) {
+    .hiw-card {
+        max-width: 170px;
+        min-width: 110px;
+    }
+
+    .hiw-step-title {
+        font-size: 0.875rem;
+    }
+
+    .hiw-step-sub {
+        font-size: 0.75rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .hiw-steps {
+        overflow-x: visible;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .hiw-card {
+        max-width: 200px;
+    }
+
+    .hiw-card-body {
+        padding: 16px 12px 20px;
+    }
+
+    .hiw-icon-wrap {
+        width: 56px;
+        height: 56px;
+    }
+
+    .hiw-icon-svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .hiw-heading {
+        font-size: 1.25rem;
+    }
+}

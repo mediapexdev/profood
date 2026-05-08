@@ -1,0 +1,197 @@
+@charset "UTF-8";
+
+/* =========================================================
+   HeroSection — full-bleed banner above the app-container
+   ========================================================= */
+
+.hero-section {
+    position: relative;
+    width: 100%;
+    /* 55vw gives comfortable height on 320–430px phones while
+       still fitting the first fold without scrolling */
+    min-height: 55vw;
+    max-height: 340px;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    /* Bottom padding creates breathing room above the fold */
+    padding-bottom: 24px;
+}
+
+/* Background photo layer */
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center 30%;
+    background-repeat: no-repeat;
+    /* Slight scale so the zoom-in animation has room to grow */
+    transform: scale(1.04);
+    transition: transform 6s ease-out;
+}
+
+/* Subtle animation: image very slowly zooms in for a living feel */
+.hero-section:hover .hero-bg,
+.hero-bg {
+    animation: heroBgKen 12s ease-out forwards;
+}
+
+@keyframes heroBgKen {
+    from { transform: scale(1.04); }
+    to   { transform: scale(1.00); }
+}
+
+/* Dark gradient — bottom-heavy so content at the bottom is readable */
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.15) 0%,
+        rgba(0, 0, 0, 0.55) 55%,
+        rgba(0, 0, 0, 0.80) 100%
+    );
+}
+
+/* Content stacks above the overlay */
+.hero-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 0 16px;
+}
+
+/* === Title === */
+.hero-title {
+    margin: 0 0 8px;
+    line-height: 1.2;
+    /* Reset IonCard/ion default margins that bubble up */
+    font-size: 1.5rem;
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.hero-title-line1 {
+    display: block;
+}
+
+/* Accent line uses brand red for warmth */
+.hero-title-accent {
+    display: block;
+    color: #E74C3C;
+}
+
+/* === Subtitle === */
+.hero-subtitle {
+    margin: 0 0 16px;
+    font-size: 0.8rem;
+    font-family: "Mulish", sans-serif;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.87);
+    line-height: 1.5;
+    max-width: 280px;
+}
+
+/* === CTA buttons row === */
+.hero-actions {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.hero-btn {
+    /* Ensure 44px minimum touch height as per CLAUDE.md */
+    --height: 44px;
+    font-family: "Mulish", sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: none;
+    letter-spacing: 0;
+    flex-shrink: 0;
+}
+
+.hero-btn-primary {
+    --background: #E74C3C;
+    --background-hover: #c0392b;
+    --background-activated: #c0392b;
+    --color: #ffffff;
+}
+
+.hero-btn-secondary {
+    --border-color: rgba(255, 255, 255, 0.75);
+    --color: #ffffff;
+}
+
+/* === Delivery badge === */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(39, 174, 96, 0.90);
+    border-radius: 20px;
+    padding: 4px 12px;
+    max-width: fit-content;
+}
+
+.hero-badge-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.hero-badge-text {
+    font-family: "Mulish", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+/* === Responsive adjustments === */
+
+@media (min-width: 480px) {
+    .hero-section {
+        min-height: 260px;
+        max-height: 380px;
+    }
+
+    .hero-title {
+        font-size: 1.75rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.875rem;
+        max-width: 340px;
+    }
+}
+
+@media (min-width: 768px) {
+    .hero-section {
+        min-height: 300px;
+        max-height: 440px;
+    }
+
+    .hero-content {
+        padding: 0 24px;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+}
+
+@media (min-width: 992px) {
+    .hero-section {
+        max-height: 520px;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        max-width: 420px;
+    }
+}

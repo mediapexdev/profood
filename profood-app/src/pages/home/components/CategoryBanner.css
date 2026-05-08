@@ -1,0 +1,172 @@
+@charset "UTF-8";
+
+/* ============================================================
+   CategoryBanner — 2-column grid of category tiles
+   ============================================================ */
+
+.category-banner-section {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.category-banner-header {
+    margin-bottom: 12px;
+}
+
+.category-banner-heading {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin: 0 0 4px;
+    color: var(--ion-text-color, #2C3E50);
+}
+
+.category-banner-sub {
+    font-family: "Mulish", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ion-color-medium, #8C8C8C);
+    margin: 0;
+}
+
+/* === Grid === */
+.category-grid {
+    display: grid;
+    /* 2 equal columns on all mobile widths */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+@media (min-width: 600px) {
+    .category-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 900px) {
+    .category-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* === Tile === */
+.category-tile {
+    /* Reset native button styles */
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    /* Min touch target height */
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    /* Smooth interactive feedback */
+    transition: transform 200ms ease, box-shadow 200ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.category-tile:active {
+    transform: scale(0.97);
+}
+
+/* Image wrapper fills the tile */
+.category-tile-img-wrap {
+    position: relative;
+    width: 100%;
+    /* Aspect ratio ensures consistent tile heights */
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+}
+
+.category-tile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 300ms ease;
+}
+
+.category-tile:hover .category-tile-img {
+    transform: scale(1.05);
+}
+
+/* Gradient overlay for text contrast */
+.category-tile-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.05) 0%,
+        rgba(0, 0, 0, 0.55) 100%
+    );
+}
+
+/* Label row pinned at the bottom of the tile */
+.category-tile-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.category-tile-name {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #ffffff;
+    line-height: 1.3;
+    /* Clip long names gracefully */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.category-tile-count {
+    font-family: "Mulish", sans-serif;
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.80);
+}
+
+/* === Skeleton tiles === */
+@keyframes catShimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+}
+
+.category-tile-skeleton {
+    border-radius: 12px;
+    overflow: hidden;
+    min-height: 100px;
+}
+
+.cat-skeleton-img {
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(
+        90deg,
+        rgba(200, 200, 200, 0.10) 25%,
+        rgba(200, 200, 200, 0.22) 50%,
+        rgba(200, 200, 200, 0.10) 75%
+    );
+    background-size: 800px 100%;
+    animation: catShimmer 1.4s infinite linear;
+    border-radius: 12px 12px 0 0;
+}
+
+.cat-skeleton-label {
+    height: 28px;
+    background: linear-gradient(
+        90deg,
+        rgba(200, 200, 200, 0.08) 25%,
+        rgba(200, 200, 200, 0.16) 50%,
+        rgba(200, 200, 200, 0.08) 75%
+    );
+    background-size: 800px 100%;
+    animation: catShimmer 1.4s infinite linear;
+    border-radius: 0 0 12px 12px;
+}

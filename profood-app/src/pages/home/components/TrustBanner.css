@@ -1,0 +1,95 @@
+@charset "UTF-8";
+
+/* ============================================================
+   TrustBanner — "Pourquoi Profood ?" quality pillars
+   ============================================================ */
+
+.trust-section {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.trust-heading {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin: 0 0 16px;
+    color: var(--ion-text-color, #2C3E50);
+    text-align: center;
+}
+
+/* 2-column grid on mobile; single row on wider screens */
+.trust-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+@media (min-width: 600px) {
+    .trust-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* === Card === */
+.trust-card {
+    margin: 0 !important;
+    border-radius: 12px !important;
+}
+
+.trust-card-body {
+    padding: 14px 10px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+}
+
+/* Coloured icon circle */
+.trust-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.trust-icon-svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* Pillar title — bold */
+.trust-title {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin: 0;
+    color: var(--ion-text-color, #2C3E50);
+    line-height: 1.3;
+}
+
+/* Pillar detail — muted */
+.trust-detail {
+    font-family: "Mulish", sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    margin: 0;
+    color: var(--ion-color-medium, #8C8C8C);
+    line-height: 1.4;
+}
+
+/* === Responsive === */
+
+@media (min-width: 480px) {
+    .trust-title {
+        font-size: 0.875rem;
+    }
+
+    .trust-detail {
+        font-size: 0.72rem;
+    }
+}

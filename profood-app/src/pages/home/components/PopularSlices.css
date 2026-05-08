@@ -1,0 +1,194 @@
+@charset "UTF-8";
+
+/* ============================================================
+   PopularSlices — Swiper carousel of individual cut cards
+   ============================================================ */
+
+.popular-slices-section {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.popular-slices-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.popular-slices-heading {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin: 0;
+    color: var(--ion-text-color, #2C3E50);
+}
+
+/* === Swiper === */
+.popular-slices-swiper {
+    overflow: visible !important;
+}
+
+.ps-slide {
+    width: 140px !important;
+}
+
+@media (min-width: 400px) {
+    .ps-slide {
+        width: 150px !important;
+    }
+}
+
+@media (min-width: 480px) {
+    .ps-slide {
+        width: 165px !important;
+    }
+}
+
+/* === Card === */
+.ps-card {
+    margin: 0 !important;
+    border-radius: 12px !important;
+}
+
+/* Image wrapper */
+.ps-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+}
+
+.ps-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ps-promo-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: #E74C3C;
+    color: #ffffff;
+    font-family: "Mulish", sans-serif;
+    font-weight: 700;
+    font-size: 0.62rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+/* Card body */
+.ps-body {
+    padding: 8px 10px 10px !important;
+}
+
+.ps-title {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem !important;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    /* Prevent very long cut names from expanding the card */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ps-price {
+    margin-bottom: 8px;
+}
+
+/* Quantity controls row */
+.ps-qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Full width for comfortable tapping */
+    width: 100%;
+}
+
+.ps-qty-btn {
+    /* Enforce 44px touch target */
+    --height: 44px;
+    --width: 44px;
+    --padding-start: 4px;
+    --padding-end: 4px;
+    flex-shrink: 0;
+}
+
+.ps-qty-value {
+    font-family: "Mulish", sans-serif;
+    font-weight: 700;
+    font-size: 0.875rem;
+    min-width: 24px;
+    text-align: center;
+    color: var(--ion-text-color, #2C3E50);
+}
+
+/* === Skeleton === */
+.popular-slices-skeleton-row {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.ps-skeleton {
+    flex: 0 0 140px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--ion-card-background, rgba(255, 255, 255, 0.08));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 10px;
+}
+
+@keyframes psShimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+}
+
+.ps-skel-img {
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(
+        90deg,
+        rgba(200, 200, 200, 0.12) 25%,
+        rgba(200, 200, 200, 0.24) 50%,
+        rgba(200, 200, 200, 0.12) 75%
+    );
+    background-size: 800px 100%;
+    animation: psShimmer 1.4s infinite linear;
+}
+
+.ps-skel-line {
+    height: 10px;
+    border-radius: 5px;
+    margin: 0 10px;
+    background: linear-gradient(
+        90deg,
+        rgba(200, 200, 200, 0.10) 25%,
+        rgba(200, 200, 200, 0.20) 50%,
+        rgba(200, 200, 200, 0.10) 75%
+    );
+    background-size: 800px 100%;
+    animation: psShimmer 1.4s infinite linear;
+}
+
+.ps-skel-title {
+    width: 70%;
+    height: 12px;
+}
+
+.ps-skel-sub {
+    width: 45%;
+}
+
+.ps-skel-btn {
+    height: 28px;
+    width: 55%;
+    border-radius: 14px;
+}
