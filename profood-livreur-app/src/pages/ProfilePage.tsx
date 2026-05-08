@@ -13,7 +13,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../components/Icon'
 import { PageHeader } from '../components/PageHeader'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext'
 
 interface MenuItemProps {
   icon: string

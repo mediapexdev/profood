@@ -15,46 +15,40 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../components/Icon'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext'
 
 export function LoginPage() {
-  const { login } = useAuth()
+  const { login, loading, error } = useAuth()
   const navigate = useNavigate()
 
   const [phone, setPhone] = useState('')
   const [pin, setPin] = useState('')
   const [showPin, setShowPin] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // Local validation error — distinct from the API-level error returned by useAuth.
+  const [validationError, setValidationError] = useState<string | null>(null)
+
+  // loading and error now come directly from useAuth (real API state).
+  const displayError = validationError ?? error
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setError(null)
+    setValidationError(null)
 
-    // Basic client-side guard — the API would enforce stricter rules.
+    // Basic client-side guard — the API enforces stricter rules server-side.
     if (!phone.trim()) {
-      setError('Veuillez saisir votre numéro de téléphone.')
+      setValidationError('Veuillez saisir votre numéro de téléphone.')
       return
     }
     if (pin.length < 4) {
-      setError('Le code PIN doit comporter 4 chiffres.')
+      setValidationError('Le code PIN doit comporter 4 chiffres.')
       return
     }
 
-    setLoading(true)
-    try {
-      const success = await login(phone.trim(), pin)
-      if (success) {
-        navigate('/', { replace: true })
-      } else {
-        // In mock mode this branch is never reached; kept for the real API.
-        setError('Identifiants incorrects. Veuillez réessayer.')
-      }
-    } catch {
-      setError('Une erreur est survenue. Veuillez réessayer.')
-    } finally {
-      setLoading(false)
+    const success = await login(phone.trim(), pin)
+    if (success) {
+      navigate('/', { replace: true })
     }
+    // On failure, useAuth sets `error` automatically — no extra catch needed.
   }
 
   return (
@@ -127,10 +121,10 @@ export function LoginPage() {
             </button>
           </div>
 
-          {/* Inline error message */}
-          {error && (
+          {/* Inline error message — shows validation errors or API errors */}
+          {displayError && (
             <p role="alert" className="text-sm text-red-600 font-medium text-center">
-              {error}
+              {displayError}
             </p>
           )}
 

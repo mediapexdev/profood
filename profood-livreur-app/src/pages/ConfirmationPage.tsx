@@ -71,9 +71,9 @@ export function ConfirmationPage() {
     }
   }
 
-  /** Persist status change and return to the dashboard. */
-  const handleConfirm = () => {
-    updateStatus(delivery.id, 'delivered')
+  /** Persist status change (API + local) then return to the dashboard. */
+  const handleConfirm = async () => {
+    await updateStatus(delivery.id, 'delivered')
     navigate('/')
   }
 
@@ -192,7 +192,7 @@ export function ConfirmationPage() {
         {/* ── Confirm button ─────────────────────────────────────────────── */}
         <button
           type="button"
-          onClick={handleConfirm}
+          onClick={() => void handleConfirm()}
           className="flex items-center justify-center gap-2 bg-green-600 text-white font-bold py-4 rounded-xl shadow-md hover:bg-green-700 active:scale-[0.98] transition text-base"
         >
           <Icon name="check_circle" size="md" />

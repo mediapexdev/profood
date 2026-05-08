@@ -56,9 +56,9 @@ export function ReportIssuePage() {
     )
   }
 
-  /** Mark the delivery as having an issue and return to the dashboard. */
-  const handleSubmit = () => {
-    updateStatus(delivery.id, 'issue')
+  /** Mark the delivery as having an issue (API + local) then return to the dashboard. */
+  const handleSubmit = async () => {
+    await updateStatus(delivery.id, 'issue')
     navigate('/')
   }
 
@@ -152,7 +152,7 @@ export function ReportIssuePage() {
         {/* ── Submit button ──────────────────────────────────────────────── */}
         <button
           type="button"
-          onClick={handleSubmit}
+          onClick={() => void handleSubmit()}
           className="flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 rounded-xl shadow-md hover:bg-primary/90 active:scale-[0.98] transition text-base"
         >
           <Icon name="send" size="md" />

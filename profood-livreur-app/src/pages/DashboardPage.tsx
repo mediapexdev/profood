@@ -16,7 +16,7 @@
 import { Link } from 'react-router-dom'
 import { Icon } from '../components/Icon'
 import { StatusBadge } from '../components/StatusBadge'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext'
 import { useDeliveries } from '../hooks/useDeliveries'
 import { useStats } from '../hooks/useStats'
 import { useNotifications } from '../hooks/useNotifications'
@@ -49,15 +49,29 @@ function StatusCard({ label, count, icon, colorClasses }: StatusCardProps) {
 
 export function DashboardPage() {
   const { driver } = useAuth()
-  const { activeDeliveries } = useDeliveries()
-  const stats = useStats()
+  const { activeDeliveries, loading: deliveriesLoading } = useDeliveries()
+  const { stats, loading: statsLoading } = useStats()
   const { unreadCount } = useNotifications()
+
+  // Show a simple loading indicator while the first fetch is in progress.
+  const isLoading = deliveriesLoading || statsLoading
 
   // Display only the driver's first name to keep the greeting concise.
   const firstName = driver?.name.split(' ')[0] ?? 'Livreur'
 
   // The 3 next deliveries to show in the preview list.
   const nextDeliveries = activeDeliveries.slice(0, 3)
+
+  // During the initial load we show a minimal skeleton so the driver knows
+  // data is being fetched rather than seeing a broken empty screen.
+  if (isLoading) {
+    return (
+      <div className="min-h-dvh bg-background-light pb-nav flex flex-col items-center justify-center gap-3">
+        <span className="w-8 h-8 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+        <p className="text-sm text-gray-400 font-medium">Chargement…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-dvh bg-background-light pb-nav">

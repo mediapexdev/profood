@@ -20,7 +20,7 @@ import { StatusBadge } from '../components/StatusBadge'
 import { useDeliveries } from '../hooks/useDeliveries'
 
 export function TourListPage() {
-  const { deliveries } = useDeliveries()
+  const { deliveries, loading, refresh } = useDeliveries()
 
   // Sort all deliveries by stopNumber ascending. Deliveries without a
   // stopNumber fall to the end of the list.
@@ -37,10 +37,16 @@ export function TourListPage() {
         rightAction={
           <button
             type="button"
-            className="flex items-center justify-center text-gray-600 hover:text-primary transition-colors"
+            onClick={() => void refresh()}
+            disabled={loading}
+            className="flex items-center justify-center text-gray-600 hover:text-primary transition-colors disabled:opacity-50"
             aria-label="Synchroniser"
           >
-            <Icon name="sync" size="md" />
+            <Icon
+              name="sync"
+              size="md"
+              className={loading ? 'animate-spin' : ''}
+            />
           </button>
         }
       />

@@ -52,8 +52,17 @@ function StatCell({ label, value, trend }: StatCellProps) {
 }
 
 export function HistoryPage() {
-  const { deliveries } = useDeliveries()
-  const stats = useStats()
+  const { deliveries, loading } = useDeliveries()
+  const { stats } = useStats()
+
+  if (loading) {
+    return (
+      <div className="min-h-dvh bg-background-light pb-nav flex flex-col items-center justify-center gap-3">
+        <span className="w-8 h-8 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+        <p className="text-sm text-gray-400 font-medium">Chargement…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-dvh bg-background-light pb-nav">
