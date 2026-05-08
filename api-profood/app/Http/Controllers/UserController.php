@@ -950,6 +950,7 @@ class UserController extends Controller
         $app_key = $request['app_key'];
         $profood_app_key = env('PROFOOD_APP_KEY');
         $profood_app_manager_key = env('PROFOOD_APP_MANAGER_KEY');
+        $profood_app_livreur_key = env('PROFOOD_APP_LIVREUR_KEY');
 
         // Eager load role relationship to avoid N+1 query when accessing role->code
         $user = User::with('role')->where('phone_number', $request->phone_number)->first();
@@ -957,7 +958,8 @@ class UserController extends Controller
         if(isset($user) &&
             ((0 == \strcmp($app_key, $profood_app_key) && $user->role->code != Role::CUSTOMER) ||
                 (0 == \strcmp($app_key, $profood_app_manager_key) && $user->role->code != Role::ADMIN &&
-                    $user->role->code != Role::MANAGER && $user->role->code != Role::SUPER_ADMIN))){
+                    $user->role->code != Role::MANAGER && $user->role->code != Role::SUPER_ADMIN) ||
+                (0 == \strcmp($app_key, $profood_app_livreur_key) && $user->role->code != Role::LIVREUR))){
 
             return response()->json(['message' => 'Numéro de téléphone incorrect'], 400);
         }
@@ -981,8 +983,11 @@ class UserController extends Controller
         $app_key = Str::of($request['app_key'])->stripTags()->trim();
         $profood_app_key = env('PROFOOD_APP_KEY');
         $profood_app_manager_key = env('PROFOOD_APP_MANAGER_KEY');
+        $profood_app_livreur_key = env('PROFOOD_APP_LIVREUR_KEY');
 
-        if(0 == \strcmp($app_key, $profood_app_manager_key) || 0 == \strcmp($app_key, $profood_app_key)){
+        if(0 == \strcmp($app_key, $profood_app_manager_key) ||
+            0 == \strcmp($app_key, $profood_app_key) ||
+            0 == \strcmp($app_key, $profood_app_livreur_key)){
 
             $response = $this->phoneNumberExists($request);
 
@@ -1486,10 +1491,12 @@ class UserController extends Controller
         $app_key = $request['app_key'];
         $profood_app_key = env('PROFOOD_APP_KEY');
         $profood_app_manager_key = env('PROFOOD_APP_MANAGER_KEY');
+        $profood_app_livreur_key = env('PROFOOD_APP_LIVREUR_KEY');
 
         if((0 == \strcmp($app_key, $profood_app_key) && $user->role->code == Role::CUSTOMER) ||
             (0 == \strcmp($app_key, $profood_app_manager_key) && ($user->role->code == Role::ADMIN ||
-                $user->role->code == Role::MANAGER || $user->role->code == Role::SUPER_ADMIN))){
+                $user->role->code == Role::MANAGER || $user->role->code == Role::SUPER_ADMIN)) ||
+            (0 == \strcmp($app_key, $profood_app_livreur_key) && $user->role->code == Role::LIVREUR)){
 
             $validator = Validator::make($request->all(), [
                 // 'phone_number'  => ['required', 'regex:#(^3[3]|^7[5-80])[ ]?[0-9]{3}([ ]?[0-9]{2}){2}$#'],
