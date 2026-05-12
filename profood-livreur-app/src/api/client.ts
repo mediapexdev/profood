@@ -38,11 +38,16 @@ const sleep = (ms: number): Promise<void> =>
  * local Laravel dev server in development, matching the pattern used by
  * profood-app and profood-manager-app.
  */
+// `VITE_API_URL` overrides the default. Useful when running inside a native
+// emulator/simulator that needs to reach the dev machine via its LAN IP
+// (e.g. VITE_API_URL=http://192.168.1.5:8000/api/) — neither `localhost`
+// nor `127.0.0.1` resolves to the host machine from an Android device.
+const defaultBaseUrl = import.meta.env.PROD
+    ? 'https://api.profood-app.com/api/'
+    : 'http://localhost:8000/api/'
+
 const apiClient = axios.create({
-  baseURL:
-    import.meta.env.PROD
-      ? 'https://api.profood-app.com/api/'
-      : 'http://localhost:8000/api/',
+  baseURL: import.meta.env.VITE_API_URL ?? defaultBaseUrl,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

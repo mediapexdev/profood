@@ -12,6 +12,22 @@ dist
 dist-ssr
 *.local
 
+# Capacitor — generated native artefacts
+ios/App/Pods/
+ios/App/build/
+ios/DerivedData/
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/captures/
+android/app/release/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
