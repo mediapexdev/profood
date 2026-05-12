@@ -29,6 +29,10 @@ import UsersPage from './pages/settings/users/UsersPage';
 import NewUserPage from './pages/settings/users/NewUserPage';
 import UserDataViewPage from './pages/settings/users/UserDataViewPage';
 import UserDataEditingPage from './pages/settings/users/UserDataEditingPage';
+import LivreursPage from './pages/settings/livreurs/LivreursPage';
+import NewLivreurPage from './pages/settings/livreurs/NewLivreurPage';
+import LivreurDataViewPage from './pages/settings/livreurs/LivreurDataViewPage';
+import LivreurDataEditingPage from './pages/settings/livreurs/LivreurDataEditingPage';
 import { useUserInfosContext } from './pages/account/components/contexts/UserInfosProvider';
 
 import './App.css';
@@ -220,6 +224,54 @@ function App() {
                         ?
                         <RequireAuth redirectTo="/connexion">
                             <UserDataEditingPage />
+                        </RequireAuth>
+                        :
+                        <NotFoundPage />
+                    }
+                />
+                <Route
+                    path="/parametres/livreurs"
+                    element={
+                        (['admin', 'super admin', 'manager'].includes(userRole?.wording.toLowerCase() as string))
+                        ?
+                        <RequireAuth redirectTo="/connexion">
+                            <LivreursPage />
+                        </RequireAuth>
+                        :
+                        <NotFoundPage />
+                    }
+                />
+                <Route
+                    path="/parametres/livreurs/nouveau"
+                    element={
+                        (['admin', 'super admin'].includes(userRole?.wording.toLowerCase() as string))
+                        ?
+                        <RequireAuth redirectTo="/connexion">
+                            <NewLivreurPage />
+                        </RequireAuth>
+                        :
+                        <NotFoundPage />
+                    }
+                />
+                <Route
+                    path="/parametres/livreurs/vue/:id"
+                    element={
+                        (['admin', 'super admin', 'manager'].includes(userRole?.wording.toLowerCase() as string))
+                        ?
+                        <RequireAuth redirectTo="/connexion">
+                            <LivreurDataViewPage />
+                        </RequireAuth>
+                        :
+                        <NotFoundPage />
+                    }
+                />
+                <Route
+                    path="/parametres/livreurs/edition/:id"
+                    element={
+                        (['admin', 'super admin'].includes(userRole?.wording.toLowerCase() as string))
+                        ?
+                        <RequireAuth redirectTo="/connexion">
+                            <LivreurDataEditingPage />
                         </RequireAuth>
                         :
                         <NotFoundPage />

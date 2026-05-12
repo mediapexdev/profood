@@ -46,16 +46,27 @@ import { useUserInfosContext } from "../../../account/components/contexts/UserIn
 
 import './UserProfileDetailsEditingFormView.css';
 
+type UserProfileDetailsEditingFormViewProps = UserProps & {
+    lockedRoleCode?: number;
+    basePath?: string;
+};
+
 /**
- * 
- * @param user 
- * @returns 
+ *
+ * @param props
+ * @returns
  */
-const UserProfileDetailsEditingFormView: React.FC<UserProps> = (user: UserProps) => {
+const UserProfileDetailsEditingFormView: React.FC<UserProfileDetailsEditingFormViewProps> = (props: UserProfileDetailsEditingFormViewProps) => {
     /**
-     * 
+     *
      */
     const { t } = useTranslation();
+
+    /**
+     *
+     */
+    const { lockedRoleCode } = props;
+    const user: UserProps = props;
 
     /**
      * 
@@ -467,7 +478,7 @@ const UserProfileDetailsEditingFormView: React.FC<UserProps> = (user: UserProps)
                                 <FormFeedback invalid='true'>{t('Veuillez renseigner ce champ')} !</FormFeedback>
                             </div>
                         </Col>
-                        <Col xl={6}>
+                        <Col xl={6} className={lockedRoleCode !== undefined ? 'd-none' : ''}>
                             <div className={`form-group-wrapper mb-1 ${!isValidRole && isTouchedForRole ? 'is-invalid' : ''}`}>
                                 <FormGroup className='form-group mb-0'>
                                     <Select

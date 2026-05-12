@@ -52,13 +52,21 @@ import PasswordMeterControl from "../../../../components/widgets/PasswordMeterCo
 
 import './NewUserFormView.css';
 
+interface NewUserFormViewProps {
+    lockedRoleCode?: number;
+    basePath?: string;
+}
+
 /**
- * 
- * @returns 
+ *
+ * @returns
  */
-const NewUserFormView: React.FC = () => {
+const NewUserFormView: React.FC<NewUserFormViewProps> = ({
+    lockedRoleCode,
+    basePath = '/parametres/utilisateurs',
+}: NewUserFormViewProps) => {
     /**
-     * 
+     *
      */
     const { t } = useTranslation();
 
@@ -115,13 +123,35 @@ const NewUserFormView: React.FC = () => {
      * 
      */
     useEffect(() => {
+        if(lockedRoleCode !== undefined && !role){
+            const lockedRole = userRoles?.find((r) => r.code === lockedRoleCode);
+            if(lockedRole){
+                setRole(lockedRole);
+                setIsValidRole(true);
+            }
+        }
+    }, [lockedRoleCode, userRoles, role]);
+
+    /**
+     *
+     */
+    useEffect(() => {
         if(reset){
             setFirstName('');
             setIsTouchedForFirstName(false);
             setLastName('');
             setIsTouchedForLastName(false);
-            setRole(undefined);
-            setIsTouchedForRole(false);
+            if(lockedRoleCode === undefined){
+                setRole(undefined);
+                setIsTouchedForRole(false);
+            }
+            else{
+                const lockedRole = userRoles?.find((r) => r.code === lockedRoleCode);
+                if(lockedRole){
+                    setRole(lockedRole);
+                    setIsValidRole(true);
+                }
+            }
             setEmail('');
             setIsTouchedForEmail(false);
             setPhoneNumber('');
@@ -133,6 +163,7 @@ const NewUserFormView: React.FC = () => {
             setIsTouchedForPasswordConfirmation(false);
             setReset(false);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[reset]);
 
     /**
@@ -348,7 +379,7 @@ const NewUserFormView: React.FC = () => {
                 fetchUsers(true, 3700);
                 showToast(t(res.data.message), 'success', {autoClose: 2000});
                 setTimeout(() => {
-                    goTo('/parametres/utilisateurs');
+                    goTo(basePath);
                 }, 3000);
             }
             else if(res.status === 204){
@@ -521,7 +552,7 @@ const NewUserFormView: React.FC = () => {
                                 <FormFeedback invalid='true'>{t('Veuillez renseigner ce champ')} !</FormFeedback>
                             </div>
                         </Col>
-                        <Col xl={6}>
+                        <Col xl={6} className={lockedRoleCode !== undefined ? 'd-none' : ''}>
                             <div className={`form-group-wrapper mb-1 ${!isValidRole && isTouchedForRole ? 'is-invalid' : ''}`}>
                                 <FormGroup className='form-group mb-0'>
                                     <Select

@@ -40,14 +40,15 @@ export interface UserDeleteModalProps {
     toggle: () => void;
     onClosed: () => void;
     user: UserProps;
+    basePath?: string;
 }
 
 /**
- * 
- * @param param0 
- * @returns 
+ *
+ * @param param0
+ * @returns
  */
-const UserDeleteModal: React.FC<UserDeleteModalProps> = ({user, show, setShow, toggle, onClosed}: UserDeleteModalProps) => {
+const UserDeleteModal: React.FC<UserDeleteModalProps> = ({user, show, setShow, toggle, onClosed, basePath = '/parametres/utilisateurs'}: UserDeleteModalProps) => {
     /**
      * 
      */
@@ -129,7 +130,7 @@ const UserDeleteModal: React.FC<UserDeleteModalProps> = ({user, show, setShow, t
                 fetchUsers(true, 3700);
                 showToast(t(res.data.message), 'success', {autoClose: 2000});
                 setTimeout(() => {
-                    goTo('/parametres/utilisateurs');
+                    goTo(basePath);
                 }, 3000);
             }
             else{

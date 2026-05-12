@@ -17,7 +17,8 @@ import {
     Grid,
     People,
     Speedometer2,
-    Tag
+    Tag,
+    Truck
 } from 'react-bootstrap-icons';
 
 import { useTranslation } from "react-i18next";
@@ -71,6 +72,11 @@ const Sidebar: React.FC = () => {
             title: t('Clients'),
             url: '/clients',
             icon: <People size={16} />
+        },
+        {
+            title: t('Livreurs'),
+            url: '/parametres/livreurs',
+            icon: <Truck size={16} />
         },
         {
             title: t('Promotions'),

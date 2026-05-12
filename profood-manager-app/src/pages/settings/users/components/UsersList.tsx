@@ -28,14 +28,16 @@ import "./UsersList.css"
 interface UsersListProps{
     users: UserProps[];
     fromSearch?: boolean;
+    basePath?: string;
+    showRole?: boolean;
 }
 
 /**
- * 
- * @param param0 
- * @returns 
+ *
+ * @param param0
+ * @returns
  */
-const UsersList: React.FC<UsersListProps> = ({users, fromSearch}: UsersListProps) => {
+const UsersList: React.FC<UsersListProps> = ({users, fromSearch, basePath = '/parametres/utilisateurs', showRole = true}: UsersListProps) => {
     /**
      * 
      */
@@ -115,7 +117,7 @@ const UsersList: React.FC<UsersListProps> = ({users, fromSearch}: UsersListProps
                 <thead>
                     <tr>
                         <th className='user ps-4'>{t('Utilisateur')}</th>
-                        <th className='role px-4'>Role</th>
+                        {showRole && <th className='role px-4'>Role</th>}
                         <th className='phone-number'>{t('Téléphone')}</th>
                         <th className='email'>{t('Adresse e-mail')}</th>
                         <th className='status px-4'>{t('Statut')}</th>
@@ -131,17 +133,19 @@ const UsersList: React.FC<UsersListProps> = ({users, fromSearch}: UsersListProps
                                 <td className='user-cell ps-4'>
                                     <UserChip
                                         user={user}
-                                        url={`/parametres/utilisateurs/vue/${user.id}`}
+                                        url={`${basePath}/vue/${user.id}`}
                                     />
                                 </td>
-                                <td className='role-cell'>
-                                    <Badge
-                                        color='info'
-                                        className='badge-role bg-light-info fw-medium'
-                                    >
-                                        <span>{t(user.role.wording)}</span>
-                                    </Badge>
-                                </td>
+                                {showRole && (
+                                    <td className='role-cell'>
+                                        <Badge
+                                            color='info'
+                                            className='badge-role bg-light-info fw-medium'
+                                        >
+                                            <span>{t(user.role.wording)}</span>
+                                        </Badge>
+                                    </td>
+                                )}
                                 <td className='phone-number-cell'>{formatPhoneNumber(user.phone_number)}</td>
                                 <td className='email-address-cell'>{user.email}</td>
                                 <td className='status-cell'>
@@ -173,7 +177,7 @@ const UsersList: React.FC<UsersListProps> = ({users, fromSearch}: UsersListProps
                                             color='none'
                                             className='bg-hover-light-primary text-info2 btn-edit btn-edit-user border-0'
                                             onClick={() => {
-                                                goTo(`/parametres/utilisateurs/edition/${user.id}`);
+                                                goTo(`${basePath}/edition/${user.id}`);
                                             }}
                                         >
                                             <FontAwesomeIcon icon={faPen} />
@@ -222,6 +226,7 @@ const UsersList: React.FC<UsersListProps> = ({users, fromSearch}: UsersListProps
                     toggle={toggleUserDeleteModal}
                     onClosed={onClosedUserDeleteModal}
                     user={userToDelete}
+                    basePath={basePath}
                 />
             }
             {/* end::Modals */}

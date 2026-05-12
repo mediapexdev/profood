@@ -30,18 +30,32 @@ import UserStatusesMenu, { UserStatus } from './UserStatusesMenu';
 
 import './UsersListView.css';
 
+interface UsersListViewProps {
+    basePath?: string;
+    roleFilterCode?: number;
+    title?: string;
+    addLabel?: string;
+    showRole?: boolean;
+}
+
 /**
- * 
- * @returns 
+ *
+ * @returns
  */
-const UsersListView: React.FC = () => {
+const UsersListView: React.FC<UsersListViewProps> = ({
+    basePath = '/parametres/utilisateurs',
+    roleFilterCode,
+    title,
+    addLabel,
+    showRole = true,
+}: UsersListViewProps) => {
     /**
-     * 
+     *
      */
     const { t } = useTranslation();
 
     /**
-     * 
+     *
      */
     const { users, fetchUsers } = useDataContext();
 
@@ -93,7 +107,12 @@ const UsersListView: React.FC = () => {
      * 
      */
     useEffect(() => {
-        let f_users = filterStatus !== 'all' ? users.filter(checkStatus) : users;
+        let f_users = roleFilterCode !== undefined
+            ? users.filter((u) => u.role?.code === roleFilterCode)
+            : users;
+        if(filterStatus !== 'all'){
+            f_users = f_users.filter(checkStatus);
+        }
         setFromSearch(filterStatus !== 'all');
 
         if(searchedText.length > 0){
@@ -102,7 +121,7 @@ const UsersListView: React.FC = () => {
         }
         setFilteredUsers(f_users);
         // setFilteredUsers(!searchedText.length ? users : users.filter(checkSearchedText));
-	}, [users, searchedText, filterStatus, checkStatus, checkSearchedText]);
+	}, [users, searchedText, filterStatus, checkStatus, checkSearchedText, roleFilterCode]);
 
     /**
      * 
@@ -135,7 +154,7 @@ const UsersListView: React.FC = () => {
                                 tag='h3'
                                 className='title-color h6 m-0'
                             >
-                                <span>{t('Liste des utilisateurs')}</span>
+                                <span>{title ?? t('Liste des utilisateurs')}</span>
                             </CardTitle>
                         </Col>
                         <Col xs='sm-auto'>
@@ -146,12 +165,12 @@ const UsersListView: React.FC = () => {
                                     type='button'
                                     color='success'
                                     className='btn-add btn-add-user fs-8 rounded-1 border-0'
-                                    onClick={() => goTo('/parametres/utilisateurs/nouveau')}
+                                    onClick={() => goTo(`${basePath}/nouveau`)}
                                 >
                                     <span className='me-2'>
                                         <FontAwesomeIcon icon={faPlus} size='sm' />
                                     </span>
-                                    <span>{t('Nouveau utilisateur')}</span>
+                                    <span>{addLabel ?? t('Nouveau utilisateur')}</span>
                                 </Button>
                                 <Button
                                     tag='button'
@@ -237,6 +256,8 @@ const UsersListView: React.FC = () => {
                     <UsersList
                         users={filteredUsers}
                         fromSearch={fromSearch}
+                        basePath={basePath}
+                        showRole={showRole}
                     />
                 </CardBody>
             </Card>

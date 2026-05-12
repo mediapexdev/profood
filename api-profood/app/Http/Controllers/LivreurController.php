@@ -214,18 +214,36 @@ class LivreurController extends Controller
      */
     public function getStats(Request $request)
     {
-        $livreur = $this->currentLivreur();
+        $user = Auth::user();
 
-        if(!$livreur instanceof Livreur){
-            return $livreur;
+        if(!isset($user)){
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé.'], 401);
         }
 
-        // Validate the optional date parameter.
+        // Validate the optional parameters.
         $validator = Validator::make($request->all(), [
-            'date' => ['nullable', 'date_format:Y-m-d'],
+            'date'       => ['nullable', 'date_format:Y-m-d'],
+            'livreur_id' => ['nullable', 'integer', 'exists:livreurs,id'],
         ]);
         if($validator->fails()){
             return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        // Admin/manager scope: fetch stats for the given livreur_id.
+        // Otherwise: resolve the livreur tied to the authenticated user.
+        if($this->isManagerScope() && $request->filled('livreur_id')){
+            $livreur = Livreur::find((int)$request->query('livreur_id'));
+
+            if(!isset($livreur)){
+                return response()->json(['message' => 'Livreur introuvable'], 404);
+            }
+        }
+        else{
+            $livreur = $this->currentLivreur();
+
+            if(!$livreur instanceof Livreur){
+                return $livreur;
+            }
         }
 
         // Default to today in the Dakar timezone, matching the intl handling
