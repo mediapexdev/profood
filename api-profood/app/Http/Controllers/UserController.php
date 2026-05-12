@@ -955,11 +955,17 @@ class UserController extends Controller
         // Eager load role relationship to avoid N+1 query when accessing role->code
         $user = User::with('role')->where('phone_number', $request->phone_number)->first();
 
-        if(isset($user) &&
-            ((0 == \strcmp($app_key, $profood_app_key) && $user->role->code != Role::CUSTOMER) ||
-                (0 == \strcmp($app_key, $profood_app_manager_key) && $user->role->code != Role::ADMIN &&
+        // The role-vs-app-key guard only applies to requests that actually
+        // carry an app_key (signin, signup, password reset). Internal admin
+        // flows (add-user, update-user-profile-details, delete-user-by-admin)
+        // do not send one — they rely on Sanctum auth + the admin role check
+        // in the calling controller instead. Without this empty()-guard,
+        // strcmp(null, null) returns 0 and falsely triggers the 400.
+        if(isset($user) && !empty($app_key) &&
+            ((!empty($profood_app_key) && 0 == \strcmp($app_key, $profood_app_key) && $user->role->code != Role::CUSTOMER) ||
+                (!empty($profood_app_manager_key) && 0 == \strcmp($app_key, $profood_app_manager_key) && $user->role->code != Role::ADMIN &&
                     $user->role->code != Role::MANAGER && $user->role->code != Role::SUPER_ADMIN) ||
-                (0 == \strcmp($app_key, $profood_app_livreur_key) && $user->role->code != Role::LIVREUR))){
+                (!empty($profood_app_livreur_key) && 0 == \strcmp($app_key, $profood_app_livreur_key) && $user->role->code != Role::LIVREUR))){
 
             return response()->json(['message' => 'Numéro de téléphone incorrect'], 400);
         }
