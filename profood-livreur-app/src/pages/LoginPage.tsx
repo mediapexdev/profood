@@ -1,15 +1,15 @@
 /**
- * LoginPage — phone + 4-digit PIN authentication screen.
+ * LoginPage — phone + password authentication screen.
  *
  * The form intentionally keeps state local to the component; there is no
  * global form library needed for a two-field login screen. Error feedback is
  * shown inline below the submit button so the driver does not need to scroll
  * to find validation messages.
  *
- * The PIN field uses `type="password"` so the device's OS masks the digits
- * by default. A visibility toggle lets the driver double-check their entry
- * before submitting. `tracking-[0.5em]` visually separates digits while they
- * are visible, mimicking a PIN-pad feel.
+ * Backend constraint: /signin matches against the user's hashed password
+ * (validator min(8) on creation). A PIN-style 4-digit code therefore cannot
+ * be accepted — drivers log in with the regular password set by the admin
+ * when their account was created.
  */
 
 import { useState, type FormEvent } from 'react'
@@ -22,8 +22,8 @@ export function LoginPage() {
   const navigate = useNavigate()
 
   const [phone, setPhone] = useState('')
-  const [pin, setPin] = useState('')
-  const [showPin, setShowPin] = useState(false)
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   // Local validation error — distinct from the API-level error returned by useAuth.
   const [validationError, setValidationError] = useState<string | null>(null)
 
@@ -39,12 +39,12 @@ export function LoginPage() {
       setValidationError('Veuillez saisir votre numéro de téléphone.')
       return
     }
-    if (pin.length < 4) {
-      setValidationError('Le code PIN doit comporter 4 chiffres.')
+    if (password.length < 8) {
+      setValidationError('Le mot de passe doit comporter au moins 8 caractères.')
       return
     }
 
-    const success = await login(phone.trim(), pin)
+    const success = await login(phone.trim(), password)
     if (success) {
       navigate('/', { replace: true })
     }
@@ -88,36 +88,29 @@ export function LoginPage() {
             />
           </div>
 
-          {/* PIN field */}
+          {/* Password field */}
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary pointer-events-none">
               <Icon name="lock_open" size="md" />
             </span>
             <input
-              type={showPin ? 'text' : 'password'}
-              inputMode="numeric"
+              type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
-              placeholder="Code PIN (4 chiffres)"
-              maxLength={4}
-              value={pin}
-              onChange={(e) => {
-                // Only allow digit characters to prevent non-numeric input.
-                const digits = e.target.value.replace(/\D/g, '')
-                setPin(digits)
-              }}
+              placeholder="Mot de passe"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
-              className="w-full h-14 pl-12 pr-12 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 font-bold focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition disabled:opacity-60"
-              style={{ letterSpacing: pin ? '0.5em' : undefined }}
+              className="w-full h-14 pl-12 pr-12 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition disabled:opacity-60"
             />
-            {/* Visibility toggle — placed on the right of the PIN field */}
+            {/* Visibility toggle — placed on the right of the password field */}
             <button
               type="button"
-              onClick={() => setShowPin((prev) => !prev)}
+              onClick={() => setShowPassword((prev) => !prev)}
               disabled={loading}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors disabled:opacity-60"
-              aria-label={showPin ? 'Masquer le PIN' : 'Afficher le PIN'}
+              aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
             >
-              <Icon name={showPin ? 'visibility_off' : 'visibility'} size="md" />
+              <Icon name={showPassword ? 'visibility_off' : 'visibility'} size="md" />
             </button>
           </div>
 
