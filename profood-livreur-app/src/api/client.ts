@@ -63,8 +63,22 @@ const apiClient = axios.create({
  *   - Every request automatically picks up the current token so there is
  *     no need to pass it manually at each call site.
  */
+/**
+ * Module-level token cache. The synchronous axios interceptor cannot await
+ * @capacitor/preferences, so AuthContext mirrors the current token here on
+ * every state transition (bootstrap, login, logout, unlock) and the
+ * interceptor just reads it. The localStorage fallback covers the brief
+ * window before bootstrap completes on web.
+ */
+let currentAuthToken: string | null = null
+
+export function setAuthToken(token: string | null): void {
+    currentAuthToken = token
+}
+
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('profood_livreur_token')
+  const token =
+    currentAuthToken ?? localStorage.getItem('profood_livreur_token')
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`
   }

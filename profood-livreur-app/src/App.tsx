@@ -27,6 +27,7 @@
 
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { BottomNav } from './components/BottomNav'
+import { UnlockGate } from './components/UnlockGate'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -50,10 +51,26 @@ import { ProfilePage } from './pages/ProfilePage'
  * onto the history stack, so pressing Back after login does not loop the user
  * back to the login screen.
  */
+function BootstrapSplash() {
+  return (
+    <div className="min-h-dvh bg-background-light flex flex-col items-center justify-center gap-3">
+      <span className="w-8 h-8 rounded-full border-2 border-gray-300 border-t-primary animate-spin" />
+      <p className="text-sm text-gray-500 font-medium">Chargement…</p>
+    </div>
+  )
+}
+
 function AuthGuard() {
-  const { driver } = useAuth()
+  const { driver, bootstrapping } = useAuth()
+  // Avoid a brief Navigate-to-login flicker while the async hydration from
+  // @capacitor/preferences resolves on a cold start.
+  if (bootstrapping) return <BootstrapSplash />
   if (driver === null) return <Navigate to="/login" replace />
-  return <Outlet />
+  return (
+    <UnlockGate>
+      <Outlet />
+    </UnlockGate>
+  )
 }
 
 /**

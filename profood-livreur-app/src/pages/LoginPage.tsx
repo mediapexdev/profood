@@ -15,10 +15,11 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../components/Icon'
+import { BiometricEnrollPrompt } from '../components/BiometricEnrollPrompt'
 import { useAuth } from '../contexts/AuthContext'
 
 export function LoginPage() {
-  const { login, loading, error } = useAuth()
+  const { login, loading, error, biometric, biometricEnrolled } = useAuth()
   const navigate = useNavigate()
 
   const [phone, setPhone] = useState('')
@@ -26,9 +27,17 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   // Local validation error — distinct from the API-level error returned by useAuth.
   const [validationError, setValidationError] = useState<string | null>(null)
+  // After a successful login, gate the navigation behind the enrollment
+  // prompt only when biometrics are usable and the driver hasn't already
+  // opted in on this device.
+  const [showEnrollPrompt, setShowEnrollPrompt] = useState(false)
 
   // loading and error now come directly from useAuth (real API state).
   const displayError = validationError ?? error
+
+  const finishLogin = () => {
+    navigate('/', { replace: true })
+  }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -45,10 +54,12 @@ export function LoginPage() {
     }
 
     const success = await login(phone.trim(), password)
-    if (success) {
-      navigate('/', { replace: true })
+    if (!success) return
+    if (biometric.available && !biometricEnrolled) {
+      setShowEnrollPrompt(true)
+      return
     }
-    // On failure, useAuth sets `error` automatically — no extra catch needed.
+    finishLogin()
   }
 
   return (
@@ -157,6 +168,10 @@ export function LoginPage() {
       >
         Profood Livreur v1.0
       </footer>
+
+      {showEnrollPrompt && (
+        <BiometricEnrollPrompt onDone={finishLogin} />
+      )}
     </div>
   )
 }
