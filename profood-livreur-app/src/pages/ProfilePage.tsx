@@ -10,6 +10,7 @@
  * Uses useAuth to read the driver object and to handle logout.
  */
 
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../components/Icon'
 import { PageHeader } from '../components/PageHeader'
@@ -41,13 +42,71 @@ function MenuItem({ icon, label, detail, onClick }: MenuItemProps) {
   )
 }
 
+interface ToggleRowProps {
+  icon: string
+  label: string
+  description?: string
+  checked: boolean
+  disabled?: boolean
+  onChange: () => void
+}
+
+function ToggleRow({ icon, label, description, checked, disabled, onChange }: ToggleRowProps) {
+  return (
+    <button
+      type="button"
+      onClick={onChange}
+      disabled={disabled}
+      className="flex items-center gap-3 w-full px-4 py-3.5 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors text-left"
+      aria-pressed={checked}
+    >
+      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <Icon name={icon} size="sm" className="text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-gray-800">{label}</p>
+        {description && (
+          <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+        )}
+      </div>
+      <span
+        className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
+          checked ? 'bg-primary' : 'bg-gray-300'
+        }`}
+        aria-hidden
+      >
+        <span
+          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+            checked ? 'translate-x-5' : 'translate-x-0.5'
+          }`}
+        />
+      </span>
+    </button>
+  )
+}
+
 export function ProfilePage() {
-  const { driver, logout } = useAuth()
+  const { driver, logout, biometric, biometricEnrolled, enrollBiometric, disableBiometric } = useAuth()
   const navigate = useNavigate()
+  const [busy, setBusy] = useState(false)
 
   const handleLogout = async () => {
     await logout()
     navigate('/login', { replace: true })
+  }
+
+  const toggleBiometric = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      if (biometricEnrolled) {
+        await disableBiometric()
+      } else {
+        await enrollBiometric()
+      }
+    } finally {
+      setBusy(false)
+    }
   }
 
   const initials = driver?.name
@@ -108,6 +167,20 @@ export function ProfilePage() {
           <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 px-4 pt-4 pb-2">
             Paramètres
           </h3>
+          {biometric.available && (
+            <ToggleRow
+              icon="fingerprint"
+              label={`Déverrouillage par ${biometric.label}`}
+              description={
+                biometricEnrolled
+                  ? 'Activé sur cet appareil'
+                  : 'Évite de retaper votre mot de passe'
+              }
+              checked={biometricEnrolled}
+              disabled={busy}
+              onChange={toggleBiometric}
+            />
+          )}
           <MenuItem icon="language" label="Langue" detail="Français" />
           <MenuItem icon="notifications" label="Notifications" />
           <MenuItem icon="help" label="Aide & Support" />
