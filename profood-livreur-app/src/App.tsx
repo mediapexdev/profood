@@ -27,6 +27,7 @@
 
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { BottomNav } from './components/BottomNav'
+import { LocationTracker } from './components/LocationTracker'
 import { UnlockGate } from './components/UnlockGate'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { LoginPage } from './pages/LoginPage'
@@ -68,6 +69,7 @@ function AuthGuard() {
   if (driver === null) return <Navigate to="/login" replace />
   return (
     <UnlockGate>
+      <LocationTracker />
       <Outlet />
     </UnlockGate>
   )

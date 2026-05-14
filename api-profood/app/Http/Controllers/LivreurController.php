@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Box;
 use App\Models\CartSlice;
 use App\Models\Livreur;
+use App\Models\LivreurLocation;
 use App\Models\LivreurNotification;
 use App\Models\Order;
 use App\Models\OrderHistory;
@@ -354,6 +355,56 @@ class LivreurController extends Controller
         $user = Auth::user();
         if(!isset($user)) return false;
         return in_array($user->role->code, [Role::ADMIN, Role::MANAGER, Role::SUPER_ADMIN], true);
+    }
+
+    /**
+     * Record a GPS ping for the current livreur. Called periodically by
+     * the livreur app while a delivery is active. Bad payloads are
+     * dropped with a 422 — coordinates that fall outside Earth ranges
+     * are almost certainly bugs in the client.
+     */
+    public function updateLocation(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'latitude'  => ['required', 'numeric', 'between:-90,90'],
+            'longitude' => ['required', 'numeric', 'between:-180,180'],
+            'accuracy'  => ['nullable', 'numeric', 'min:0'],
+        ]);
+        if($validator->fails()){
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+        $livreur = $this->currentLivreur();
+
+        if(!$livreur instanceof Livreur){
+            return $livreur;
+        }
+        $location = LivreurLocation::create([
+            'livreur_id'  => $livreur->id,
+            'latitude'    => (float)$request->latitude,
+            'longitude'   => (float)$request->longitude,
+            'accuracy'    => $request->accuracy !== null ? (float)$request->accuracy : null,
+            'recorded_at' => now(),
+        ]);
+        return response()->json(['id' => $location->id, 'recorded_at' => $location->recorded_at], 201);
+    }
+
+    /**
+     * Manager scope. Return the most recent location ping of a given
+     * livreur (or 404 if they have never reported one).
+     */
+    public function getLivreurLastLocation($id)
+    {
+        if(!$this->isManagerScope()){
+            return response()->json(['message' => 'Demande rejetée !'], 403);
+        }
+        $location = LivreurLocation::where('livreur_id', (int)$id)
+            ->orderBy('recorded_at', 'desc')
+            ->first();
+
+        if(!isset($location)){
+            return response()->json(['message' => 'Aucune position enregistrée'], 404);
+        }
+        return response()->json($location, 200);
     }
 
     /**

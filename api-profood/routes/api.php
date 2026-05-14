@@ -183,6 +183,8 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     Route::get('get-livreur-notifications', [LivreurController::class, 'getNotifications']);
     Route::post('livreur-mark-notification-read', [LivreurController::class, 'markNotificationRead']);
     Route::post('livreur-mark-all-notifications-read', [LivreurController::class, 'markAllNotificationsRead']);
+    Route::post('livreur-update-location', [LivreurController::class, 'updateLocation']);
+    Route::get('get-livreur-last-location/{id}', [LivreurController::class, 'getLivreurLastLocation']);
 
     Route::get('get-livreurs', [LivreurController::class, 'index']);
     Route::post('assign-livreur-to-order', [LivreurController::class, 'assignToOrder']);

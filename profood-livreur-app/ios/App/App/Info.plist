@@ -37,6 +37,8 @@
 	</dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Profood Livreur utilise Face ID pour déverrouiller rapidement votre session sans avoir à retaper votre mot de passe.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Profood Livreur transmet votre position au gestionnaire pendant vos livraisons en cours, pour le suivi de tournée.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
