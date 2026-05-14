@@ -86,23 +86,35 @@ keep climbing from there. Livreur starts at `versionCode 1`.
   `android/app/build/outputs/bundle/release/app-release.aab`
 - Upload to Play Console (Internal testing track first)
 
-## Android — customer app blocker
+## Android — customer app: scaffold restored, SDK bump pending
 
-`profood-app/android/app/src/main/` is empty: the scaffold exists
-(`build.gradle`, gradle wrapper, etc.) but the source files
-(AndroidManifest.xml, MainActivity, res/) were never committed. The
-historical `versionCode 9` in build.gradle suggests a previous working
-state that was lost (likely during the iCloud git-corruption episode
-documented in monorepo consolidation).
+The historically-missing `profood-app/android/app/src/main/` source
+tree has been rebuilt by copying the livreur app's scaffold and
+adapting:
+- Package: `com.profoodapp.app` (java path matches, MainActivity
+  package declaration matches)
+- Display name: "Profood" via `strings.xml`
+- Permissions: INTERNET, ACCESS_FINE_LOCATION,
+  ACCESS_COARSE_LOCATION (the last two back the checkout GPS capture)
+- versionCode kept at 9 to preserve Play Store history
 
-Two routes:
-1. Run `npx cap add android` to regenerate from the Capacitor template,
-   then re-customise (display name, permissions, icon, etc.).
-2. Recover from a backup if available (see `~/Projects/profood-backups/`
-   from the 2026-04-09 backup batch).
+`npx cap sync android` passes from `profood-app/`. The build itself
+needs Android Studio + AGP/SDK alignment, which is the remaining
+work:
 
-Either way, the Android customer build needs separate work before the
-release flow above applies to it.
+- `variables.gradle` still has `compileSdkVersion = 33` /
+  `targetSdkVersion = 33`. Play Store requires 35 for new apps and
+  updates since Aug 2024.
+- AGP at `android/build.gradle` is `8.0.0`, which maxes out around
+  compileSdk 34. Bumping to compileSdk 35 needs AGP 8.6+.
+- Customer app is on Capacitor 5; the livreur is on 7. The 5 → 7
+  migration is the cleanest way to land all the SDK / AGP / plugin
+  bumps in one pass, and it must be done before Play Store
+  submission. Same migration also benefits iOS (newer plugin
+  versions, fewer deprecation warnings).
+
+Until those upgrades land, the Android customer app will compile in
+older toolchains but cannot be submitted to Play.
 
 ## Mobile shell sanity check before submit
 
@@ -113,7 +125,8 @@ release flow above applies to it.
 | iOS PrivacyInfo          | Ready    | Ready       |
 | iOS usage descriptions   | Location | Face ID, Loc|
 | Android icon (adaptive)  | TODO     | TODO        |
-| Android signing config   | n/a      | Ready       |
+| Android signing config   | TODO     | Ready       |
+| Android scaffold         | Restored | Ready       |
 | Privacy policy URL       | TODO     | TODO        |
 | Store screenshots        | TODO     | TODO        |
 | Listing copy             | Drafted  | Drafted     |
