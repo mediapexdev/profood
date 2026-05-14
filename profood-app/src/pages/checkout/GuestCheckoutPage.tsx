@@ -23,6 +23,7 @@ import GuestCheckoutForm, { GuestInfo } from '../cart/components/forms/GuestChec
 import { getGuestCart, clearGuestCart } from '../../services/GuestCartService';
 import { PromoValidationResult } from '../../types/Promotion';
 import { SHA256_Encrypt, formatDate, toAbsolutePublicUrl } from '../../helpers/AssetHelpers';
+import { captureDeliveryCoordinates } from '../../helpers/Geolocation';
 import { useLoadingSpinnerContext } from '../../contexts/LoadingSpinnerProvider';
 import { useCartContext } from '../cart/components/contexts/CartProvider';
 import useToast from '../../components/hooks/useToast';
@@ -130,12 +131,13 @@ const GuestCheckoutPage: React.FC = () => {
     /**
      * Submits the guest order with cash on delivery
      */
-    const submitCashOrder = () => {
+    const submitCashOrder = async () => {
         if (!guestInfo) return;
 
         setShowSpinner(true);
         const orderStringId = SHA256_Encrypt(formatDate(new Date(), 'full', true, 'full'));
         const cartItems = prepareCartData();
+        const coords = await captureDeliveryCoordinates();
 
         const data: any = {
             order_id: orderStringId,
@@ -145,7 +147,8 @@ const GuestCheckoutPage: React.FC = () => {
             guest_email: guestInfo.email || '',
             address: guestInfo.address,
             montant: calculateTotal(),
-            cart_items: cartItems
+            cart_items: cartItems,
+            ...(coords ?? {}),
         };
 
         if (promoApplied) {
@@ -184,12 +187,13 @@ const GuestCheckoutPage: React.FC = () => {
     /**
      * Submits the guest order with PayTech payment
      */
-    const submitPayTechOrder = () => {
+    const submitPayTechOrder = async () => {
         if (!guestInfo) return;
 
         setShowSpinner(true);
         const orderStringId = SHA256_Encrypt(formatDate(new Date(), 'full', true, 'full'));
         const cartItems = prepareCartData();
+        const coords = await captureDeliveryCoordinates();
 
         const requestTokenUrl = process.env.NODE_ENV === "production"
             ? 'https://api.profood-app.com/api/guest-order-with-payment'
@@ -203,7 +207,8 @@ const GuestCheckoutPage: React.FC = () => {
             guest_email: guestInfo.email || '',
             address: guestInfo.address,
             montant: calculateTotal(),
-            cart_items: cartItems
+            cart_items: cartItems,
+            ...(coords ?? {}),
         };
 
         if (promoApplied) {

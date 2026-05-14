@@ -40,6 +40,28 @@ use Twilio\Rest\Client as TwilioClient;
 class OrderController extends Controller
 {
     /**
+     * Pull optional delivery coordinates from the request, validate the
+     * ranges, and return them in a shape ready to spread into Order::create.
+     * Returns nulls when either value is missing or out of range — we never
+     * want to reject a whole order for a bad geoloc payload.
+     */
+    private function extractDeliveryCoordinates(Request $request): array
+    {
+        $lat = $request->input('delivery_latitude');
+        $lng = $request->input('delivery_longitude');
+
+        if(!is_numeric($lat) || !is_numeric($lng)){
+            return ['delivery_latitude' => null, 'delivery_longitude' => null];
+        }
+        $lat = (float)$lat;
+        $lng = (float)$lng;
+        if($lat < -90.0 || $lat > 90.0 || $lng < -180.0 || $lng > 180.0){
+            return ['delivery_latitude' => null, 'delivery_longitude' => null];
+        }
+        return ['delivery_latitude' => $lat, 'delivery_longitude' => $lng];
+    }
+
+    /**
      * Add an order.
      *
      * @param  \App\Http\Requests\StoreOrderRequest  $request
@@ -175,7 +197,7 @@ class OrderController extends Controller
             // Apply discount to montant
             $finalMontant = $montant - $discountAmount;
 
-            $order = Order::create([
+            $order = Order::create(array_merge([
                 'cart_id'                   => $cart->id,
                 'customer_id'               => $customer->id,
                 'address'                   => Str::of($request->address)->stripTags()->trim(),
@@ -185,7 +207,7 @@ class OrderController extends Controller
                 'promotion_id'              => $promotion ? $promotion->id : null,
                 'discount_amount'           => $discountAmount,
                 'promotion_code'            => $promotionCode,
-            ]);
+            ], $this->extractDeliveryCoordinates($request)));
             $code = $this->generateReferenceNumber($order);
             $order->string_id = $code;
             $order->save();
@@ -342,6 +364,9 @@ class OrderController extends Controller
             $code = $order->string_id;
             $order->montant = $finalMontant;
             $order->address = Str::of($request->address)->stripTags()->trim();
+            $coords = $this->extractDeliveryCoordinates($request);
+            $order->delivery_latitude = $coords['delivery_latitude'];
+            $order->delivery_longitude = $coords['delivery_longitude'];
             $order->save();
         }
         if(!$with_payment){
@@ -517,7 +542,7 @@ class OrderController extends Controller
         $finalMontant = $montant - $discountAmount;
 
         // Create the guest order
-        $order = Order::create([
+        $order = Order::create(array_merge([
             'customer_id'               => null,
             'is_guest_order'            => true,
             'guest_first_name'          => (string)$guest_first_name,
@@ -533,7 +558,7 @@ class OrderController extends Controller
             'promotion_id'              => $promotion ? $promotion->id : null,
             'discount_amount'           => $discountAmount,
             'promotion_code'            => $promotionCode,
-        ]);
+        ], $this->extractDeliveryCoordinates($request)));
 
         // Generate reference number
         $code = $this->generateReferenceNumber($order);
@@ -768,7 +793,7 @@ class OrderController extends Controller
         }
 
         // Create the guest order
-        $order = Order::create([
+        $order = Order::create(array_merge([
             'customer_id'               => null,
             'is_guest_order'            => true,
             'guest_first_name'          => (string)$guest_first_name,
@@ -783,7 +808,7 @@ class OrderController extends Controller
             'promotion_id'              => $promotion ? $promotion->id : null,
             'discount_amount'           => $discountAmount,
             'promotion_code'            => $promotionCode,
-        ]);
+        ], $this->extractDeliveryCoordinates($request)));
 
         // Generate reference number
         $code = $this->generateReferenceNumber($order);

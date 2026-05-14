@@ -17,6 +17,8 @@ interface ApiOrder {
   id: number
   string_id: string
   address: string
+  delivery_latitude: number | string | null
+  delivery_longitude: number | string | null
   montant: number | string
   payment_method: string | null
   is_guest_order: boolean
@@ -107,6 +109,20 @@ function formatWeight(grams: number | null | undefined): string | undefined {
   return grams >= 1000 ? `${(grams / 1000).toFixed(1)} kg` : `${grams} g`
 }
 
+// Postgres decimal columns come back as strings via the Laravel JSON cast;
+// coerce + validate so we only surface coords that the maps deep-link can
+// actually use.
+function parseCoordinates(
+  lat: number | string | null,
+  lng: number | string | null,
+): [number, number] | undefined {
+  if (lat == null || lng == null) return undefined
+  const latNum = typeof lat === 'string' ? Number(lat) : lat
+  const lngNum = typeof lng === 'string' ? Number(lng) : lng
+  if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) return undefined
+  return [latNum, lngNum]
+}
+
 function mapApiOrderToDelivery(order: ApiOrder, stopNumber: number): Delivery {
   const customerName = order.is_guest_order
     ? `${order.guest_first_name ?? ''} ${order.guest_last_name ?? ''}`.trim() || 'Client invité'
@@ -147,7 +163,11 @@ function mapApiOrderToDelivery(order: ApiOrder, stopNumber: number): Delivery {
     orderRef: order.string_id ? order.string_id : `PF-${order.id}`,
     status: mapStatusCodeToDeliveryStatus(order.status?.code),
     customer: { name: customerName, phone: customerPhone, avatar: customerAvatar },
-    address: { street: order.address ?? '', city: '' },
+    address: {
+      street: order.address ?? '',
+      city: '',
+      coordinates: parseCoordinates(order.delivery_latitude, order.delivery_longitude),
+    },
     items: [...boxItems, ...sliceItems],
     scheduledTime,
     estimatedDuration: '–',

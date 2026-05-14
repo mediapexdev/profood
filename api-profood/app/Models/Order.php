@@ -33,6 +33,8 @@ class Order extends Model
         'order_payment_status_id',
         'payment_method',
         'address',
+        'delivery_latitude',
+        'delivery_longitude',
         'guest_first_name',
         'guest_last_name',
         'guest_phone_number',

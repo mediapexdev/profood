@@ -20,6 +20,7 @@ import api from "../../../../api/api";
 import LocalityModal from "../modals/LocalityModal";
 import EmptyCart from "../others/EmptyCart";
 import { SHA256_Encrypt, formatDate, formatNumber } from "../../../../helpers/AssetHelpers";
+import { captureDeliveryCoordinates } from "../../../../helpers/Geolocation";
 import OrderFinalizationModal from "../modals/OrderFinalizationModal";
 import { useLoadingSpinnerContext } from "../../../../contexts/LoadingSpinnerProvider";
 import useToast from "../../../../components/hooks/useToast";
@@ -84,17 +85,19 @@ const OrderSummary: React.FC = () => {
     /**
      * 
      */
-    const addOrder = () => {
+    const addOrder = async () => {
         setShowSpinner(true);
         const orderStringId = SHA256_Encrypt(formatDate(new Date(), 'full', true, 'full'));
         const address = localStorage.getItem('selectedLocality');
         localStorage.removeItem('selectedLocality');
+        const coords = await captureDeliveryCoordinates();
         const data = {
             // command_id: 1,
             customer_id: id,
             address: address,
             montant: totalBoxes + totalSlices,
-            order_id: orderStringId
+            order_id: orderStringId,
+            ...(coords ?? {}),
         };
         const token = localStorage.getItem('token');
 
@@ -128,12 +131,13 @@ const OrderSummary: React.FC = () => {
     /**
      * 
      */
-    const proceedToPayment = () => {
+    const proceedToPayment = async () => {
 
         const token = localStorage.getItem('token');
         const orderStringId = SHA256_Encrypt(formatDate(new Date(), 'full', true, 'full'));
         const address = localStorage.getItem('selectedLocality');
         // localStorage.removeItem('selectedLocality');
+        const coords = await captureDeliveryCoordinates();
         const requestTokenUrl = process.env.NODE_ENV === "production" ?
             // 'https://api-profood.herokuapp.com/api/send-payment' :
             'https://api.profood-app.com/api/add-order-with-payment' :
@@ -144,7 +148,8 @@ const OrderSummary: React.FC = () => {
             customer_id: id,
             address: address,
             montant: totalBoxes + totalSlices,
-            order_id: orderStringId
+            order_id: orderStringId,
+            ...(coords ?? {}),
             //will be sent to paiement.php page
         })
         .withOption({
