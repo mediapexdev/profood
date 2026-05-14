@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Box;
 use App\Models\CartSlice;
 use App\Models\Livreur;
+use App\Models\LivreurNotification;
 use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Models\OrderStatus;
@@ -167,6 +168,8 @@ class LivreurController extends Controller
         if(!isset($order)){
             return response()->json(['message' => 'Commande inexistante'], 404);
         }
+        $previousLivreurId = $order->livreur_id;
+
         if($request->livreur_id !== null){
             $livreur = Livreur::find((int)$request->livreur_id);
 
@@ -179,6 +182,19 @@ class LivreurController extends Controller
             $order->livreur_id = null;
         }
         $order->save();
+
+        // Drop an inbox row only on a real (re)assignment so the driver sees
+        // it next time they open the app. No-op when unassigning or when
+        // the same livreur is "re-assigned" to a row they already own.
+        if($order->livreur_id && $order->livreur_id !== $previousLivreurId){
+            LivreurNotification::create([
+                'livreur_id' => $order->livreur_id,
+                'type'       => 'delivery',
+                'title'      => 'Nouvelle livraison assignée',
+                'body'       => "Commande {$order->string_id} ajoutée à votre tournée.",
+                'order_id'   => $order->id,
+            ]);
+        }
 
         Log::info('Livreur assigned to order', [
             'order_id'   => $order->id,
@@ -338,6 +354,71 @@ class LivreurController extends Controller
         $user = Auth::user();
         if(!isset($user)) return false;
         return in_array($user->role->code, [Role::ADMIN, Role::MANAGER, Role::SUPER_ADMIN], true);
+    }
+
+    /**
+     * Return the current livreur's notification inbox, most recent first.
+     */
+    public function getNotifications()
+    {
+        $livreur = $this->currentLivreur();
+
+        if(!$livreur instanceof Livreur){
+            return $livreur;
+        }
+        $rows = LivreurNotification::where('livreur_id', $livreur->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(100)
+            ->get();
+
+        return response()->json($rows, 200);
+    }
+
+    /**
+     * Mark a single notification as read.
+     */
+    public function markNotificationRead(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => ['required', 'integer']
+        ]);
+        if($validator->fails()){
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+        $livreur = $this->currentLivreur();
+
+        if(!$livreur instanceof Livreur){
+            return $livreur;
+        }
+        $notification = LivreurNotification::where('id', (int)$request->id)
+            ->where('livreur_id', $livreur->id)
+            ->first();
+
+        if(!isset($notification)){
+            return response()->json(['message' => 'Notification introuvable'], 404);
+        }
+        if($notification->read_at === null){
+            $notification->read_at = now();
+            $notification->save();
+        }
+        return response()->json(['message' => 'Notification marquée comme lue', 'id' => $notification->id], 200);
+    }
+
+    /**
+     * Mark every unread notification of the current livreur as read.
+     */
+    public function markAllNotificationsRead()
+    {
+        $livreur = $this->currentLivreur();
+
+        if(!$livreur instanceof Livreur){
+            return $livreur;
+        }
+        $updated = LivreurNotification::where('livreur_id', $livreur->id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return response()->json(['message' => 'Notifications marquées comme lues', 'count' => $updated], 200);
     }
 
     /**

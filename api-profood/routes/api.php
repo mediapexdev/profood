@@ -180,6 +180,9 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     Route::get('get-livreur-delivery/{id}', [LivreurController::class, 'getDelivery']);
     Route::post('livreur-update-order-status', [LivreurController::class, 'updateDeliveryStatus']);
     Route::get('get-livreur-stats', [LivreurController::class, 'getStats']);
+    Route::get('get-livreur-notifications', [LivreurController::class, 'getNotifications']);
+    Route::post('livreur-mark-notification-read', [LivreurController::class, 'markNotificationRead']);
+    Route::post('livreur-mark-all-notifications-read', [LivreurController::class, 'markAllNotificationsRead']);
 
     Route::get('get-livreurs', [LivreurController::class, 'index']);
     Route::post('assign-livreur-to-order', [LivreurController::class, 'assignToOrder']);

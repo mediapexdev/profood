@@ -5,11 +5,6 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
 } from '../api/notifications'
-import mockNotifications from '../mocks/notifications.json'
-
-// Double-cast via unknown: the JSON inferred type uses `null` for optional
-// fields and `string` for the NotificationType literal union.
-const MOCK_NOTIFICATIONS = mockNotifications as unknown as Notification[]
 
 export interface UseNotificationsReturn {
   notifications: Notification[]
@@ -28,33 +23,23 @@ export interface UseNotificationsReturn {
 }
 
 /**
- * Manages in-app notifications state.
+ * Manages the in-app notifications inbox.
  *
- * Data source strategy:
- *   1. On mount, attempt GET /livreur/notifications (stub — currently no-ops).
- *   2. If the response is empty (endpoint not yet implemented), seed with
- *      the local mock data so the UI remains usable during development.
- *   3. Mutations (mark read) are applied locally AND sent to the API.
- *
- * BACKEND GAP: The notifications endpoint does not yet exist.
- * This hook falls back to mock data automatically.
- * See src/api/notifications.ts and TODO_BACKEND_GAPS.md — Item 8.
+ * Backed by `livreur_notifications` on the API — see
+ * api/notifications.ts. Mutations are optimistic locally and
+ * fire-and-forget to the backend.
  */
 export function useNotifications(): UseNotificationsReturn {
-  const [notifications, setNotifications] =
-    useState<Notification[]>(MOCK_NOTIFICATIONS)
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
 
   const loadNotifications = useCallback(async () => {
     setLoading(true)
     try {
       const data = await fetchNotifications()
-      // The stub returns [] until the backend endpoint is built.
-      // Fall back to mock data so the UI always shows something.
-      setNotifications(data.length > 0 ? data : MOCK_NOTIFICATIONS)
+      setNotifications(data)
     } catch {
-      // Any error → use mock data silently.
-      setNotifications(MOCK_NOTIFICATIONS)
+      setNotifications([])
     } finally {
       setLoading(false)
     }

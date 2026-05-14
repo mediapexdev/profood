@@ -1,47 +1,78 @@
 /**
  * Notifications API module.
  *
- * BACKEND GAP (HIGH PRIORITY):
- * There is currently no notifications endpoint in the Profood API
- * (routes/api.php does not include any /notifications route).
- *
- * Until the following endpoints are implemented, this module provides
- * typed stubs that resolve immediately with empty data rather than
- * making failing network calls:
- *
- *   GET  /livreur/notifications             — list driver notifications
- *   PATCH /livreur/notifications/:id/read   — mark a notification as read
- *   PATCH /livreur/notifications/read-all   — mark all as read
- *
- * See TODO_BACKEND_GAPS.md — Item 8.
+ * Backs the in-app inbox shown on NotificationsPage. The backend
+ * persists notifications in the `livreur_notifications` table — see
+ * api-profood/app/Http/Controllers/LivreurController.php for the
+ * endpoints. New rows are created when a manager assigns an order
+ * via /assign-livreur-to-order. Push notifications come later.
  */
 
-import type { Notification } from '../types'
+import apiClient from './client'
+import type { Notification, NotificationType } from '../types'
 
-/**
- * Returns an empty list until the backend notifications endpoint is available.
- * The hook layer (useNotifications) seeds with local mock data as a fallback
- * when this returns an empty array.
- */
+interface ApiLivreurNotification {
+  id: number
+  type: string
+  title: string
+  body: string
+  order_id: number | null
+  read_at: string | null
+  created_at: string
+}
+
+const TYPES = new Set<NotificationType>([
+  'delivery',
+  'schedule',
+  'message',
+  'payment',
+  'alert',
+])
+
+function normaliseType(raw: string): NotificationType {
+  return (TYPES.has(raw as NotificationType) ? raw : 'alert') as NotificationType
+}
+
+// Quick-and-cheap relative time formatter — good enough for the inbox.
+// Anything older than a week falls back to a localised date.
+function formatRelativeTime(iso: string): string {
+  const then = new Date(iso).getTime()
+  if (Number.isNaN(then)) return ''
+  const diff = Date.now() - then
+  const minute = 60_000
+  const hour = 60 * minute
+  const day = 24 * hour
+  if (diff < minute) return "À l'instant"
+  if (diff < hour) return `Il y a ${Math.floor(diff / minute)} min`
+  if (diff < day) return `Il y a ${Math.floor(diff / hour)} h`
+  if (diff < 7 * day) return `Il y a ${Math.floor(diff / day)} j`
+  return new Date(iso).toLocaleDateString('fr-FR')
+}
+
+function mapApiNotification(row: ApiLivreurNotification): Notification {
+  return {
+    id: String(row.id),
+    type: normaliseType(row.type),
+    title: row.title,
+    body: row.body,
+    time: formatRelativeTime(row.created_at),
+    read: row.read_at !== null,
+  }
+}
+
 export async function fetchNotifications(): Promise<Notification[]> {
-  // TODO: Replace with real API call once the endpoint exists:
-  // const response = await apiClient.get<Notification[]>('/livreur/notifications')
-  // return response.data
-  return Promise.resolve([])
+  const response = await apiClient.get<ApiLivreurNotification[]>(
+    '/get-livreur-notifications'
+  )
+  return response.data.map(mapApiNotification)
 }
 
-/**
- * No-op until the backend endpoint is available.
- */
-export async function markNotificationRead(_id: string): Promise<void> {
-  // TODO: await apiClient.patch(`/livreur/notifications/${_id}/read`)
-  return Promise.resolve()
+export async function markNotificationRead(id: string): Promise<void> {
+  const numericId = Number(id)
+  if (!Number.isFinite(numericId)) return
+  await apiClient.post('/livreur-mark-notification-read', { id: numericId })
 }
 
-/**
- * No-op until the backend endpoint is available.
- */
 export async function markAllNotificationsRead(): Promise<void> {
-  // TODO: await apiClient.patch('/livreur/notifications/read-all')
-  return Promise.resolve()
+  await apiClient.post('/livreur-mark-all-notifications-read')
 }
