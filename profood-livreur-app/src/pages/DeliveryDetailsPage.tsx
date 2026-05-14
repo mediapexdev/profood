@@ -21,6 +21,7 @@ import { Icon } from '../components/Icon'
 import { PageHeader } from '../components/PageHeader'
 import { StatusBadge } from '../components/StatusBadge'
 import { useDeliveries } from '../hooks/useDeliveries'
+import { openDirections } from '../lib/navigation'
 
 /** Format a number as French-locale FCFA currency (e.g. "25 000 FCFA"). */
 function formatFCFA(amount: number): string {
@@ -92,10 +93,19 @@ export function DeliveryDetailsPage() {
         {/* ── 3. Address card ────────────────────────────────────────────── */}
         <div className="bg-white rounded-2xl p-4 shadow-sm flex items-start gap-3">
           <Icon name="location_on" size="md" className="text-primary mt-0.5 flex-shrink-0" />
-          <div>
+          <div className="flex-1 min-w-0">
             <p className="font-semibold text-gray-900 text-sm">{delivery.address.street}</p>
             <p className="text-xs text-gray-500 mt-0.5">{delivery.address.city}</p>
           </div>
+          <button
+            type="button"
+            onClick={() => openDirections(delivery.address)}
+            className="flex-shrink-0 flex items-center gap-1.5 bg-primary text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-primary/90 active:scale-95 transition"
+            aria-label="Ouvrir l'itinéraire dans Maps"
+          >
+            <Icon name="directions" size="sm" />
+            Itinéraire
+          </button>
         </div>
 
         {/* ── 4. Order meta grid ─────────────────────────────────────────── */}
