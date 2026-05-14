@@ -2,11 +2,11 @@ import apiClient from './client'
 import type { DailyStats } from '../types'
 
 /**
- * Shape returned by GET /get-livreur-stats.
- *
- * The backend sends camelCase keys so the mapping below is straightforward.
- * Fields that are not provided by this endpoint (totalDistance, averageTime)
- * remain as '– ' placeholders in the returned DailyStats object.
+ * Shape returned by GET /get-livreur-stats. Both totalDistanceKm and
+ * averageDeliverySeconds are recent additions — they may be null when
+ * GPS tracking has not produced enough points yet, or when no delivered
+ * order has both an "in-progress" and a "delivered" history row for the
+ * day.
  */
 interface ApiLivreurStats {
   total: number
@@ -17,6 +17,24 @@ interface ApiLivreurStats {
   totalAmount: number
   deliveriesGrouped: number
   deliveriesIndividual: number
+  totalDistanceKm?: number | null
+  averageDeliverySeconds?: number | null
+}
+
+function formatDistance(km: number | null | undefined): string {
+  if (km == null || !Number.isFinite(km) || km <= 0) return '– km'
+  if (km < 1) return `${Math.round(km * 1000)} m`
+  return `${km.toFixed(km < 10 ? 1 : 0)} km`
+}
+
+function formatAverageTime(seconds: number | null | undefined): string {
+  if (seconds == null || !Number.isFinite(seconds) || seconds <= 0) return '– min'
+  if (seconds < 60) return `${Math.round(seconds)} s`
+  const minutes = seconds / 60
+  if (minutes < 60) return `${Math.round(minutes)} min`
+  const hours = Math.floor(minutes / 60)
+  const remainder = Math.round(minutes - hours * 60)
+  return remainder > 0 ? `${hours} h ${remainder} min` : `${hours} h`
 }
 
 /**
@@ -24,12 +42,6 @@ interface ApiLivreurStats {
  *
  * @param date - Optional date in Y-m-d format (e.g. "2026-05-08").
  *               When omitted the backend defaults to today in Africa/Dakar tz.
- *
- * Maps the API response to the DailyStats shape consumed by the UI.
- * Fields that the new endpoint does not provide are left as placeholder
- * strings rather than fabricated values:
- *   - totalDistance  → '– km'   (no GPS tracking in the backend)
- *   - averageTime    → '– min'  (no delivery-time tracking in the backend)
  */
 export async function fetchDailyStats(date?: string): Promise<DailyStats> {
   const params: Record<string, string> = {}
@@ -54,9 +66,7 @@ export async function fetchDailyStats(date?: string): Promise<DailyStats> {
     // cancelled maps to "issues" in the UI vocabulary
     deliveriesWithIssues: d.cancelled,
     totalAmount:          d.totalAmount,
-    // totalDistance is not tracked by the backend — render '–' in the UI
-    totalDistance:        '– km',
-    // averageTime is not tracked by the backend — render '–' in the UI
-    averageTime:          '– min',
+    totalDistance:        formatDistance(d.totalDistanceKm),
+    averageTime:          formatAverageTime(d.averageDeliverySeconds),
   }
 }

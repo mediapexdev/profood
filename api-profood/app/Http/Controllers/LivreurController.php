@@ -338,16 +338,119 @@ class LivreurController extends Controller
             }
         }
 
+        // Distance travelled: sum great-circle deltas between consecutive
+        // location pings recorded during the day. Returns 0.0 when fewer
+        // than two pings exist.
+        $totalDistanceKm = $this->computeTotalDistanceKm($livreur->id, $dayStart, $dayEnd);
+
+        // Average delivery duration: mean seconds between the
+        // IN_THE_PROCESS_OF_DELIVERY history row and the DELIVERED history
+        // row for each delivered order. null when no delivered order yet.
+        $averageDeliverySeconds = $this->computeAverageDeliverySeconds($livreur->id, $dayStart, $dayEnd);
+
         return response()->json([
-            'total'                => $total,
-            'completed'            => $completed,
-            'inProgress'           => $inProgress,
-            'pending'              => max(0, $pending),
-            'cancelled'            => $cancelled,
-            'totalAmount'          => $totalAmount,
-            'deliveriesGrouped'    => $deliveriesGrouped,
-            'deliveriesIndividual' => $deliveriesIndividual,
+            'total'                  => $total,
+            'completed'              => $completed,
+            'inProgress'             => $inProgress,
+            'pending'                => max(0, $pending),
+            'cancelled'              => $cancelled,
+            'totalAmount'            => $totalAmount,
+            'deliveriesGrouped'      => $deliveriesGrouped,
+            'deliveriesIndividual'   => $deliveriesIndividual,
+            'totalDistanceKm'        => round($totalDistanceKm, 2),
+            'averageDeliverySeconds' => $averageDeliverySeconds,
         ], 200);
+    }
+
+    /**
+     * Walk the livreur's location pings for the day in chronological order
+     * and accumulate the great-circle distance between consecutive points.
+     * Kept inside the controller — a single caller, no value in extracting.
+     */
+    private function computeTotalDistanceKm(int $livreurId, Carbon $dayStart, Carbon $dayEnd): float
+    {
+        $points = LivreurLocation::where('livreur_id', $livreurId)
+            ->whereBetween('recorded_at', [$dayStart, $dayEnd])
+            ->orderBy('recorded_at', 'asc')
+            ->get(['latitude', 'longitude']);
+
+        if($points->count() < 2){
+            return 0.0;
+        }
+        $total = 0.0;
+        $prev = null;
+        foreach($points as $p){
+            if($prev !== null){
+                $total += $this->haversineKm(
+                    (float)$prev->latitude,  (float)$prev->longitude,
+                    (float)$p->latitude,     (float)$p->longitude
+                );
+            }
+            $prev = $p;
+        }
+        return $total;
+    }
+
+    /**
+     * Haversine great-circle distance in kilometres. Earth radius approx
+     * 6371 km — fine for the precision we need (dashboard tile, not
+     * navigation).
+     */
+    private function haversineKm(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        $r = 6371.0;
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
+        $a = sin($dLat / 2) ** 2
+             + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        return $r * $c;
+    }
+
+    /**
+     * For each delivered order assigned to this livreur during the day,
+     * compute the seconds between the IN_THE_PROCESS_OF_DELIVERY history
+     * row and the DELIVERED history row, then return the mean. Returns
+     * null when no completed order has both timestamps yet, so the
+     * client can render a "–" placeholder instead of a misleading 0.
+     */
+    private function computeAverageDeliverySeconds(int $livreurId, Carbon $dayStart, Carbon $dayEnd): ?int
+    {
+        $inProgressStatus = OrderStatus::where('code', OrderStatus::IN_THE_PROCESS_OF_DELIVERY)->first();
+        $deliveredStatus  = OrderStatus::where('code', OrderStatus::DELIVERED)->first();
+        if(!$inProgressStatus || !$deliveredStatus) return null;
+
+        $deliveredOrderIds = Order::where('livreur_id', $livreurId)
+            ->where('order_status_id', $deliveredStatus->id)
+            ->whereBetween('created_at', [$dayStart, $dayEnd])
+            ->pluck('id');
+
+        if($deliveredOrderIds->isEmpty()) return null;
+
+        $histories = OrderHistory::whereIn('order_id', $deliveredOrderIds)
+            ->whereIn('order_status_id', [$inProgressStatus->id, $deliveredStatus->id])
+            ->orderBy('created_at', 'asc')
+            ->get(['order_id', 'order_status_id', 'created_at']);
+
+        $startedAt   = [];
+        $deliveredAt = [];
+        foreach($histories as $h){
+            if($h->order_status_id === $inProgressStatus->id){
+                $startedAt[$h->order_id] = $h->created_at;
+            }
+            elseif($h->order_status_id === $deliveredStatus->id){
+                $deliveredAt[$h->order_id] = $h->created_at;
+            }
+        }
+        $deltas = [];
+        foreach($deliveredAt as $orderId => $endAt){
+            if(isset($startedAt[$orderId])){
+                $diff = $endAt->diffInSeconds($startedAt[$orderId]);
+                if($diff > 0) $deltas[] = $diff;
+            }
+        }
+        if(empty($deltas)) return null;
+        return (int) round(array_sum($deltas) / count($deltas));
     }
 
     protected function isManagerScope(): bool
