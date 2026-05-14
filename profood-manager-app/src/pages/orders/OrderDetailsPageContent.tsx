@@ -34,6 +34,7 @@ import OrderCustomerDetails from "./components/OrderCustomerDetails";
 import OrderPaymentDetails from "./components/OrderPaymentDetails";
 import OrderDeliveryAddressDetails from "./components/OrderDeliveryAddressDetails";
 import OrderStatusesView from "./components/OrderStatusesView";
+import LivreurLiveLocation from "./components/LivreurLiveLocation";
 import { useDataContext } from "../../components/contexts/DataProvider";
 import { useLoadingSpinnerContext } from "../../components/contexts/LoadingSpinnerProvider";
 import { useUserInfosContext } from "../account/components/contexts/UserInfosProvider";
@@ -576,6 +577,7 @@ const OrderDetailsPageContent: React.FC<OrderProps> = (order: OrderProps) => {
                                                             {formatPhoneNumber(order.livreur.user.phone_number)}
                                                         </span>
                                                     </div>
+                                                    <LivreurLiveLocation livreurId={order.livreur.id} />
                                                 </div>
                                             ) : (
                                                 <Badge className='bg-light-secondary text-secondary fw-medium'>
