@@ -20,6 +20,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useDeliveries } from '../hooks/useDeliveries'
 import { useStats } from '../hooks/useStats'
 import { useNotifications } from '../hooks/useNotifications'
+import { openDirections } from '../lib/navigation'
 
 // ── Small presentational sub-components ──────────────────────────────────────
 
@@ -49,9 +50,31 @@ function StatusCard({ label, count, icon, colorClasses }: StatusCardProps) {
 
 export function DashboardPage() {
   const { driver } = useAuth()
-  const { activeDeliveries, loading: deliveriesLoading } = useDeliveries()
+  const {
+    activeDeliveries,
+    loading: deliveriesLoading,
+    updateStatus,
+  } = useDeliveries()
   const { stats, loading: statsLoading } = useStats()
   const { unreadCount } = useNotifications()
+
+  // Démarrer la tournée: mark the first stop in-progress (if it isn't
+  // already) then hand off to native Maps. The sort in useDeliveries
+  // ensures activeDeliveries[0] is the closest pending stop, or any
+  // already in-progress stop the livreur hasn't confirmed yet.
+  const handleStartTour = async () => {
+    const next = activeDeliveries[0]
+    if (!next) return
+    if (next.status !== 'in_progress') {
+      try {
+        await updateStatus(next.id, 'in_progress')
+      } catch {
+        // updateStatus already surfaces an error toast via the hook;
+        // we still launch Maps so the driver can start driving.
+      }
+    }
+    openDirections(next.address)
+  }
 
   // Show a simple loading indicator while the first fetch is in progress.
   const isLoading = deliveriesLoading || statsLoading
@@ -134,13 +157,24 @@ export function DashboardPage() {
         </div>
 
         {/* ── 3. CTA button ────────────────────────────────────────────── */}
-        <Link
-          to="/tournee"
-          className="flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 rounded-xl shadow-md hover:bg-primary/90 active:scale-[0.98] transition text-base"
-        >
-          <Icon name="play_arrow" filled size="md" className="text-white" />
-          Démarrer la tournée
-        </Link>
+        {activeDeliveries.length > 0 ? (
+          <button
+            type="button"
+            onClick={() => void handleStartTour()}
+            className="flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 rounded-xl shadow-md hover:bg-primary/90 active:scale-[0.98] transition text-base"
+          >
+            <Icon name="play_arrow" filled size="md" className="text-white" />
+            Démarrer la tournée
+          </button>
+        ) : (
+          <Link
+            to="/tournee"
+            className="flex items-center justify-center gap-2 bg-gray-100 text-gray-500 font-bold py-4 rounded-xl text-base"
+          >
+            <Icon name="inbox" size="md" />
+            Aucune livraison à démarrer
+          </Link>
+        )}
 
         {/* ── 4. Status grid (2×2) ──────────────────────────────────────── */}
         <section aria-label="Statuts des livraisons">

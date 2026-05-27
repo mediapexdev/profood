@@ -18,6 +18,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Icon } from '../components/Icon'
 import { PageHeader } from '../components/PageHeader'
 import { useDeliveries } from '../hooks/useDeliveries'
+import { openDirections } from '../lib/navigation'
 
 // Number of photo proof slots to render.
 const PHOTO_SLOT_COUNT = 3
@@ -25,7 +26,7 @@ const PHOTO_SLOT_COUNT = 3
 export function ConfirmationPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { getDelivery, updateStatus } = useDeliveries()
+  const { getDelivery, updateStatus, activeDeliveries } = useDeliveries()
 
   const delivery = id ? getDelivery(id) : undefined
 
@@ -36,6 +37,9 @@ export function ConfirmationPage() {
   const [checkedItems, setCheckedItems] = useState<boolean[]>(
     () => (delivery?.items ?? []).map(() => true)
   )
+
+  const [confirmed, setConfirmed] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   if (!delivery) {
     return (
@@ -71,10 +75,31 @@ export function ConfirmationPage() {
     }
   }
 
-  /** Persist status change (API + local) then return to the dashboard. */
+  // Persist the status change then surface the "next stop" prompt so
+  // the livreur can hop straight into Maps for the following delivery
+  // instead of bouncing back through the dashboard.
   const handleConfirm = async () => {
-    await updateStatus(delivery.id, 'delivered')
-    navigate('/')
+    setSubmitting(true)
+    try {
+      await updateStatus(delivery.id, 'delivered')
+      setConfirmed(true)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  // After the optimistic update marks this delivery `delivered`,
+  // activeDeliveries excludes it, so [0] is the actual next stop.
+  const nextStop = confirmed
+    ? activeDeliveries.find((d) => d.id !== delivery.id)
+    : undefined
+
+  const handleNavigateNext = () => {
+    if (!nextStop) return
+    if (nextStop.status !== 'in_progress') {
+      void updateStatus(nextStop.id, 'in_progress')
+    }
+    openDirections(nextStop.address)
   }
 
   return (
@@ -193,12 +218,101 @@ export function ConfirmationPage() {
         <button
           type="button"
           onClick={() => void handleConfirm()}
-          className="flex items-center justify-center gap-2 bg-green-600 text-white font-bold py-4 rounded-xl shadow-md hover:bg-green-700 active:scale-[0.98] transition text-base"
+          disabled={submitting || confirmed}
+          className="flex items-center justify-center gap-2 bg-green-600 text-white font-bold py-4 rounded-xl shadow-md hover:bg-green-700 active:scale-[0.98] transition text-base disabled:opacity-60 disabled:active:scale-100"
         >
           <Icon name="check_circle" size="md" />
-          Confirmer la livraison
+          {submitting ? 'Confirmation…' : 'Confirmer la livraison'}
         </button>
       </main>
+
+      {/* ── Post-confirm prompt: next stop or done ──────────────────────── */}
+      {confirmed && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-5 shadow-xl flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <Icon name="check_circle" size="md" className="text-green-600" />
+              </span>
+              <div>
+                <p className="font-bold text-gray-900 text-base leading-tight">
+                  Livraison confirmée
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {delivery.customer.name} — {delivery.orderRef}
+                </p>
+              </div>
+            </div>
+
+            {nextStop ? (
+              <>
+                <div className="bg-slate-50 rounded-xl p-3 flex items-start gap-3">
+                  <span className="w-9 h-9 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+                    {nextStop.stopNumber ?? '—'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                      Prochain arrêt
+                    </p>
+                    <p className="font-semibold text-gray-900 text-sm truncate">
+                      {nextStop.customer.name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {nextStop.address.street}
+                      {nextStop.address.city ? `, ${nextStop.address.city}` : ''}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleNavigateNext}
+                  className="flex items-center justify-center gap-2 bg-primary text-white font-bold py-3.5 rounded-xl shadow-sm hover:bg-primary/90 active:scale-[0.98] transition"
+                >
+                  <Icon name="directions" size="md" />
+                  Lancer l'itinéraire
+                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/carte')}
+                    className="flex items-center justify-center gap-1.5 bg-white text-gray-700 border border-gray-200 font-semibold py-2.5 rounded-xl text-sm hover:bg-gray-50"
+                  >
+                    <Icon name="map" size="sm" />
+                    Voir la liste
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/')}
+                    className="flex items-center justify-center gap-1.5 bg-white text-gray-700 border border-gray-200 font-semibold py-2.5 rounded-xl text-sm hover:bg-gray-50"
+                  >
+                    <Icon name="home" size="sm" />
+                    Tableau de bord
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="bg-green-50 rounded-xl p-3 text-center">
+                  <p className="font-semibold text-green-800 text-sm">
+                    Toutes vos livraisons sont à jour.
+                  </p>
+                  <p className="text-xs text-green-700 mt-0.5">
+                    Bonne fin de journée !
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/')}
+                  className="flex items-center justify-center gap-2 bg-primary text-white font-bold py-3.5 rounded-xl shadow-sm hover:bg-primary/90 active:scale-[0.98] transition"
+                >
+                  <Icon name="home" size="md" />
+                  Retour au tableau de bord
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

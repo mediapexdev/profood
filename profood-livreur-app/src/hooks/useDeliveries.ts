@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Delivery, DeliveryStatus } from '../types/index'
 import { fetchDeliveries, updateDeliveryStatus } from '../api/orders'
 import mockDeliveries from '../mocks/deliveries.json'
+import { useCurrentPosition } from './useCurrentPosition'
+import { haversineKm } from '../lib/distance'
 
 // Double-cast via unknown: the JSON inferred type uses `null` for optional
 // avatar fields and `string` for the status literal union.
@@ -46,6 +48,7 @@ export function useDeliveries(): UseDeliveriesReturn {
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const currentPosition = useCurrentPosition()
 
   const loadDeliveries = useCallback(async () => {
     setLoading(true)
@@ -126,13 +129,34 @@ export function useDeliveries(): UseDeliveriesReturn {
     }
   }
 
-  const activeDeliveries = useMemo(
-    () =>
-      deliveries.filter(
-        (d) => d.status === 'pending' || d.status === 'in_progress'
-      ),
-    [deliveries]
-  )
+  // Ordering rules:
+  //   1. in_progress always before pending — once a livreur is mid-delivery
+  //      the next stop should keep being that one until confirmed.
+  //   2. Within the same status, sort by geographic distance from the
+  //      livreur's current GPS so MapPage / Dashboard always surface the
+  //      closest reachable stop. Stops without coords drop to the end of
+  //      their tier (distance = +Infinity).
+  //   3. If no GPS fix yet, fall back to the API order (stable sort).
+  const activeDeliveries = useMemo(() => {
+    const active = deliveries.filter(
+      (d) => d.status === 'pending' || d.status === 'in_progress'
+    )
+
+    const statusRank = (s: DeliveryStatus) => (s === 'in_progress' ? 0 : 1)
+
+    const distanceTo = (d: Delivery): number => {
+      if (!currentPosition) return 0
+      const c = d.address.coordinates
+      if (!c) return Number.POSITIVE_INFINITY
+      return haversineKm(currentPosition, c)
+    }
+
+    return [...active].sort((a, b) => {
+      const r = statusRank(a.status) - statusRank(b.status)
+      if (r !== 0) return r
+      return distanceTo(a) - distanceTo(b)
+    })
+  }, [deliveries, currentPosition])
 
   const completedDeliveries = useMemo(
     () =>

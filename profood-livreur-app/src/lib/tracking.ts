@@ -1,6 +1,7 @@
 import { Geolocation } from '@capacitor/geolocation'
 import apiClient from '../api/client'
 import { isNative } from './platform'
+import { setCurrentPosition } from './currentPosition'
 
 /**
  * Periodically ping the backend with the driver's current GPS while at
@@ -24,6 +25,7 @@ async function reportOnce(): Promise<void> {
             timeout: 15_000,
             maximumAge: 5_000,
         })
+        setCurrentPosition([pos.coords.latitude, pos.coords.longitude])
         await apiClient.post('/livreur-update-location', {
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
@@ -57,4 +59,5 @@ export function stopLocationTracking(): void {
         clearInterval(tickHandle)
         tickHandle = null
     }
+    setCurrentPosition(null)
 }
