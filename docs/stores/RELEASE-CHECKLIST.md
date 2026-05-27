@@ -118,15 +118,23 @@ older toolchains but cannot be submitted to Play.
 
 ## Mobile shell sanity check before submit
 
-| Item                     | Customer | Livreur     |
-|--------------------------|----------|-------------|
-| iOS app icon (1024)      | TODO     | TODO        |
-| iOS launch storyboard    | Default  | Default     |
-| iOS PrivacyInfo          | Ready    | Ready       |
-| iOS usage descriptions   | Location | Face ID, Loc|
-| Android icon (adaptive)  | TODO     | TODO        |
-| Android signing config   | TODO     | Ready       |
-| Android scaffold         | Restored | Ready       |
-| Privacy policy URL       | TODO     | TODO        |
-| Store screenshots        | TODO     | TODO        |
-| Listing copy             | Drafted  | Drafted     |
+| Item                     | Customer       | Livreur     |
+|--------------------------|----------------|-------------|
+| iOS app icon (1024)      | Placeholder    | Placeholder |
+| iOS splash               | Placeholder    | Placeholder |
+| iOS launch storyboard    | Default        | Default     |
+| iOS PrivacyInfo          | Ready          | Ready       |
+| iOS usage descriptions   | Location       | Face ID, Loc|
+| Android icon (adaptive)  | Capacitor def. | Capacitor def. |
+| Android signing config   | Ready (fallback to debug) | Ready (fallback to debug) |
+| Android keystore.properties.example | Ready | Ready |
+| Android scaffold         | Restored       | Ready       |
+| Android compileSdk/target| 33 (blocks Play) | 35 (Play OK) |
+| Privacy policy URL       | TODO           | TODO        |
+| Store screenshots        | TODO           | TODO        |
+| Listing copy             | Drafted        | Drafted     |
+
+**Updated 2026-05-27** : customer iOS assets restored (placeholders
+mirrored from livreur), customer Android signing scaffold added with
+debug fallback. See `DEPLOY-TEST-GUIDE.md` for step-by-step submission
+to TestFlight + Play Internal Testing.

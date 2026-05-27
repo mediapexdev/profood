@@ -22,6 +22,12 @@ Thumbs.db
 serviceAccount*.json
 auth.json
 
+# --- Android signing (keystores must never be committed) ---
+*.jks
+*.keystore
+**/android/keystore.properties
+!**/android/keystore.properties.example
+
 # --- Node / JavaScript ---
 node_modules/
 .pnp/
