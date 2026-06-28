@@ -22,8 +22,13 @@ return new class extends Migration
     {
         // Make customer_id and cart_id nullable using raw SQL (avoids need for doctrine/dbal)
         // Guest orders don't have a customer record or a cart record
-        DB::statement('ALTER TABLE orders ALTER COLUMN customer_id DROP NOT NULL');
-        DB::statement('ALTER TABLE orders ALTER COLUMN cart_id DROP NOT NULL');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE orders MODIFY customer_id BIGINT UNSIGNED NULL');
+            DB::statement('ALTER TABLE orders MODIFY cart_id BIGINT UNSIGNED NULL');
+        } else {
+            DB::statement('ALTER TABLE orders ALTER COLUMN customer_id DROP NOT NULL');
+            DB::statement('ALTER TABLE orders ALTER COLUMN cart_id DROP NOT NULL');
+        }
 
         Schema::table('orders', function (Blueprint $table) {
             // Add guest customer information fields
@@ -56,7 +61,12 @@ return new class extends Migration
         });
 
         // Restore customer_id and cart_id to non-nullable (note: this may fail if there are guest orders)
-        DB::statement('ALTER TABLE orders ALTER COLUMN customer_id SET NOT NULL');
-        DB::statement('ALTER TABLE orders ALTER COLUMN cart_id SET NOT NULL');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE orders MODIFY customer_id BIGINT UNSIGNED NOT NULL');
+            DB::statement('ALTER TABLE orders MODIFY cart_id BIGINT UNSIGNED NOT NULL');
+        } else {
+            DB::statement('ALTER TABLE orders ALTER COLUMN customer_id SET NOT NULL');
+            DB::statement('ALTER TABLE orders ALTER COLUMN cart_id SET NOT NULL');
+        }
     }
 };

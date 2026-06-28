@@ -12,7 +12,11 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE users ALTER COLUMN email DROP NOT NULL');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE users MODIFY email VARCHAR(255) NULL');
+        } else {
+            DB::statement('ALTER TABLE users ALTER COLUMN email DROP NOT NULL');
+        }
     }
 
     /**
@@ -22,6 +26,10 @@ return new class extends Migration
      */
     public function down()
     {
-        DB::statement('ALTER TABLE users ALTER COLUMN email SET NOT NULL');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE users MODIFY email VARCHAR(255) NOT NULL');
+        } else {
+            DB::statement('ALTER TABLE users ALTER COLUMN email SET NOT NULL');
+        }
     }
 };
