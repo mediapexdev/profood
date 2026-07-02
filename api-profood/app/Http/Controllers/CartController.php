@@ -238,16 +238,24 @@ class CartController extends Controller
         $response = $this->CheckCustomer($customer);
 
         if(!isset($response)){
-            // Eager load cart relationship to avoid N+1 query when accessing cart_slice->cart->customer_id
-            $cart_slice = CartSlice::with('cart')->where('slice_id', $request->slice_id)->first();
+            // Scope the lookup to the customer's CURRENT cart — a bare
+            // where('slice_id') would match the first row across ALL carts
+            // (other customers' or old ones) and delete the wrong record.
+            $cart = Cart::where([
+                'is_current'    => true,
+                'customer_id'   => $customer->id
+            ])->first();
 
-            if(!isset($cart_slice)){
+            $deleted = isset($cart)
+                ? CartSlice::where([
+                    'cart_id'   => $cart->id,
+                    'slice_id'  => $request->slice_id
+                ])->delete()
+                : 0;
+
+            if($deleted === 0){
                 return response()->json(['message' => 'Produit inexistant !'], 404);
             }
-            if($cart_slice->cart->customer_id != $customer->id){
-                return response()->json(['message' => 'Interdite !'], 403);
-            }
-            $cart_slice->delete();
             return response()->json(['message' => 'Produit supprimée du panier'], 200);
         }
         return $response;
