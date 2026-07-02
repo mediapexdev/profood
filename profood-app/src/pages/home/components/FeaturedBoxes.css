@@ -2,6 +2,7 @@
 
 /* ============================================================
    FeaturedBoxes — Swiper carousel of box types
+   Card layout: full-width photo on top, text + CTA below.
    ============================================================ */
 
 .featured-boxes-section {
@@ -60,8 +61,6 @@
 
 /* === Swiper overrides === */
 .featured-boxes-swiper {
-    /* Overflow visible so the floating box images are not clipped */
-    overflow: visible !important;
     padding-bottom: 28px !important; /* room for pagination dots */
 }
 
@@ -90,40 +89,41 @@
 
 /* === Card === */
 .featured-box-card {
-    /* Top margin absorbs the floating product image */
-    margin-top: 52px !important;
-    margin-inline: 0 !important;
+    margin: 0 !important;
     border-radius: 12px !important;
-    overflow: visible !important;
+    /* Clips the top photo to the card's rounded corners */
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-/* Product image floats above the card */
+/* Full-width photo filling the top of the card */
 .featured-box-img-wrap {
-    position: absolute;
-    left: 0;
-    right: 0;
-    /* Pull the image upward relative to the card top */
-    transform: translateY(-44px);
-    text-align: center;
-    /* Must be above the card layer */
-    z-index: 1;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
 }
 
 .featured-box-img {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    object-fit: cover;
-    display: inline-block;
-    /* Subtle shadow to lift the image */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
-/* Promotion badge positioned on the image */
+/* Make the shadow <img> inside ion-img cover the frame */
+.featured-box-img::part(image) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Promotion badge pinned to the photo's top-right corner */
 .featured-box-promo-badge {
     position: absolute;
-    top: -8px;
-    right: calc(50% - 52px);
+    top: 8px;
+    right: 8px;
     background: #E74C3C;
     color: #ffffff;
     font-family: "Mulish", sans-serif;
@@ -132,14 +132,15 @@
     padding: 2px 6px;
     border-radius: 10px;
     white-space: nowrap;
-    z-index: 2;
+    z-index: 1;
 }
 
-/* Card body — extra top padding to clear the floated image */
+/* Card body below the photo */
 .featured-box-body {
-    padding-top: 52px !important;
-    padding-inline: 12px !important;
-    padding-bottom: 12px !important;
+    padding: 10px 12px 12px !important;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
 }
 
 .featured-box-title {
@@ -147,22 +148,25 @@
     font-weight: 700;
     font-size: 0.875rem !important;
     line-height: 1.3;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .featured-box-capacity {
     font-family: "Mulish", sans-serif;
     font-weight: 600;
     font-size: 0.72rem !important;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
-/* Price + CTA row */
+/* Price + CTA — stacked on narrow cards so the "Composer" button never
+   overflows the card edge; single row from ≥480px (see media query at the
+   end of this file, kept after this base rule so source order wins). */
 .featured-box-footer {
+    margin-top: auto; /* pin to card bottom for equal-height cards */
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 4px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
 }
 
 .featured-box-btn {
@@ -171,7 +175,7 @@
     font-size: 0.75rem;
     text-transform: none;
     letter-spacing: 0;
-    flex-shrink: 0;
+    margin: 0;
 }
 
 .featured-box-btn .btn-text {
@@ -179,7 +183,7 @@
     text-transform: none;
 }
 
-/* === Skeleton loading === */
+/* === Skeleton loading (mirrors the real card: photo block + lines) === */
 .featured-boxes-skeleton-row {
     display: flex;
     flex-flow: row nowrap;
@@ -191,13 +195,11 @@
     flex: 0 0 160px;
     background: var(--ion-card-background, rgba(255, 255, 255, 0.08));
     border-radius: 12px;
-    padding: 12px;
-    /* Top margin matches the card to keep layout consistent */
-    margin-top: 52px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 8px;
+    padding-bottom: 12px;
 }
 
 @keyframes shimmer {
@@ -214,37 +216,48 @@
         rgba(200, 200, 200, 0.12) 75%
     );
     background-size: 800px 100%;
-    border-radius: 4px;
     animation: shimmer 1.4s infinite linear;
 }
 
 .skeleton-img {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    /* Pull the skeleton image above the card top, matching the real card */
-    margin-top: -88px;
+    width: 100%;
+    aspect-ratio: 4 / 3;
 }
 
 .skeleton-line {
-    width: 100%;
     height: 12px;
     border-radius: 6px;
+    margin: 0 12px;
 }
 
 .skeleton-line-title {
     height: 14px;
-    width: 75%;
+    width: 70%;
 }
 
 .skeleton-line-sub {
     height: 10px;
-    width: 55%;
+    width: 50%;
 }
 
 .skeleton-line-btn {
     height: 28px;
-    width: 60%;
     border-radius: 14px;
     margin-top: 4px;
+}
+
+/* === Footer layout switch (kept AFTER the base column rule so it wins
+   in source order): from ≥480px the card is wide enough for the price and
+   the "Composer" button to share one row. === */
+@media (min-width: 480px) {
+    .featured-box-footer {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4px;
+    }
+
+    .featured-box-btn {
+        flex-shrink: 0;
+    }
 }

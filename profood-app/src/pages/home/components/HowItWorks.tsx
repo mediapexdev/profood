@@ -79,27 +79,25 @@ const HowItWorks: React.FC = () => {
                     <React.Fragment key={step.id}>
                         <IonCard className="hiw-card translucent-style">
                             <IonCardContent className="hiw-card-body">
-                                {/* Step number badge */}
-                                <div className="hiw-step-number" aria-hidden="true">
-                                    {step.id}
-                                </div>
-
-                                {/* Icon circle */}
+                                {/* Icon circle with the step-number badge overlaid */}
                                 <div className="hiw-icon-wrap" aria-hidden="true">
+                                    <span className="hiw-step-number">{step.id}</span>
                                     {step.icon}
                                 </div>
 
                                 {/* Text content */}
-                                <p className="hiw-step-title">{step.title}</p>
-                                <p className="hiw-step-sub">{step.subtitle}</p>
-                                {step.detail && (
-                                    <p className="hiw-step-detail">
-                                        {step.detail}
-                                        {step.detailSub && (
-                                            <span className="hiw-step-detail-sub"> — {step.detailSub}</span>
-                                        )}
-                                    </p>
-                                )}
+                                <div className="hiw-text">
+                                    <p className="hiw-step-title">{step.title}</p>
+                                    <p className="hiw-step-sub">{step.subtitle}</p>
+                                    {step.detail && (
+                                        <p className="hiw-step-detail">
+                                            {step.detail}
+                                            {step.detailSub && (
+                                                <span className="hiw-step-detail-sub"> — {step.detailSub}</span>
+                                            )}
+                                        </p>
+                                    )}
+                                </div>
                             </IonCardContent>
                         </IonCard>
 

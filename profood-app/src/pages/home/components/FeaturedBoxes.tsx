@@ -117,7 +117,7 @@ const FeaturedBoxes: React.FC<FeaturedBoxesProps> = ({ boxes }) => {
                                 className="featured-box-card card translucent-style"
                                 button={false}
                             >
-                                {/* Product image — floats above card top edge */}
+                                {/* Product photo — fills the top of the card */}
                                 <div className="featured-box-img-wrap">
                                     {/* Promotion badge */}
                                     {box.is_on_promotion && box.discount_percentage && (

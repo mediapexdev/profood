@@ -37,6 +37,20 @@
     gap: 10px;
 }
 
+/* With an odd number of categories the last tile would sit alone next to
+   an empty cell — let it span the full row instead, with a wider photo
+   ratio so its height matches the regular tiles. Mobile only: from 600px
+   the grid switches to 3 columns. */
+@media (max-width: 599px) {
+    .category-tile:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+
+    .category-tile:last-child:nth-child(odd) .category-tile-img-wrap {
+        aspect-ratio: 8 / 3;
+    }
+}
+
 @media (min-width: 600px) {
     .category-grid {
         grid-template-columns: repeat(3, 1fr);

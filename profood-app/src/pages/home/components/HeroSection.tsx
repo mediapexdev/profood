@@ -34,12 +34,13 @@ const HeroSection: React.FC = () => {
 
     return (
         <section className="hero-section" aria-label={t('Viande fraîche, livrée chez vous')}>
-            {/* Background image layer — PROFOOD-1920-X-1980.jpg works as a dark-
-                meat photography backdrop. A gradient overlay ensures text contrast. */}
+            {/* Background image layer — acheter-au-detail.jpg is a clean top-down
+                flat-lay of assorted fresh meats & fish on dark trays (no baked-in
+                text). A gradient overlay ensures text contrast. */}
             <div
                 className="hero-bg"
                 style={{
-                    backgroundImage: `url(${toAbsolutePublicUrl('/media/images/illustrations/PROFOOD-1920-X-1980.jpg')})`,
+                    backgroundImage: `url(${toAbsolutePublicUrl('/media/images/illustrations/acheter-au-detail.jpg')})`,
                 }}
                 aria-hidden="true"
             />
@@ -70,8 +71,7 @@ const HeroSection: React.FC = () => {
                         {t('Créer mon Box')}
                     </IonButton>
                     <IonButton
-                        fill="outline"
-                        color="light"
+                        fill="solid"
                         className="hero-btn hero-btn-secondary"
                         onClick={handleSlicesCTA}
                         aria-label={t('Voir la carte')}
