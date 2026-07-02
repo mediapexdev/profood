@@ -27,6 +27,12 @@ import useToast from '../../../components/hooks/useToast';
 import { useCartContext } from './contexts/CartProvider';
 import { useUserInfosContext } from '../../../contexts/UserInfosProvider';
 import { CartSliceProps } from './slices/CartSlice';
+import {
+    getGuestCart,
+    removeBoxFromGuestCart,
+    removeSliceFromGuestCart,
+    saveGuestCart,
+} from '../../../services/GuestCartService';
 
 /**
  * CartItemList — unified list of everything in the cart.
@@ -74,7 +80,12 @@ const CartItemList: React.FC = () => {
         (boxId: number) => {
             const token = localStorage.getItem('token');
             if (!token || !logged) {
-                showToast(`${t('Veuillez vous connecter pour supprimer le box du panier')}.`);
+                // Guest cart lives in localStorage — remove locally, then
+                // re-sync: guest box ids are ARRAY INDEXES that shift after
+                // a removal, so fetchData() rebuilds the mapping.
+                removeBoxFromGuestCart(boxId);
+                fetchData();
+                showToast(`${t('Box supprimé du panier')} !`);
                 return;
             }
             api
@@ -99,7 +110,7 @@ const CartItemList: React.FC = () => {
                     showToast(`${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
                 });
         },
-        [logged, userId, deleteBox, showToast, t]
+        [logged, userId, deleteBox, fetchData, showToast, t]
     );
 
     // ── Delete slice ───────────────────────────────────────────────────────────
@@ -108,7 +119,10 @@ const CartItemList: React.FC = () => {
         (cartSliceId: number, sliceId: number) => {
             const token = localStorage.getItem('token');
             if (!token || !logged) {
-                showToast(`${t('Veuillez vous connecter pour supprimer le produit du panier')}.`);
+                // Guest cart lives in localStorage — remove locally, no API call
+                removeSliceFromGuestCart(sliceId);
+                deleteSlice(cartSliceId);
+                showToast(`${t('Produit supprimé du panier')} !`);
                 return;
             }
             api
@@ -166,7 +180,15 @@ const CartItemList: React.FC = () => {
 
             const token = localStorage.getItem('token');
             if (!token || !logged) {
-                showToast(`${t('Veuillez vous connecter pour modifier le panier')}.`);
+                // Guest cart lives in localStorage — adjust the stored
+                // quantity, then re-sync the context from storage.
+                const guestCart = getGuestCart();
+                const stored = guestCart.slices.find((s) => s.slice_id === cartSlice.slice.id);
+                if (stored) {
+                    stored.quantity += delta;
+                    saveGuestCart(guestCart);
+                    fetchData();
+                }
                 return;
             }
 

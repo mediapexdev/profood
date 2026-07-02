@@ -1,18 +1,22 @@
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 
 import {
     IonButton,
     IonCard,
     IonCardContent,
     IonCardTitle,
+    IonIcon,
     IonImg,
 } from '@ionic/react';
+import { reload } from 'ionicons/icons';
 import { useTranslation } from 'react-i18next';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { SliceProps } from '../../../components/slices/Slice';
 import PriceDisplay from '../../../components/price/PriceDisplay';
-import SlicesHandlersContext from '../../../contexts/SlicesHandlersContext';
+import useGoToCart from '../../../components/hooks/useGoToCart';
+import useSliceCartHandlers from '../../../components/hooks/useSliceCartHandlers';
+import CategoryProvider from '../../../contexts/CategoryProvider';
 import MinusIcon from '../../../components/icons/svg/MinusIcon';
 import PlusIcon from '../../../components/icons/svg/PlusIcon';
 
@@ -29,35 +33,26 @@ interface PopularSlicesProps {
 }
 
 /**
- * PopularSlices — horizontal Swiper carousel of individual cut cards.
- *
- * Dynamic: renders from DataContext.slicesProps.  Shows skeleton cards
- * while the array is empty.
- *
- * Each card exposes the same add/remove quantity controls as the full
- * Slice component, sharing the SlicesHandlersContext so the cart
- * state stays in sync regardless of where the user adds items.
- *
- * We deliberately show only a preview (capped at 8 slices) to keep
- * the home page scannable; the full catalogue is a tap away via
- * /categories/.
+ * Inner component — must live under CategoryProvider so the quantity
+ * steppers of LOGGED-IN users accumulate a selection, exactly like
+ * category pages.  Guests bypass the selection entirely: their taps go
+ * straight to the localStorage guest cart (same behaviour as
+ * CategoriesPage), so they can order without an account.
  */
-const PopularSlices: React.FC<PopularSlicesProps> = ({ slices }) => {
+const PopularSlicesContent: React.FC<PopularSlicesProps> = ({ slices }) => {
     const { t } = useTranslation();
+    const goToCart = useGoToCart();
 
-    /**
-     * Shared cart handlers — same context used by the Slice component
-     * in category pages, so quantity state is consistent.
-     */
-    const { add, remove, getQuantity } = useContext(SlicesHandlersContext);
-
-    const handleAdd = useCallback((id: number) => {
-        add({ id, quantity: 1 });
-    }, [add]);
-
-    const handleRemove = useCallback((id: number) => {
-        remove(id);
-    }, [remove]);
+    const {
+        logged,
+        totalNumber,
+        guestTotal,
+        handleAdd,
+        handleRemove,
+        displayedQuantity,
+        addToCart,
+        resetSelection,
+    } = useSliceCartHandlers(slices);
 
     const isLoading = slices.length === 0;
 
@@ -72,6 +67,16 @@ const PopularSlices: React.FC<PopularSlicesProps> = ({ slices }) => {
         <section className="popular-slices-section home-section" aria-label={t('Acheter au détail')}>
             <div className="popular-slices-header">
                 <h2 className="popular-slices-heading">{t('Acheter au détail')}</h2>
+                <IonButton
+                    fill="clear"
+                    size="small"
+                    color="primary"
+                    className="popular-slices-see-all"
+                    routerLink="/categories/"
+                    aria-label={t('Voir tout')}
+                >
+                    {t('Voir tout')}
+                </IonButton>
             </div>
 
             {isLoading ? (
@@ -95,7 +100,7 @@ const PopularSlices: React.FC<PopularSlicesProps> = ({ slices }) => {
                     a11y={{ enabled: true }}
                 >
                     {displayedSlices.map((slice) => {
-                        const qty = getQuantity(slice.id);
+                        const qty = displayedQuantity(slice.id);
 
                         return (
                             <SwiperSlide key={slice.id} className="ps-slide">
@@ -112,6 +117,17 @@ const PopularSlices: React.FC<PopularSlicesProps> = ({ slices }) => {
                                             src={slice.illustration}
                                             alt={t(slice.wording)}
                                             className="ps-img"
+                                            onIonError={(e) => {
+                                                /* Broken/missing illustration: hide the img so the
+                                                   wrapper's placeholder icon shows instead of the
+                                                   browser broken-image glyph */
+                                                (e.target as HTMLElement).classList.add('ps-img-broken');
+                                            }}
+                                            onIonImgDidLoad={(e) => {
+                                                /* The src can recover (retry, cache) after a failure —
+                                                   un-hide the image again */
+                                                (e.target as HTMLElement).classList.remove('ps-img-broken');
+                                            }}
                                         />
                                     </div>
 
@@ -167,8 +183,82 @@ const PopularSlices: React.FC<PopularSlicesProps> = ({ slices }) => {
                     })}
                 </Swiper>
             )}
+
+            {/* Selection bar (logged users): submit the selection to the
+                server cart */}
+            {logged && totalNumber > 0 && (
+                <div className="ps-selection-bar" role="status">
+                    <span className="ps-selection-count">
+                        {totalNumber} {t('découpes')}
+                    </span>
+                    <div className="ps-selection-actions">
+                        <IonButton
+                            type="button"
+                            buttonType="button"
+                            size="small"
+                            color="primary"
+                            className="ps-selection-add"
+                            onClick={addToCart}
+                        >
+                            {t('Ajouter au panier')}
+                        </IonButton>
+                        <IonButton
+                            type="button"
+                            buttonType="button"
+                            size="small"
+                            fill="clear"
+                            className="ps-selection-reset"
+                            onClick={resetSelection}
+                            aria-label={t('Réinitialiser la sélection')}
+                        >
+                            <IonIcon icon={reload} />
+                        </IonButton>
+                    </div>
+                </div>
+            )}
+
+            {/* Cart shortcut (guests): items were added to the guest cart
+                immediately — offer a jump to the cart to finish the order
+                without an account */}
+            {!logged && guestTotal > 0 && (
+                <div className="ps-selection-bar" role="status">
+                    <span className="ps-selection-count">
+                        {guestTotal} {t('découpes')}
+                    </span>
+                    <div className="ps-selection-actions">
+                        <IonButton
+                            type="button"
+                            buttonType="button"
+                            size="small"
+                            color="primary"
+                            className="ps-selection-add"
+                            onClick={() => goToCart()}
+                        >
+                            {t('Voir le panier')}
+                        </IonButton>
+                    </div>
+                </div>
+            )}
         </section>
     );
 };
+
+/**
+ * PopularSlices — horizontal Swiper carousel of individual cut cards.
+ *
+ * Dynamic: renders from DataContext.slicesProps.  Shows skeleton cards
+ * while the array is empty.
+ *
+ * Logged-in users build a selection (CategoryProvider) submitted through
+ * the "Ajouter au panier" bar — same API flow as the category pages.
+ * Guests add straight to the localStorage guest cart and are offered a
+ * shortcut to the cart, where the guest checkout flow takes over: no
+ * account is required to place an order.
+ */
+const PopularSlices: React.FC<PopularSlicesProps> = (props) => (
+    <CategoryProvider>
+        <PopularSlicesContent {...props} />
+    </CategoryProvider>
+);
 
 export default PopularSlices;

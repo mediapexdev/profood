@@ -55,6 +55,57 @@
     }
 }
 
+/* === Cart selection bar (sits above the category filter bar) ===
+   Same visual language as the home PopularSlices bar. */
+.cat-selection-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 8px 12px 0;
+    padding: 6px 6px 6px 14px;
+    border-radius: 12px;
+    background: rgba(39, 174, 96, 0.12);
+    border: 1px solid rgba(39, 174, 96, 0.35);
+}
+
+.cat-selection-count {
+    font-family: "Mulish", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #27AE60;
+    white-space: nowrap;
+}
+
+.cat-selection-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.cat-selection-add {
+    font-family: "Mulish", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    margin: 0;
+}
+
+.cat-selection-reset {
+    --padding-start: 6px;
+    --padding-end: 6px;
+    margin: 0;
+}
+
+/* The bar makes the fixed footer taller on mobile — grow the content
+   padding so the last product row stays reachable */
+@media (max-width: 991px) {
+    .categories-page.has-selection-bar ion-content {
+        --padding-bottom: 184px;
+    }
+}
+
 /* Products wrapper */
 .categories-products-wrapper {
     padding: 16px 0;

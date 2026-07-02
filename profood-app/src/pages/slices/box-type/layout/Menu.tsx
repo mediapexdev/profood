@@ -14,7 +14,9 @@ import api from '../../../../api/api';
 import { CurrentBoxTypeContext } from '../BoxTypeSlicesPage';
 import { useBoxTypeContext } from '../../../../contexts/BoxTypeProvider';
 import useToast from '../../../../components/hooks/useToast';
+import { addBoxToGuestCartFromSelection } from '../../../../services/GuestCartService';
 import { useCartContext } from '../../../cart/components/contexts/CartProvider';
+import { useDataContext } from '../../../../contexts/DataProvider';
 import { useUserInfosContext } from '../../../../contexts/UserInfosProvider';
 
 import './Menu.css';
@@ -45,9 +47,16 @@ const Menu: React.FC = () => {
     const { maximumNumber, slices, totalNumber, clear } = useBoxTypeContext();
 
     /**
-     * 
+     *
      */
-    const { updateBoxes } = useCartContext();
+    const { updateBoxes, fetchData } = useCartContext();
+
+    /**
+     * Full slice catalogue — used to enrich guest selections (the
+     * selection only stores {id, quantity}) with display data before
+     * persisting them to the localStorage guest cart.
+     */
+    const { slicesProps } = useDataContext();
 
     /**
      * 
@@ -62,15 +71,29 @@ const Menu: React.FC = () => {
     const resetSelection = useCallback(() => {
         clear();
         showToast(`${t('Sélection réinitialisée')} !`);
-    }, [clear]);
+    }, [clear, showToast, t]);
 
     /**
-     * 
+     *
      */
     const { logged, userId } = useUserInfosContext();
 
     /**
-     * 
+     * A 401 means the stored token is missing or expired — prompt the
+     * user to sign in instead of surfacing the raw API error.
+     */
+    const showRequestError = useCallback((error: any) => {
+        if (error?.response?.status === 401) {
+            showToast(`${t('Veuillez vous connecter pour ajouter au panier')}.`);
+        }
+        else {
+            showToast(error?.response?.data?.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
+        }
+        console.log(error);
+    }, [showToast, t]);
+
+    /**
+     *
      */
     const addTocart = useCallback(() => {
 
@@ -105,26 +128,35 @@ const Menu: React.FC = () => {
                                 showToast(res.data.message ? t(res.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
                             }
                         })
-                        .catch((error) => {
-                            showToast(error.response.data.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
-                            console.log(error);
-                        });
+                        .catch(showRequestError);
                     }
                     else{
                         showToast(res.data.message ? t(res.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
                     }
                 })
-                .catch((error) => {
-                    showToast(error.response.data.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
-                    console.log(error);
-                });
+                .catch(showRequestError);
             }
             else{
-                showToast(`${t('Veuillez vous connecter pour ajouter au panier')}.`);
-                // router.push("/signin", "forward", "push");
+                // Guest flow: persist the composed box to the localStorage
+                // guest cart — no account required to order.
+                if(currentBoxType){
+                    const enrichedSelection = slices.map((s) => ({
+                        id: s.id,
+                        quantity: s.quantity,
+                        slice: slicesProps.find((sp) => sp.id === s.id)
+                    }));
+
+                    addBoxToGuestCartFromSelection(currentBoxType, enrichedSelection);
+                    clear();
+                    fetchData();
+                    showToast(`${t('Box ajouté au panier')} !`);
+                }
+                else{
+                    showToast(`${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
+                }
             }
         }
-    }, [clear, currentBoxType?.id, logged, maximumNumber, slices, totalNumber, updateBoxes, userId]);
+    }, [clear, currentBoxType, fetchData, logged, maximumNumber, showRequestError, showToast, slices, slicesProps, t, totalNumber, updateBoxes, userId]);
 
     return (
         // {/* begin::Buttons */}

@@ -77,6 +77,18 @@ export const getGuestCart = (): GuestCart => {
 };
 
 /**
+ * Event fired on window after every guest-cart mutation, so that
+ * components mirroring the cart in React state (quantity steppers,
+ * cart badges, ...) can re-sync — several pages stay mounted at once
+ * under Ionic's router outlet and would otherwise go stale.
+ */
+export const GUEST_CART_CHANGED_EVENT = 'guest-cart:changed';
+
+const notifyGuestCartChanged = (): void => {
+    window.dispatchEvent(new CustomEvent(GUEST_CART_CHANGED_EVENT));
+};
+
+/**
  * Saves the guest cart to localStorage
  * Updates the updated_at timestamp automatically
  *
@@ -86,6 +98,7 @@ export const saveGuestCart = (cart: GuestCart): void => {
     try {
         cart.updated_at = Date.now();
         localStorage.setItem(GUEST_CART_KEY, JSON.stringify(cart));
+        notifyGuestCartChanged();
     } catch (error) {
         console.error('Error saving guest cart to localStorage:', error);
     }
@@ -228,6 +241,7 @@ export const removeSliceFromGuestCart = (sliceId: number): void => {
 export const clearGuestCart = (): void => {
     try {
         localStorage.removeItem(GUEST_CART_KEY);
+        notifyGuestCartChanged();
     } catch (error) {
         console.error('Error clearing guest cart from localStorage:', error);
     }

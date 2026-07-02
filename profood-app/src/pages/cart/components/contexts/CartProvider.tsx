@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import api from "../../../../api/api";
 import { BoxProps } from "../../../../components/box/BoxDetails";
+import { getGuestCart } from "../../../../services/GuestCartService";
 import { CartSliceProps } from "../slices/CartSlice";
 import CartContext, { CartContextType } from "./CartContext";
 import { useLoadingSpinnerContext } from "../../../../contexts/LoadingSpinnerProvider";
@@ -116,9 +117,12 @@ const CartProvider = ({ children }: Props) => {
      * @param itemId 
      */
     const deleteSlice = useCallback((itemId: number) => {
-        // Check if the item is already in the cart
-        setSlices((slices) => slices.filter((slice) => slice.id !== itemId));
-        calculateSlicesAmount(slices);
+        // Recompute totals from the post-delete array — passing the stale
+        // `slices` captured by the closure would keep the removed item in
+        // the order summary amounts.
+        const newSlices = slices.filter((slice) => slice.id !== itemId);
+        setSlices(newSlices);
+        calculateSlicesAmount(newSlices);
     }, [calculateSlicesAmount, slices]);
 
     /**
@@ -185,7 +189,12 @@ const CartProvider = ({ children }: Props) => {
                     })
                     .catch((error) => {
                         setShowSpinner(false);
-                        showToast(error.response.data.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
+                        // 401 = the stored session is no longer valid; the api
+                        // client purges it and the app returns to logged-out —
+                        // an empty cart is the correct state, not an error.
+                        if(error?.response?.status !== 401){
+                            showToast(error.response?.data?.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
+                        }
                         // console.log(error);
                     });
                 }
@@ -196,14 +205,43 @@ const CartProvider = ({ children }: Props) => {
             })
             .catch((error) => {
                 setShowSpinner(false);
-                showToast(error.response.data.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
+                // 401 handled globally (session purge) — stay silent on load.
+                if(error?.response?.status !== 401){
+                    showToast(error.response?.data?.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
+                }
                 // console.log(error);
             });
         }
         else{
+            // No valid session: the cart lives in localStorage (guest cart).
+            // Surface it through the same context so the cart page, totals
+            // and checkout flow work for unauthenticated users too.
+            const guestCart = getGuestCart();
+
+            const guestSlices: CartSliceProps[] = guestCart.slices.map((s) => ({
+                id: s.slice_id,
+                quantity: s.quantity,
+                cart_id: 0,
+                slice: s.slice
+            }));
+
+            const guestBoxes: BoxProps[] = guestCart.boxes.map((b, index) => ({
+                id: index,
+                cart_id: 0,
+                type: b.box_type,
+                box_slices: b.slices.map((bs, i) => ({
+                    id: i,
+                    box_id: index,
+                    quantity: bs.quantity,
+                    slice: bs.slice
+                }))
+            }));
+
+            updateBoxes(guestBoxes);
+            updateSlices(guestSlices);
             setShowSpinner(false);
         }
-    }, [setShowSpinner, showToast, updateBoxes, updateSlices, userId]);
+    }, [setShowSpinner, showToast, t, updateBoxes, updateSlices, userId]);
 
     /**
      * 

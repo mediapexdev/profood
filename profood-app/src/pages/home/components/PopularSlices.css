@@ -24,9 +24,13 @@
     color: var(--ion-text-color, #2C3E50);
 }
 
-/* === Swiper === */
-.popular-slices-swiper {
-    overflow: visible !important;
+.popular-slices-see-all {
+    font-family: "Mulish", sans-serif;
+    font-size: 0.8rem;
+    text-transform: none;
+    /* Override Ionic clear-button default padding */
+    --padding-start: 4px;
+    --padding-end: 4px;
 }
 
 .ps-slide {
@@ -51,16 +55,48 @@
     border-radius: 12px !important;
 }
 
-/* Image wrapper */
+/* Image wrapper — subtle backdrop doubles as a placeholder frame */
 .ps-img-wrap {
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
     border-radius: 12px 12px 0 0;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* Neutral placeholder icon — sits behind the photo, only visible when the
+   image is missing/broken (the loaded photo covers it entirely) */
+.ps-img-wrap::before {
+    content: '🥩';
+    /* Empty alternative text: purely decorative, hidden from screen
+       readers (browsers without the slash syntax keep the line above) */
+    content: '🥩' / '';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    opacity: 0.35;
+}
+
+/* Applied via onIonError when the illustration fails to load */
+.ps-img-broken {
+    visibility: hidden;
 }
 
 .ps-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    /* Positioned so the loaded photo paints above the ::before placeholder */
+    position: relative;
+}
+
+/* object-fit must target the shadow <img> inside ion-img — setting it on
+   the host has no effect */
+.ps-img::part(image) {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -126,6 +162,48 @@
     min-width: 24px;
     text-align: center;
     color: var(--ion-text-color, #2C3E50);
+}
+
+/* === Selection bar (shown when totalNumber > 0) === */
+.ps-selection-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 6px 6px 6px 14px;
+    border-radius: 12px;
+    background: rgba(39, 174, 96, 0.12);
+    border: 1px solid rgba(39, 174, 96, 0.35);
+}
+
+.ps-selection-count {
+    font-family: "Mulish", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #27AE60;
+    white-space: nowrap;
+}
+
+.ps-selection-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.ps-selection-add {
+    font-family: "Mulish", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    margin: 0;
+}
+
+.ps-selection-reset {
+    --padding-start: 6px;
+    --padding-end: 6px;
+    margin: 0;
 }
 
 /* === Skeleton === */
