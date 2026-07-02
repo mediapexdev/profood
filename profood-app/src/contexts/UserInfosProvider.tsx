@@ -63,6 +63,31 @@ const UserInfosProvider = ({ children }: Props) => {
     }, []);
 
     /**
+     * The api client purges the localStorage session and emits this event
+     * whenever the server answers 401 (expired/revoked token).  Mirror the
+     * purge in React state so the whole UI flips back to logged-out.
+     */
+    useEffect(() => {
+        const handleSessionExpired = () => {
+            setLogged(false);
+            setId(0);
+            setUserId(0);
+            setFirstName('');
+            setLastName('');
+            setPhoneNumber('');
+            setEmail('');
+            setRole(undefined);
+            setAvatar(undefined);
+            setActive(false);
+            setSessionCount(0);
+            setCreatedAt('');
+        };
+
+        window.addEventListener('auth:session-expired', handleSessionExpired);
+        return () => window.removeEventListener('auth:session-expired', handleSessionExpired);
+    }, []);
+
+    /**
      * Define the context value
      * Memoize to prevent unnecessary re-renders when parent components re-render
      */

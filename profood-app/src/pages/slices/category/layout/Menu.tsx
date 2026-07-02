@@ -48,7 +48,7 @@ const Menu: React.FC = () => {
     const resetSelection = useCallback(() => {
         clear();
         showToast(`${t('Sélection réinitialisée')} !`);
-    }, [clear]);
+    }, [clear, showToast, t]);
 
     /**
      * 
@@ -56,7 +56,21 @@ const Menu: React.FC = () => {
     const { logged, userId } = useUserInfosContext();
 
     /**
-     * 
+     * A 401 means the stored token is missing or expired — prompt the
+     * user to sign in instead of surfacing the raw API error.
+     */
+    const showRequestError = useCallback((error: any) => {
+        if (error?.response?.status === 401) {
+            showToast(`${t('Veuillez vous connecter pour ajouter au panier')}.`);
+        }
+        else {
+            showToast(error?.response?.data?.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
+        }
+        console.log(error);
+    }, [showToast, t]);
+
+    /**
+     *
      */
     const addTocart = useCallback(() => {
 
@@ -89,26 +103,20 @@ const Menu: React.FC = () => {
                                 showToast(res.data.message ? t(res.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
                             }
                         })
-                        .catch((error) => {
-                            showToast(error.response.data.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
-                            console.log(error);
-                        });
+                        .catch(showRequestError);
                     }
                     else{
                         showToast(res.data.message ? t(res.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
                     }
                 })
-                .catch((error) => {
-                    showToast(error.response.data.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
-                    console.log(error);
-                });
+                .catch(showRequestError);
             }
             else{
                 showToast(`${t('Veuillez vous connecter pour ajouter au panier')}.`);
                 // router.push("/signin", "forward", "push");
             }
         }
-    }, [clear, logged, slices, totalNumber, updateSlices, userId]);
+    }, [clear, logged, showRequestError, showToast, slices, t, totalNumber, updateSlices, userId]);
 
     return (
         // {/* begin::Buttons */}

@@ -84,6 +84,25 @@ const apiClient = axios.create({
  * Client errors (4xx except 408 and 429) are not retried as they indicate problems
  * with the request itself that won't be resolved by retrying.
  */
+/**
+ * Purges the locally stored session when the API reports the token is no
+ * longer valid (401), and notifies the app so React state can follow.
+ *
+ * The user-infos blob is stored under a key equal to the token itself
+ * (see UserInfosProvider), so both entries are removed.  UserInfosProvider
+ * listens for the event and resets its state, which flips the whole UI
+ * back to logged-out.
+ */
+const purgeExpiredSession = () => {
+  const token = localStorage.getItem("token");
+
+  if (token !== null) {
+    localStorage.removeItem(token);
+    localStorage.removeItem("token");
+    window.dispatchEvent(new CustomEvent("auth:session-expired"));
+  }
+};
+
 apiClient.interceptors.response.use(
   // Success handler - pass through successful responses
   (response) => response,
@@ -91,6 +110,19 @@ apiClient.interceptors.response.use(
   // Error handler - implement retry logic
   async (error: AxiosError) => {
     const config = error.config as any;
+
+    // Session expired / token revoked: purge the stale local session so
+    // the app returns to a consistent logged-out state.  Only purge when
+    // the failing request actually carried the stored token — a 401 from
+    // e.g. a wrong-password /signin attempt must not wipe a valid session.
+    if (error.response?.status === 401) {
+      const storedToken = localStorage.getItem("token");
+      const sentAuth = (error.config?.headers as any)?.Authorization;
+
+      if (storedToken !== null && sentAuth === `Bearer ${storedToken}`) {
+        purgeExpiredSession();
+      }
+    }
 
     // Initialize retry count if not present
     if (!config.__retryCount) {
