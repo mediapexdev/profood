@@ -18,6 +18,13 @@ return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
+
+    // This API authenticates with Bearer tokens sent in the Authorization
+    // header (no cookies / no session). Combined with 'supports_credentials'
+    // => false below, a wildcard origin is valid per the CORS spec and leaks
+    // no credentials. To lock down further once every production frontend
+    // origin is known, replace ['*'] with the explicit list below — and only
+    // re-enable 'supports_credentials' if cookie-based auth is ever introduced.
     'allowed_origins' => ['*'],
 
     // 'allowed_origins' => [
@@ -46,6 +53,10 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    // false: the apps use Bearer-token auth (Authorization header), not
+    // cookies, so credentials are unnecessary. 'true' together with the '*'
+    // origin above is rejected by browsers — the CORS spec forbids a wildcard
+    // origin when credentials are included.
+    'supports_credentials' => false,
 
 ];

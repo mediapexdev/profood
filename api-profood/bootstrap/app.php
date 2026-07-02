@@ -12,6 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // The API runs behind the LWS / Varnish reverse proxy. Trust the
+        // forwarded headers so the app detects HTTPS (X-Forwarded-Proto) and
+        // generates correct absolute URLs — password-reset links, PayTech
+        // redirect URLs, etc. Laravel 11 trusts no proxies by default.
+        $middleware->trustProxies(at: '*');
+
         $middleware->append(\App\Http\Middleware\ContentSecurityPolicy::class);
 
         $middleware->alias([

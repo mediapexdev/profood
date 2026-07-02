@@ -1,0 +1,23 @@
+# SPA routing fallback for Apache / LWS static hosting.
+#
+# The manager app uses BrowserRouter, producing clean URLs such as
+# /commandes and /clients. On a plain static host, refreshing or deep-linking
+# any non-root route returns 404 because Apache looks for a real file that
+# does not exist. This rewrite serves real files/directories as-is and routes
+# everything else to index.html, letting React Router resolve the path on the
+# client. Assumes the app is hosted at the domain root (matches <base href="/">).
+#
+# CRA copies the contents of public/ (including this file) into build/ at
+# build time, so the rule ships with the deployable artifact.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Serve existing files and directories directly.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Everything else falls back to the SPA entry point.
+  RewriteRule ^ index.html [L]
+</IfModule>
