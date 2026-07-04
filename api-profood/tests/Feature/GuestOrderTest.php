@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Slice;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -20,6 +21,13 @@ use Tests\TestCase;
 class GuestOrderTest extends TestCase
 {
     use DatabaseTransactions;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // The guest routes carry a tight per-IP throttle; irrelevant in tests
+        $this->withoutMiddleware(ThrottleRequests::class);
+    }
 
     /**
      * Build a valid guest-order payload from the seeded catalogue.

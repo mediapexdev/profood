@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 
 import {
     IonButton,
@@ -22,6 +22,8 @@ import { toAbsolutePublicUrl } from "../../helpers/AssetHelpers";
 import Error404 from "../errors/components/Error404";
 import api from "../../api/api";
 import { useUserInfosContext } from "../../contexts/UserInfosProvider";
+import { useCartContext } from "../cart/components/contexts/CartProvider";
+import { clearGuestCart } from "../../services/GuestCartService";
 import useToast from "../../components/hooks/useToast";
 
 import './GuestOrderSuccess.css';
@@ -47,6 +49,10 @@ const GuestOrderSuccess: React.FC = () => {
         setCreatedAt
     } = useUserInfosContext();
 
+    const location = useLocation();
+    const { updateBoxes, updateSlices } = useCartContext();
+
+    const [storedReference, setStoredReference] = useState<string>('');
     const [orderReference, setOrderReference] = useState<string>('');
     const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
     const [password, setPassword] = useState<string>('');
@@ -54,11 +60,17 @@ const GuestOrderSuccess: React.FC = () => {
     const [submitting, setSubmitting] = useState<boolean>(false);
 
     useEffect(() => {
-        const reference = localStorage.getItem('guest_order_reference');
-        if (reference) {
-            setOrderReference(reference);
-        }
-    }, []);
+        // The URL :id must match the reference this device stored when it
+        // placed the order — a crafted or stale link never validates.
+        // Coming back from PayTech, ?ref= additionally carries the REAL order
+        // reference (the client only knows its temporary hash at payment
+        // time); it is used for display and account conversion only.
+        const refFromPayment = new URLSearchParams(location.search).get('ref');
+        const stored = localStorage.getItem('guest_order_reference') ?? '';
+
+        setStoredReference(stored);
+        setOrderReference(refFromPayment || stored);
+    }, [location.search]);
 
     useIonViewDidLeave(() => {
         localStorage.removeItem('guest_order_reference');
@@ -66,7 +78,22 @@ const GuestOrderSuccess: React.FC = () => {
 
     const goToHome = () => router.push('/', "forward", "pop");
 
-    const isValidOrder = orderReference.length > 0 && orderReference === id;
+    const isValidOrder = storedReference.length > 0 && storedReference === id;
+
+    /**
+     * The PayTech flow intentionally leaves the guest cart intact until the
+     * payment is confirmed; clear it (and the applied promo) once this
+     * success page is reached. No-op for the cash flow, already cleared.
+     */
+    useEffect(() => {
+        if (isValidOrder) {
+            clearGuestCart();
+            localStorage.removeItem('appliedPromoCode');
+            updateBoxes([]);
+            updateSlices([]);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isValidOrder]);
     const passwordsMatch = password.length >= 8 && password === passwordConfirm;
 
     const submitConversion = async () => {

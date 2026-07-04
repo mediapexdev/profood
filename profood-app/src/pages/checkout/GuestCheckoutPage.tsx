@@ -238,10 +238,9 @@ const GuestCheckoutPage: React.FC = () => {
                     setShowSpinner(true);
                 },
                 didGetToken: function (pt_token: string, redirectUrl: string) {
-                    clearGuestCart();
-                    localStorage.removeItem('appliedPromoCode');
-                    updateBoxes([]);
-                    updateSlices([]);
+                    // The cart is NOT cleared here: the payment hasn't happened
+                    // yet. GuestOrderSuccess clears it after PayTech redirects
+                    // back, so an abandoned payment keeps the cart intact.
                     localStorage.setItem('guest_order_reference', orderStringId);
                     console.log(pt_token + " " + redirectUrl);
                     setTimeout(() => setShowSpinner(false), 6000);

@@ -1555,12 +1555,20 @@ class OrderController extends Controller
      */
     private function processOrderPaymentRequest(Order $order, $montant, $code, $hash_id)
     {
-        // $base_url   = (App::environment('local')) ? 'http://127.0.0.1:3000' : 'https://profood-app.com';
-        // $base_url   = 'https://profood-app-five.vercel.app';
-        $base_url   = 'https://profood-app.com';
-        // $base_url   = 'http://localhost:3000';
+        $base_url = config('services.paytech.client_app_url');
 
-        $jsonResponse = (new PayTech(env('PAY_TECH_API_KEY'), env('PAY_TECH_API_SECRET')))
+        // Guests land on the guest success page (order reference passed as
+        // ?ref= so account conversion works) and go back to their still-intact
+        // cart on cancel; customers keep the historical order pages.
+        if ($order->is_guest_order) {
+            $success_url = $base_url . '/guest-order-success/' . $hash_id . '?ref=' . $code;
+            $cancel_url  = $base_url . '/views/cart';
+        } else {
+            $success_url = $base_url . '/orders/successful-order/' . $hash_id;
+            $cancel_url  = $base_url . '/orders/cancelled-order/' . $hash_id;
+        }
+
+        $jsonResponse = (new PayTech(config('services.paytech.api_key'), config('services.paytech.api_secret')))
             ->setQuery([
                 'item_name'    => $code,
                 'item_price'   => $montant,
@@ -1569,17 +1577,16 @@ class OrderController extends Controller
             ->setCustomeField([
                 'item_id'      => $order->id,
                 'time_command' => time(),
-                'ip_user'      => $_SERVER['REMOTE_ADDR'],
-                'lang'         => $_SERVER['HTTP_ACCEPT_LANGUAGE']
+                'ip_user'      => request()->ip(),
+                'lang'         => request()->header('Accept-Language', 'fr')
             ])
-            ->setTestMode(true)
+            // Sandbox unless production explicitly sets PAYTECH_TEST_MODE=false
+            ->setTestMode((bool) config('services.paytech.test_mode'))
             ->setRefCommand(uniqid())
             ->setNotificationUrl([
-                // 'ipn_url'     => $base_url . '/redirect-payment', //only https
                 'ipn_url'       => 'https://api.profood-app.com/api/redirect-payment', //only https
-                'success_url'   => $base_url . '/orders/successful-order/' . $hash_id,
-                'cancel_url'    => $base_url . '/orders/cancelled-order/' . $hash_id,
-                // 'cancel_url'    => 'http://localhost:3000/orders/cancelled-order/' . $request->order_id
+                'success_url'   => $success_url,
+                'cancel_url'    => $cancel_url,
             ])
             ->send();
 
@@ -1605,8 +1612,13 @@ class OrderController extends Controller
         $api_key_sha256 = $request->api_key_sha256;
         $api_secret_sha256 = $request->api_secret_sha256;
 
-        $my_api_key = env('API_KEY');
-        $my_api_secret = env('API_SECRET');
+        // PayTech hashes the account credentials in every IPN — validate
+        // against the SAME pair used to request the payment. (Previously this
+        // read env('API_KEY')/env('API_SECRET'), names that exist nowhere in
+        // .env.example and that return null under config:cache, so no IPN
+        // could ever be accepted.)
+        $my_api_key = config('services.paytech.api_key');
+        $my_api_secret = config('services.paytech.api_secret');
 
         // Log incoming payment webhook
         Log::info('PayTech payment webhook received', [
