@@ -113,7 +113,12 @@ const GuestCheckoutPage: React.FC = () => {
             cartItems.push({
                 type: 'box',
                 box_type_id: box.box_type_id,
-                quantity: 1
+                quantity: 1,
+                // Composition chosen by the guest — persisted server-side as BoxSlice rows
+                slices: (box.slices ?? []).map(box_slice => ({
+                    slice_id: box_slice.slice_id,
+                    quantity: box_slice.quantity
+                }))
             });
         });
 

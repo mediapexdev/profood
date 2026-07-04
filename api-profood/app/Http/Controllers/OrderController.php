@@ -11,6 +11,7 @@ use App\Mail\CustomerOrderStatusNotificationEmail;
 use App\Mail\OrderAcknowledgmentEmail;
 use App\Mail\OrderNotificationEmail;
 use App\Models\Box;
+use App\Models\BoxSlice;
 use App\Models\BoxType;
 use App\Models\Cart;
 use App\Models\CartSlice;
@@ -26,6 +27,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -406,6 +408,63 @@ class OrderController extends Controller
     }
 
     /**
+     * Persist the content of a guest order as a cart snapshot.
+     *
+     * Guest orders have no shopping cart on the server, so the order content
+     * arrives as a cart_items payload. This stores it with the exact same
+     * structure as an authenticated order (Cart -> Box/BoxSlice + CartSlice),
+     * so the manager app renders guest orders without any change and the
+     * PayTech webhook finds a real cart on order->cart_id.
+     *
+     * The snapshot cart belongs to no customer (customer_id null) and is
+     * never a current cart.
+     *
+     * @param  array  $cart_items  Validated items: [{type:'box', box_type_id, quantity?, slices?:[{slice_id, quantity}]}, {type:'slice', slice_id, quantity}]
+     *
+     * @return \App\Models\Cart
+     */
+    private function createGuestCartSnapshot(array $cart_items): Cart
+    {
+        return DB::transaction(function () use ($cart_items) {
+            $cart = Cart::create([
+                'customer_id' => null,
+                'is_current'  => false,
+            ]);
+
+            foreach ($cart_items as $item) {
+                if ($item['type'] === 'box') {
+                    // Boxes are stored one row per unit, like the authenticated flow.
+                    // Capped defensively: this endpoint is public.
+                    $quantity = isset($item['quantity']) ? min(20, max(1, (int)$item['quantity'])) : 1;
+
+                    for ($i = 0; $i < $quantity; $i++) {
+                        $box = Box::create([
+                            'box_type_id' => $item['box_type_id'],
+                            'cart_id'     => $cart->id,
+                        ]);
+
+                        foreach ($item['slices'] ?? [] as $box_slice) {
+                            BoxSlice::create([
+                                'box_id'   => $box->id,
+                                'slice_id' => $box_slice['slice_id'],
+                                'quantity' => (int)$box_slice['quantity'],
+                            ]);
+                        }
+                    }
+                } else if ($item['type'] === 'slice') {
+                    CartSlice::create([
+                        'cart_id'  => $cart->id,
+                        'slice_id' => $item['slice_id'],
+                        'quantity' => (int)$item['quantity'],
+                    ]);
+                }
+            }
+
+            return $cart;
+        });
+    }
+
+    /**
      * Add a guest order (unauthenticated customer).
      *
      * This endpoint allows customers to place orders without creating an account.
@@ -541,6 +600,9 @@ class OrderController extends Controller
         // Apply discount to montant
         $finalMontant = $montant - $discountAmount;
 
+        // Persist the order content so managers can see what was ordered
+        $guest_cart = $this->createGuestCartSnapshot($cart_items);
+
         // Create the guest order
         $order = Order::create(array_merge([
             'customer_id'               => null,
@@ -554,7 +616,7 @@ class OrderController extends Controller
             'order_status_id'           => $order_status->id,
             'order_payment_status_id'   => $payment_status->id,
             'payment_method'            => 'À la livraison', // Guest orders default to cash on delivery
-            'cart_id'                   => null, // Guest orders don't have a cart_id since they don't have an account
+            'cart_id'                   => $guest_cart->id,
             'promotion_id'              => $promotion ? $promotion->id : null,
             'discount_amount'           => $discountAmount,
             'promotion_code'            => $promotionCode,
@@ -792,6 +854,9 @@ class OrderController extends Controller
             return response()->json(['message' => "Une erreur est survenue ! Veuillez réessayer ou contacter Profood"], 500);
         }
 
+        // Persist the order content so managers can see what was ordered
+        $guest_cart = $this->createGuestCartSnapshot($cart_items);
+
         // Create the guest order
         $order = Order::create(array_merge([
             'customer_id'               => null,
@@ -804,7 +869,7 @@ class OrderController extends Controller
             'montant'                   => $finalMontant,
             'order_status_id'           => $order_status->id,
             'order_payment_status_id'   => $payment_status->id,
-            'cart_id'                   => null,
+            'cart_id'                   => $guest_cart->id,
             'promotion_id'              => $promotion ? $promotion->id : null,
             'discount_amount'           => $discountAmount,
             'promotion_code'            => $promotionCode,
@@ -1586,16 +1651,19 @@ class OrderController extends Controller
                 }
                 // $customer   = Auth::user();
                 // $cart       = Cart::where(['customer_id' => $customer->id, 'is_current' => true])->first();
+                // Guest orders created before cart snapshots have no cart_id
                 $cart = Cart::find($order->cart_id);
-                $cart->is_current = false;
-                $cart->save();
+                if (isset($cart)) {
+                    $cart->is_current = false;
+                    $cart->save();
+                }
 
                 // Log successful payment completion
                 Log::info('Payment completed successfully via PayTech webhook', [
                     'order_id' => $order->id,
                     'order_ref' => $order->string_id,
                     'payment_method' => $payment_method,
-                    'cart_id' => $cart->id,
+                    'cart_id' => $order->cart_id,
                     'is_guest_order' => $order->isGuestOrder(),
                     'customer_name' => $order->getCustomerName(),
                     'action' => 'redirectPayment'

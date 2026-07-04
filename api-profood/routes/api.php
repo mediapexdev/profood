@@ -51,9 +51,13 @@ Route::get('get-slices-by-category/{id}', [SliceController::class, 'getSlicesByC
 Route::get('get-localites', [LocaliteController::class, 'getLocalites']);
 Route::get('get-localites-with-full-info', [LocaliteController::class, 'getLocalitesWithFullInfo']);
 
-Route::post('guest-order', [OrderController::class, 'addGuestOrder']);
-Route::post('guest-order-with-payment', [OrderController::class, 'addGuestOrderWithPayment']);
-Route::post('convert-guest-order', [OrderController::class, 'convertGuestOrder']);
+// Public order-creation endpoints: tighter per-IP throttle than the global
+// api limiter because each request writes an order plus its cart snapshot.
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('guest-order', [OrderController::class, 'addGuestOrder']);
+    Route::post('guest-order-with-payment', [OrderController::class, 'addGuestOrderWithPayment']);
+    Route::post('convert-guest-order', [OrderController::class, 'convertGuestOrder']);
+});
 Route::post('redirect-payment', [OrderController::class, 'redirectPayment']);
 
 // Public promotion endpoints
