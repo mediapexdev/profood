@@ -1,15 +1,19 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
     IonButton,
+    IonIcon,
     IonInput,
     IonItem,
     IonLabel,
+    IonList,
     IonNote,
-    IonTextarea,
 } from '@ionic/react';
+import { locationOutline } from 'ionicons/icons';
 
 import { useTranslation } from 'react-i18next';
+
+import { useDataContext } from '../../../../contexts/DataProvider';
 
 /**
  * Guest contact and delivery information collected by this form.
@@ -52,6 +56,15 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const normalizePhone = (value: string): string => value.replace(/\s+/g, '');
 
 /**
+ * Lowercases and strips accents so "médina" matches "Medina" and vice versa.
+ */
+const normalizeText = (value: string): string =>
+    value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+/** Maximum number of locality suggestions rendered under the field */
+const MAX_SUGGESTIONS = 8;
+
+/**
  * GuestCheckoutForm — Step 1 of the guest checkout flow.
  *
  * Collects delivery contact information for customers who want to order without
@@ -64,6 +77,24 @@ const normalizePhone = (value: string): string => value.replace(/\s+/g, '');
 const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCancel }) => {
     const { t } = useTranslation();
 
+    /**
+     * Existing delivery localities (fetched once app-wide by DataProvider).
+     * They power the destination autocomplete below.
+     */
+    const { localities, fetchLocalities } = useDataContext();
+
+    /**
+     * Resilience: if the initial app-wide fetch failed (offline at launch,
+     * API hiccup), retry silently when the guest reaches the checkout form.
+     */
+    const localitiesRequested = useRef<boolean>(false);
+    useEffect(() => {
+        if (localities.length === 0 && !localitiesRequested.current) {
+            localitiesRequested.current = true;
+            fetchLocalities(false);
+        }
+    }, [localities.length, fetchLocalities]);
+
     // ── Form field state ───────────────────────────────────────────────────────
     const [firstName, setFirstName]   = useState<string>('');
     const [lastName, setLastName]     = useState<string>('');
@@ -71,12 +102,40 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
     const [email, setEmail]           = useState<string>('');
     const [address, setAddress]       = useState<string>('');
 
+    /** Whether the locality suggestion list is visible */
+    const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+
     // ── Touched state — show errors only after user has interacted with a field
     const [touched, setTouched] = useState<Record<string, boolean>>({});
 
     const markTouched = useCallback((field: string) => {
         setTouched(prev => ({ ...prev, [field]: true }));
     }, []);
+
+    // ── Locality autocomplete ──────────────────────────────────────────────────
+
+    /** Localities whose wording contains the typed text (accent-insensitive) */
+    const suggestions = useMemo(() => {
+        const query = normalizeText(address.trim());
+        if (!query) return [];
+        return localities
+            .filter(locality => normalizeText(locality.wording).includes(query))
+            .slice(0, MAX_SUGGESTIONS);
+    }, [address, localities]);
+
+    /** True when the typed text exactly matches an existing locality */
+    const matchesKnownLocality = useMemo(() => {
+        const query = normalizeText(address.trim());
+        return query.length > 0
+            && localities.some(locality => normalizeText(locality.wording) === query);
+    }, [address, localities]);
+
+    /** Fills the field with the tapped suggestion and closes the list */
+    const selectLocality = useCallback((wording: string) => {
+        setAddress(wording);
+        setShowSuggestions(false);
+        markTouched('address');
+    }, [markTouched]);
 
     // ── Derived validation ─────────────────────────────────────────────────────
 
@@ -108,11 +167,19 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
             ? t('Adresse e-mail invalide')
             : null;
 
-    /** Address: required, max 255 chars */
+    /**
+     * Address: required, max 255 chars.
+     * When the locality list is available, the destination must be one of the
+     * existing localities (same rule as the logged-in flow's LocalityModal).
+     * If the list could not be loaded, fall back to free text so a guest is
+     * never blocked from ordering.
+     */
     const addressError = !address.trim()
         ? t('Veuillez renseigner votre adresse de livraison')
         : address.trim().length > 255
         ? t("L'adresse ne doit pas dépasser 255 caractères")
+        : localities.length > 0 && !matchesKnownLocality
+        ? t('Veuillez sélectionner une localité dans la liste')
         : null;
 
     const isValid =
@@ -162,6 +229,18 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
         return error ? 'danger' : 'success';
     };
 
+    /**
+     * Renders a field error below its IonItem. Rendered in-flow (not in the
+     * item's "error" slot) because Ionic hides slotted notes unless the item
+     * carries its native ion-invalid class, which custom validation never sets.
+     */
+    const fieldError = (field: string, error: string | null) =>
+        touched[field] && error ? (
+            <IonNote color="danger" className="guest-field-note font-xs">
+                {error}
+            </IonNote>
+        ) : null;
+
     return (
         <form onSubmit={handleSubmit} noValidate>
             {/* ── Section title ──────────────────────────────────────────── */}
@@ -186,12 +265,8 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                     onIonBlur={() => markTouched('firstName')}
                     aria-label={t('Prénom')}
                 />
-                {touched.firstName && firstNameError && (
-                    <IonNote slot="error" color="danger" className="font-xs">
-                        {firstNameError}
-                    </IonNote>
-                )}
             </IonItem>
+            {fieldError('firstName', firstNameError)}
 
             {/* ── Last name ──────────────────────────────────────────────── */}
             <IonItem
@@ -210,12 +285,8 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                     onIonBlur={() => markTouched('lastName')}
                     aria-label={t('Nom')}
                 />
-                {touched.lastName && lastNameError && (
-                    <IonNote slot="error" color="danger" className="font-xs">
-                        {lastNameError}
-                    </IonNote>
-                )}
             </IonItem>
+            {fieldError('lastName', lastNameError)}
 
             {/* ── Phone number ───────────────────────────────────────────── */}
             <IonItem
@@ -235,17 +306,13 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                     onIonBlur={() => markTouched('phoneNumber')}
                     aria-label={t('Numéro de téléphone')}
                 />
-                {touched.phoneNumber && phoneError && (
-                    <IonNote slot="error" color="danger" className="font-xs">
-                        {phoneError}
-                    </IonNote>
-                )}
-                {!touched.phoneNumber && (
-                    <IonNote slot="helper" className="font-xs content-color">
-                        {t('Format requis: 77, 78, 76, 75, 70 ou 33')}
-                    </IonNote>
-                )}
             </IonItem>
+            {fieldError('phoneNumber', phoneError)}
+            {!touched.phoneNumber && (
+                <IonNote className="guest-field-note font-xs content-color">
+                    {t('Format requis: 77, 78, 76, 75, 70 ou 33')}
+                </IonNote>
+            )}
 
             {/* ── Email (optional) ───────────────────────────────────────── */}
             <IonItem
@@ -264,35 +331,64 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                     onIonBlur={() => markTouched('email')}
                     aria-label={t('Adresse e-mail (optionnel)')}
                 />
-                {touched.email && emailError && (
-                    <IonNote slot="error" color="danger" className="font-xs">
-                        {emailError}
-                    </IonNote>
-                )}
             </IonItem>
+            {fieldError('email', emailError)}
 
-            {/* ── Delivery address ───────────────────────────────────────── */}
+            {/* ── Delivery destination (locality autocomplete) ───────────── */}
             <IonItem
                 lines="full"
                 color={itemColor('address', addressError)}
                 style={{ marginBottom: '0.5rem' }}
             >
                 <IonLabel position="floating">{t('Adresse de livraison')} *</IonLabel>
-                <IonTextarea
+                <IonInput
+                    type="text"
                     value={address}
-                    rows={3}
                     maxlength={255}
-                    placeholder={t('Ex: Dakar, Plateau, Rue Félix Faure')}
-                    onIonInput={(e) => setAddress(e.detail.value ?? '')}
-                    onIonBlur={() => markTouched('address')}
+                    placeholder={t('Rechercher votre localité')}
+                    onIonInput={(e) => {
+                        setAddress(e.detail.value ?? '');
+                        setShowSuggestions(true);
+                    }}
+                    onIonFocus={() => setShowSuggestions(true)}
+                    onIonBlur={() => {
+                        markTouched('address');
+                        // Delay so a tap on a suggestion lands before the list closes
+                        setTimeout(() => setShowSuggestions(false), 250);
+                    }}
                     aria-label={t('Adresse de livraison')}
                 />
-                {touched.address && addressError && (
-                    <IonNote slot="error" color="danger" className="font-xs">
-                        {addressError}
-                    </IonNote>
-                )}
             </IonItem>
+            {fieldError('address', addressError)}
+            {!touched.address && localities.length > 0 && (
+                <IonNote className="guest-field-note font-xs content-color">
+                    {t('Commencez à taper puis choisissez votre localité')}
+                </IonNote>
+            )}
+
+            {/* Suggestion list — rendered in-flow to avoid IonCard clipping */}
+            {showSuggestions && suggestions.length > 0 && !matchesKnownLocality && (
+                <IonList className="locality-suggestions" lines="full">
+                    {suggestions.map(locality => (
+                        <IonItem
+                            button
+                            detail={false}
+                            key={locality.id}
+                            onClick={() => selectLocality(locality.wording)}
+                        >
+                            <IonIcon
+                                icon={locationOutline}
+                                slot="start"
+                                size="small"
+                                color="primary"
+                            />
+                            <IonLabel className="content-color font-sm ion-text-wrap">
+                                {locality.wording}
+                            </IonLabel>
+                        </IonItem>
+                    ))}
+                </IonList>
+            )}
 
             {/* ── Submit ─────────────────────────────────────────────────── */}
             <div style={{ marginTop: '1.5rem' }}>

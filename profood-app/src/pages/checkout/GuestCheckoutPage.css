@@ -134,3 +134,29 @@
         height: 56px;
     }
 }
+
+/* Locality autocomplete suggestions (guest checkout form) */
+.locality-suggestions {
+    max-height: 264px;
+    overflow-y: auto;
+    margin: 0 0 0.5rem 0;
+    padding: 0;
+    border: 1px solid var(--ion-color-step-150, #d7d8da);
+    border-radius: 8px;
+}
+
+.locality-suggestions ion-item {
+    --min-height: 42px;
+    font-size: 0.875rem;
+}
+
+[data-theme="dark"] .locality-suggestions {
+    border-color: var(--ion-color-step-250, #3a3a3c);
+}
+
+/* In-flow field notes (errors/helpers) under each form item */
+.guest-field-note {
+    display: block;
+    padding: 2px 16px 0;
+    margin-bottom: 0.5rem;
+}

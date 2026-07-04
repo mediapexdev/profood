@@ -279,7 +279,7 @@ const LocalityModal: React.FC<LocalityModalProps> = ({localitiesInfo, onDismiss}
                     !localitySelected &&
                     <IonToolbar>
                         <IonSearchbar
-                            placeholder='Rechercher votre localité'
+                            placeholder={t('Rechercher votre localité')}
                             autoFocus={true}
                             onIonInput={searchbarInput}
                         />
