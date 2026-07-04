@@ -293,6 +293,17 @@
     --height: 100%;
     --max-height: 100%;
   }
+
+  /*
+   * Modals whose content is an IonPage (position: absolute) contribute no
+   * intrinsic height, so --height: auto collapses them to 0px on desktop.
+   * Give the checkout modals an explicit height.
+   */
+  ion-modal#localityModal,
+  ion-modal#orderFinalizationModal {
+    --height: 80vh;
+    --max-height: 640px;
+  }
 }
 
 /**
