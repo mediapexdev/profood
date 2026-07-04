@@ -122,21 +122,39 @@ const DataProvider = ({ children }: Props) => {
         if(showSpinner){
             setShowSpinner(true);
         }
-        // Request all localities with high per_page value to avoid multiple requests
-        api.get('/get-localites-with-full-info?per_page=500').then((res) => {
-            // Handle both paginated and non-paginated response formats
-            const localitiesData = Array.isArray(res.data) ? res.data : (res.data.data || []);
-            setLocalities(localitiesData);
-            setTimeout(() => {
-                if(showSpinner){
-                    setShowSpinner(false);
+        // The API may cap per_page below the total (~1000 localities), so walk
+        // every page of the paginated response and accumulate the full list.
+        const fetchPage = (page: number, accumulated: LocalityInfo[]) => {
+            api.get(`/get-localites-with-full-info?per_page=2000&page=${page}`).then((res) => {
+                // Handle both paginated and non-paginated response formats
+                const pageData: LocalityInfo[] = Array.isArray(res.data) ? res.data : (res.data.data || []);
+                const lastPage: number = Array.isArray(res.data) ? page : (res.data.last_page || page);
+                const all = accumulated.concat(pageData);
+
+                setLocalities(all);
+
+                if(page < lastPage && pageData.length > 0){
+                    fetchPage(page + 1, all);
                 }
-            }, spinnerTime);
-        }).catch((error) => {
-            setShowSpinner(false);
-            showToast(`${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
-            console.log(error);
-        });
+                else{
+                    setTimeout(() => {
+                        if(showSpinner){
+                            setShowSpinner(false);
+                        }
+                    }, spinnerTime);
+                }
+            }).catch((error) => {
+                setShowSpinner(false);
+                // Keep the pages already loaded rather than wiping the list
+                if(accumulated.length > 0){
+                    setLocalities(accumulated);
+                }
+                showToast(`${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
+                console.log(error);
+            });
+        };
+
+        fetchPage(1, []);
     }, [setShowSpinner, showToast, t]);
 
     /**

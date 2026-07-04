@@ -108,13 +108,13 @@ class LocaliteController extends Controller
      */
     function getLocalitesWithFullInfo(Request $request)
     {
-        // Calculate per_page with a default of 20 and maximum of 100
-        // This method manually builds an array, so we implement pagination differently
-        $perPage = min($request->input('per_page', 20), 100);
+        // Higher cap than the other endpoints: clients need the full list (~1000 rows)
+        // in one request to power the delivery-destination autocomplete.
+        $perPage = min($request->input('per_page', 20), 2000);
         $page = $request->input('page', 1);
 
         $localites = [];
-        $communes = Commune::all();
+        $communes = Commune::with(['localites.commune', 'localites.departement'])->get();
 
         foreach($communes as $commune){
             foreach($commune->localites as $localite){
