@@ -152,7 +152,8 @@ const GuestCheckoutPage: React.FC = () => {
         };
 
         if (promoApplied) {
-            data.promo_code = promoApplied.code;
+            // The API reads `promotion_code` (see OrderController@addGuestOrder)
+            data.promotion_code = promoApplied.code;
         }
 
         api.post('/guest-order', data, {
@@ -212,7 +213,8 @@ const GuestCheckoutPage: React.FC = () => {
         };
 
         if (promoApplied) {
-            paymentData.promo_code = promoApplied.code;
+            // The API reads `promotion_code` (see OrderController@addGuestOrderWithPayment)
+            paymentData.promotion_code = promoApplied.code;
         }
 
         // Store order info for after payment

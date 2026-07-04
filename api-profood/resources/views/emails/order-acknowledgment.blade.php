@@ -65,7 +65,7 @@
                             <td style="padding:8px 24px 24px 24px;color:#424242;font-size:16px;line-height:180%;border-radius:0 0 6px 6px;">
                                 <span style="color:#424242;">Client(e)</span>
                                 <br>
-                                <span style="color:#424242;font-weight:600;">{{$order->customer->fullName()}}</span>
+                                <span style="color:#424242;font-weight:600;">{{ $order->customer ? $order->customer->fullName() : (trim(($order->guest_first_name ?? '') . ' ' . ($order->guest_last_name ?? '')) ?: 'Client invité') }}</span>
                             </td>
                         </tr>
                     </tbody>
