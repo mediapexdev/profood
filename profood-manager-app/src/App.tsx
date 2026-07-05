@@ -19,6 +19,7 @@ import CustomerDataViewPage from './pages/customers/CustomerDataViewPage';
 import CustomerDataEditingPage from './pages/customers/CustomerDataEditingPage';
 import PromotionsPage from './pages/promotions/PromotionsPage';
 import OrdersPage from './pages/orders/OrdersPage';
+import NewOrderPage from './pages/orders/NewOrderPage';
 import OrderDetailsPage from './pages/orders/OrderDetailsPage';
 import OrderInvoicePage from './pages/orders/OrderInvoicePage';
 import OrderReceiptPage from './pages/orders/OrderReceiptPage';
@@ -60,7 +61,14 @@ function App() {
                 />
                 <Route path="/connexion" element={<SignInPage />} />
                 <Route path="/reinitialisation-mot-de-passe" element={<PasswordResetPage />} />
-                <Route path="/recu/:id" element={<PublicReceiptPage />} />
+                <Route
+                    path="/recu/:id"
+                    element={
+                        <RequireAuth redirectTo="/connexion">
+                            <PublicReceiptPage />
+                        </RequireAuth>
+                    }
+                />
                 <Route
                     path="/tableau-de-bord"
                     element={
@@ -98,6 +106,14 @@ function App() {
                     element={
                         <RequireAuth redirectTo="/connexion">
                             <OrdersPage />
+                        </RequireAuth>
+                    }
+                />
+                <Route
+                    path="/commandes/nouvelle"
+                    element={
+                        <RequireAuth redirectTo="/connexion">
+                            <NewOrderPage />
                         </RequireAuth>
                     }
                 />
