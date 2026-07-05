@@ -16,7 +16,8 @@
  */
 
 import { useState } from 'react'
-import type { NotificationType } from '../types'
+import { useNavigate } from 'react-router-dom'
+import type { Notification, NotificationType } from '../types'
 import { Icon } from '../components/Icon'
 import { PageHeader } from '../components/PageHeader'
 import { useNotifications } from '../hooks/useNotifications'
@@ -72,6 +73,16 @@ const TYPE_CONFIG: Record<NotificationType, TypeConfig> = {
 export function NotificationsPage() {
   const { notifications, markAsRead, markAllAsRead } = useNotifications()
   const [activeTab, setActiveTab] = useState<TabId>('all')
+  const navigate = useNavigate()
+
+  /**
+   * Opening a notification marks it read and, when it references an order,
+   * jumps straight to that delivery's detail page.
+   */
+  const handleOpen = (notif: Notification): void => {
+    if (!notif.read) markAsRead(notif.id)
+    if (notif.orderId) navigate(`/livraison/${notif.orderId}`)
+  }
 
   /**
    * Filter the notification list based on the selected tab.
@@ -138,9 +149,11 @@ export function NotificationsPage() {
             const typeConfig = TYPE_CONFIG[notif.type]
 
             return (
-              <div
+              <button
                 key={notif.id}
-                className={`rounded-2xl shadow-sm overflow-hidden transition-colors ${
+                type="button"
+                onClick={() => handleOpen(notif)}
+                className={`w-full text-left rounded-2xl shadow-sm overflow-hidden transition-colors hover:shadow-md active:scale-[0.99] ${
                   notif.read ? 'bg-gray-50' : 'bg-white'
                 }`}
               >
@@ -180,28 +193,16 @@ export function NotificationsPage() {
                       </div>
                     </div>
 
-                    {/* Action buttons (if present) */}
-                    {notif.actions && notif.actions.length > 0 && (
-                      <div className="flex gap-2 mt-3 ml-12">
-                        {notif.actions.map((action, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => markAsRead(notif.id)}
-                            className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
-                              action.variant === 'primary'
-                                ? 'bg-primary text-white hover:bg-primary/90'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                          >
-                            {action.label}
-                          </button>
-                        ))}
+                    {/* Tap-through affordance when this notification points to an order */}
+                    {notif.orderId && (
+                      <div className="flex items-center gap-1 mt-2 ml-12 text-primary text-xs font-bold">
+                        Voir la livraison
+                        <Icon name="chevron_right" size="sm" />
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
+              </button>
             )
           })
         )}

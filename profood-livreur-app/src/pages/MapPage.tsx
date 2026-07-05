@@ -62,6 +62,11 @@ export function MapPage() {
                 <p className="text-xs text-gray-500">
                   {nextStop.address.city}
                 </p>
+                {nextStop.distanceKm != null && (
+                  <p className="text-xs font-semibold text-primary mt-1">
+                    À {nextStop.distanceKm.toFixed(1)} km
+                  </p>
+                )}
               </div>
             </div>
             <button

@@ -57,6 +57,7 @@ function mapApiNotification(row: ApiLivreurNotification): Notification {
     body: row.body,
     time: formatRelativeTime(row.created_at),
     read: row.read_at !== null,
+    orderId: row.order_id != null ? String(row.order_id) : undefined,
   }
 }
 

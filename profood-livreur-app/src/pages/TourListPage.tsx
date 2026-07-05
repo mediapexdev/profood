@@ -1,16 +1,18 @@
 /**
  * TourListPage — ordered list of all stops in the driver's current tour.
  *
- * The page is intentionally simple: stops are sorted by stopNumber so the
- * driver always sees them in the correct sequence. A vertical connector line
- * between cards gives a visual "timeline" metaphor that maps naturally to
- * an ordered route.
+ * Stops come pre-sorted and renumbered 1..N by useDeliveries (the single
+ * source of truth shared with Map and Dashboard), so the driver sees the same
+ * sequence everywhere. A vertical connector line between cards gives a visual
+ * "timeline" metaphor that maps naturally to an ordered route. Completed stops
+ * are listed separately below, without numbers.
  *
  * Layout (top → bottom):
  *   1. PageHeader with sync action
- *   2. Distance badge + "view on map" button
+ *   2. Remaining-stops badge + navigation link
  *   3. Section heading with stop count
  *   4. Delivery cards connected by vertical line, each linking to /livraison/:id
+ *   5. "Terminées" section
  */
 
 import { Link } from 'react-router-dom'
@@ -20,15 +22,12 @@ import { StatusBadge } from '../components/StatusBadge'
 import { useDeliveries } from '../hooks/useDeliveries'
 
 export function TourListPage() {
-  const { deliveries, loading, refresh } = useDeliveries()
+  const { activeDeliveries, completedDeliveries, loading, refresh } = useDeliveries()
 
-  // Sort all deliveries by stopNumber ascending. Deliveries without a
-  // stopNumber fall to the end of the list.
-  const sortedDeliveries = [...deliveries].sort((a, b) => {
-    const aStop = a.stopNumber ?? Infinity
-    const bStop = b.stopNumber ?? Infinity
-    return aStop - bStop
-  })
+  // The ordered tour = the active stops already sorted and renumbered 1..N by
+  // useDeliveries (the single source of truth), so the sequence here matches
+  // the Map and Dashboard exactly.
+  const orderedDeliveries = activeDeliveries
 
   return (
     <div className="min-h-dvh bg-background-light pb-nav">
@@ -53,21 +52,23 @@ export function TourListPage() {
 
       <main className="px-4 pt-5 flex flex-col gap-5">
 
-        {/* ── Distance badge + map link ──────────────────────────────────── */}
+        {/* ── Remaining-stops badge + navigation link ────────────────────── */}
         <div className="flex items-center justify-between gap-3">
-          {/* Distance indicator pill */}
+          {/* Remaining-stops indicator pill (real count, not a hardcoded km) */}
           <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-2 rounded-xl font-semibold text-sm">
             <Icon name="route" size="sm" />
-            <span>12.4 km restants</span>
+            <span>
+              {orderedDeliveries.length} arrêt{orderedDeliveries.length !== 1 ? 's' : ''} restant{orderedDeliveries.length !== 1 ? 's' : ''}
+            </span>
           </div>
 
-          {/* Map link */}
+          {/* Navigation hub link */}
           <Link
             to="/tournee/carte"
             className="flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary/80 transition-colors"
           >
-            <Icon name="map" size="sm" />
-            Voir sur la carte
+            <Icon name="directions" size="sm" />
+            Voir l'itinéraire
           </Link>
         </div>
 
@@ -79,18 +80,18 @@ export function TourListPage() {
             </h2>
             {/* Count badge */}
             <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">
-              {sortedDeliveries.length}
+              {orderedDeliveries.length}
             </span>
           </div>
 
-          {sortedDeliveries.length === 0 ? (
+          {orderedDeliveries.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-8">
               Aucune livraison dans votre tournée.
             </p>
           ) : (
             <ul className="flex flex-col">
-              {sortedDeliveries.map((delivery, index) => {
-                const isLast = index === sortedDeliveries.length - 1
+              {orderedDeliveries.map((delivery, index) => {
+                const isLast = index === orderedDeliveries.length - 1
                 // Only show first 2 item names to keep the card compact.
                 const previewItems = delivery.items.slice(0, 2)
 
@@ -141,7 +142,10 @@ export function TourListPage() {
                         <div className="flex items-start gap-1.5 mb-3">
                           <Icon name="location_on" size="sm" className="text-gray-400 mt-0.5 flex-shrink-0" />
                           <p className="text-xs text-gray-500">
-                            {delivery.address.street}, {delivery.address.city}
+                            {[delivery.address.street, delivery.address.city].filter(Boolean).join(', ')}
+                            {delivery.distanceKm != null && (
+                              <span className="text-primary font-semibold"> · {delivery.distanceKm.toFixed(1)} km</span>
+                            )}
                           </p>
                         </div>
 
@@ -171,6 +175,43 @@ export function TourListPage() {
             </ul>
           )}
         </section>
+
+        {/* ── Completed stops (delivered / issue) ────────────────────────── */}
+        {completedDeliveries.length > 0 && (
+          <section aria-label="Arrêts terminés">
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                Terminées
+              </h2>
+              <span className="bg-gray-100 text-gray-500 text-xs font-bold px-2 py-0.5 rounded-full">
+                {completedDeliveries.length}
+              </span>
+            </div>
+
+            <ul className="flex flex-col gap-3">
+              {completedDeliveries.map((delivery) => (
+                <li key={delivery.id}>
+                  <Link
+                    to={`/livraison/${delivery.id}`}
+                    className="block bg-white rounded-2xl p-4 shadow-sm border-l-4 border-gray-200 opacity-90 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-bold text-gray-900 text-sm truncate">
+                          {delivery.customer.name}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {delivery.orderRef}
+                        </p>
+                      </div>
+                      <StatusBadge status={delivery.status} />
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
     </div>
   )

@@ -36,6 +36,11 @@ export interface Delivery {
   amount: number
   notes?: string
   stopNumber?: number
+  /**
+   * Great-circle distance (km) from the livreur's current GPS to this stop.
+   * Set only for active stops when a GPS fix and coordinates are available.
+   */
+  distanceKm?: number
 }
 
 export type DeliveryStatus = 'pending' | 'in_progress' | 'delivered' | 'issue'
@@ -47,6 +52,8 @@ export interface Notification {
   body: string
   time: string
   read: boolean
+  /** Order this notification refers to, when any — enables tap-through to the delivery. */
+  orderId?: string
   actions?: NotificationAction[]
 }
 

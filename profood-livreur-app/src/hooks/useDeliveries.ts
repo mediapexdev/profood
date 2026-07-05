@@ -129,14 +129,17 @@ export function useDeliveries(): UseDeliveriesReturn {
     }
   }
 
-  // Ordering rules:
+  // Ordering rules — this is the SINGLE source of truth for the tour order,
+  // consumed identically by TourList, Map and Dashboard so the stop numbers
+  // never contradict each other:
   //   1. in_progress always before pending — once a livreur is mid-delivery
   //      the next stop should keep being that one until confirmed.
   //   2. Within the same status, sort by geographic distance from the
-  //      livreur's current GPS so MapPage / Dashboard always surface the
-  //      closest reachable stop. Stops without coords drop to the end of
-  //      their tier (distance = +Infinity).
+  //      livreur's current GPS so the closest reachable stop comes first.
+  //      Stops without coords drop to the end of their tier (+Infinity).
   //   3. If no GPS fix yet, fall back to the API order (stable sort).
+  // Stops are then RENUMBERED 1..N in this final order, and their real
+  // distance is attached, so "Arrêt N" always matches the actual sequence.
   const activeDeliveries = useMemo(() => {
     const active = deliveries.filter(
       (d) => d.status === 'pending' || d.status === 'in_progress'
@@ -144,18 +147,20 @@ export function useDeliveries(): UseDeliveriesReturn {
 
     const statusRank = (s: DeliveryStatus) => (s === 'in_progress' ? 0 : 1)
 
-    const distanceTo = (d: Delivery): number => {
-      if (!currentPosition) return 0
+    const distanceTo = (d: Delivery): number | undefined => {
+      if (!currentPosition) return undefined
       const c = d.address.coordinates
-      if (!c) return Number.POSITIVE_INFINITY
+      if (!c) return undefined
       return haversineKm(currentPosition, c)
     }
 
-    return [...active].sort((a, b) => {
-      const r = statusRank(a.status) - statusRank(b.status)
-      if (r !== 0) return r
-      return distanceTo(a) - distanceTo(b)
-    })
+    return [...active]
+      .sort((a, b) => {
+        const r = statusRank(a.status) - statusRank(b.status)
+        if (r !== 0) return r
+        return (distanceTo(a) ?? Number.POSITIVE_INFINITY) - (distanceTo(b) ?? Number.POSITIVE_INFINITY)
+      })
+      .map((d, i) => ({ ...d, stopNumber: i + 1, distanceKm: distanceTo(d) }))
   }, [deliveries, currentPosition])
 
   const completedDeliveries = useMemo(

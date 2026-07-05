@@ -1,20 +1,21 @@
 /**
- * HistoryPage — view past deliveries with aggregate statistics.
+ * HistoryPage — past deliveries (delivered / cancelled) with honest aggregates.
  *
  * Layout (top → bottom):
  *   1. PageHeader with title
- *   2. Quick-stats grid (3 cols): today / week / month counts with trend icons
- *   3. Full delivery list — border-l-4 primary for delivered, slate for others
- *
- * The stats shown are derived from the mock data; in production they would
- * come from a dedicated statistics endpoint that aggregates by time window.
+ *   2. Quick-stats grid (3 cols): delivered count, cancelled count, amount
+ *      collected — all derived from the driver's actual completed deliveries,
+ *      never fabricated week/month multipliers.
+ *   3. Status filter (Toutes / Livrées / Problèmes)
+ *   4. Completed-delivery list
  */
 
+import { useMemo, useState } from 'react'
+import type { DeliveryStatus } from '../types'
 import { Icon } from '../components/Icon'
 import { PageHeader } from '../components/PageHeader'
 import { StatusBadge } from '../components/StatusBadge'
 import { useDeliveries } from '../hooks/useDeliveries'
-import { useStats } from '../hooks/useStats'
 
 /** Format a number as French-locale FCFA currency string. */
 function formatFCFA(amount: number): string {
@@ -24,24 +25,16 @@ function formatFCFA(amount: number): string {
 interface StatCellProps {
   label: string
   value: number | string
-  trend: 'up' | 'down' | 'neutral'
+  icon: string
+  className: string
 }
 
-/**
- * A single cell in the 3-column quick-stats grid.
- * Trend icons provide an at-a-glance performance indicator.
- */
-function StatCell({ label, value, trend }: StatCellProps) {
-  const trendConfig = {
-    up: { icon: 'trending_up', className: 'text-green-500' },
-    down: { icon: 'trending_down', className: 'text-red-500' },
-    neutral: { icon: 'trending_flat', className: 'text-gray-400' },
-  }[trend]
-
+/** A single cell in the 3-column quick-stats grid (no fabricated trends). */
+function StatCell({ label, value, icon, className }: StatCellProps) {
   return (
     <div className="bg-white rounded-2xl p-3 shadow-sm text-center">
-      <div className="flex items-center justify-center gap-1 mb-1">
-        <Icon name={trendConfig.icon} size="sm" className={trendConfig.className} />
+      <div className="flex items-center justify-center mb-1">
+        <Icon name={icon} size="sm" className={className} />
       </div>
       <p className="text-xl font-bold text-gray-900 leading-none">{value}</p>
       <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 mt-1 leading-tight">
@@ -51,9 +44,31 @@ function StatCell({ label, value, trend }: StatCellProps) {
   )
 }
 
+type FilterId = 'all' | 'delivered' | 'issue'
+
+const FILTERS: { id: FilterId; label: string }[] = [
+  { id: 'all', label: 'Toutes' },
+  { id: 'delivered', label: 'Livrées' },
+  { id: 'issue', label: 'Problèmes' },
+]
+
 export function HistoryPage() {
-  const { deliveries, loading } = useDeliveries()
-  const { stats } = useStats()
+  const { completedDeliveries, loading } = useDeliveries()
+  const [filter, setFilter] = useState<FilterId>('all')
+
+  const { deliveredCount, issueCount, collected } = useMemo(() => {
+    const delivered = completedDeliveries.filter((d) => d.status === 'delivered')
+    const issues = completedDeliveries.filter((d) => d.status === 'issue')
+    return {
+      deliveredCount: delivered.length,
+      issueCount: issues.length,
+      collected: delivered.reduce((sum, d) => sum + (d.amount || 0), 0),
+    }
+  }, [completedDeliveries])
+
+  const visible = completedDeliveries.filter((d) =>
+    filter === 'all' ? true : d.status === (filter as DeliveryStatus)
+  )
 
   if (loading) {
     return (
@@ -68,42 +83,59 @@ export function HistoryPage() {
     <div className="min-h-dvh bg-background-light pb-nav">
       <PageHeader title="Historique des Livraisons" />
 
-      <main className="px-4 pt-5  flex flex-col gap-5">
+      <main className="px-4 pt-5 flex flex-col gap-5">
 
-        {/* ── Quick stats ────────────────────────────────────────────────── */}
+        {/* ── Quick stats (real, derived from completed deliveries) ───────── */}
         <div className="grid grid-cols-3 gap-3">
           <StatCell
-            label="Aujourd'hui"
-            value={stats.deliveriesCompleted}
-            trend="up"
+            label="Livrées"
+            value={deliveredCount}
+            icon="check_circle"
+            className="text-green-500"
           />
           <StatCell
-            label="Semaine"
-            value={stats.deliveriesTotal}
-            trend="up"
+            label="Problèmes"
+            value={issueCount}
+            icon="warning"
+            className="text-red-500"
           />
           <StatCell
-            label="Ce mois"
-            value={stats.deliveriesTotal * 4}
-            trend="neutral"
+            label="Encaissé"
+            value={formatFCFA(collected)}
+            icon="payments"
+            className="text-primary"
           />
         </div>
 
+        {/* ── Status filter ──────────────────────────────────────────────── */}
+        <div className="flex bg-white rounded-xl shadow-sm p-1">
+          {FILTERS.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => setFilter(f.id)}
+              className={`flex-1 py-2 text-xs font-bold uppercase tracking-wide rounded-lg transition-colors ${
+                filter === f.id ? 'bg-primary text-white' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
         {/* ── Delivery list ──────────────────────────────────────────────── */}
-        <section aria-label="Liste des livraisons">
+        <section aria-label="Liste des livraisons terminées">
           <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">
-            Toutes les livraisons
+            Livraisons terminées
           </h2>
 
-          {deliveries.length === 0 ? (
+          {visible.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-8">
-              Aucune livraison enregistrée.
+              Aucune livraison terminée.
             </p>
           ) : (
             <ul className="flex flex-col gap-3">
-              {deliveries.map((delivery) => {
-                // Delivered orders use the brand primary accent; all others
-                // use a neutral slate border to indicate incomplete state.
+              {visible.map((delivery) => {
                 const borderClass =
                   delivery.status === 'delivered'
                     ? 'border-primary'
@@ -135,7 +167,7 @@ export function HistoryPage() {
                             <span>{delivery.scheduledTime}</span>
                             <span className="text-gray-300">·</span>
                             <span className="truncate">
-                              {delivery.address.street}, {delivery.address.city}
+                              {[delivery.address.street, delivery.address.city].filter(Boolean).join(', ')}
                             </span>
                           </div>
 

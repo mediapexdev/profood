@@ -13,6 +13,7 @@
 
 import { NavLink } from 'react-router-dom'
 import { Icon } from './Icon'
+import { useNotifications } from '../hooks/useNotifications'
 
 interface Tab {
   to: string
@@ -29,6 +30,8 @@ const TABS: Tab[] = [
 ]
 
 export function BottomNav() {
+  const { unreadCount } = useNotifications()
+
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-primary/10 pt-2 max-w-[480px] mx-auto"
@@ -52,7 +55,14 @@ export function BottomNav() {
             >
               {({ isActive }) => (
                 <>
-                  <Icon name={tab.icon} filled={isActive} size="md" />
+                  <span className="relative">
+                    <Icon name={tab.icon} filled={isActive} size="md" />
+                    {tab.to === '/notifications' && unreadCount > 0 && (
+                      <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-white">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </span>
                   <span className="text-[10px] font-bold uppercase tracking-wider">
                     {tab.label}
                   </span>

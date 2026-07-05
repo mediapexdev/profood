@@ -16,11 +16,14 @@
  *   8. Action buttons (only when status is not delivered or issue)
  */
 
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import type { Delivery } from '../types'
 import { Icon } from '../components/Icon'
 import { PageHeader } from '../components/PageHeader'
 import { StatusBadge } from '../components/StatusBadge'
 import { useDeliveries } from '../hooks/useDeliveries'
+import { fetchDelivery } from '../api/orders'
 import { openDirections } from '../lib/navigation'
 
 /** Format a number as French-locale FCFA currency (e.g. "25 000 FCFA"). */
@@ -30,9 +33,47 @@ function formatFCFA(amount: number): string {
 
 export function DeliveryDetailsPage() {
   const { id } = useParams<{ id: string }>()
-  const { getDelivery } = useDeliveries()
+  const { getDelivery, loading } = useDeliveries()
 
-  const delivery = id ? getDelivery(id) : undefined
+  const fromList = id ? getDelivery(id) : undefined
+
+  // Deep-link fallback: when the order isn't in the in-memory list (e.g. the
+  // page was opened cold from a notification), fetch it directly by id instead
+  // of showing "introuvable" for an order the server can still serve.
+  const [fetched, setFetched] = useState<Delivery | undefined>(undefined)
+  const [notFound, setNotFound] = useState(false)
+  const attemptedIdRef = useRef<string | undefined>(undefined)
+
+  useEffect(() => {
+    if (!id || fromList || loading) return
+    if (attemptedIdRef.current === id) return
+    attemptedIdRef.current = id
+    let active = true
+    void fetchDelivery(id).then((d) => {
+      if (!active) return
+      if (d) setFetched(d)
+      else setNotFound(true)
+    })
+    return () => {
+      active = false
+    }
+  }, [id, fromList, loading])
+
+  const delivery = fromList ?? fetched
+
+  // Still resolving (list loading or single fetch in flight) → show a spinner
+  // rather than flashing a misleading "not found".
+  if (!delivery && !notFound && (loading || !!id)) {
+    return (
+      <div className="min-h-dvh bg-background-light">
+        <PageHeader title="Détails de la livraison" showBack />
+        <div className="flex flex-col items-center justify-center gap-3 pt-24 px-4">
+          <span className="w-8 h-8 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+          <p className="text-sm text-gray-400 font-medium">Chargement…</p>
+        </div>
+      </div>
+    )
+  }
 
   // Guard: render a minimal not-found state if the id resolves to nothing.
   if (!delivery) {
