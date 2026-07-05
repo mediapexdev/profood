@@ -148,6 +148,19 @@ const PublicReceiptPage: React.FC = () => {
                     </>
                 )}
 
+                {/* Discount — shown only when a promo code reduced the total.
+                    order.montant is already net, so this line makes the subtotals
+                    reconcile with the total. */}
+                {Number(order.discount_amount ?? 0) > 0 && (
+                    <>
+                        <div className="receipt-subtotal-row">
+                            <span>{t('Réduction')}{order.promotion_code ? ` (${order.promotion_code})` : ''}</span>
+                            <span>-{formatNumber(Number(order.discount_amount))} Fcfa</span>
+                        </div>
+                        <div className="receipt-separator"></div>
+                    </>
+                )}
+
                 {/* Total */}
                 <div className="receipt-total-row">
                     <span>TOTAL</span>
