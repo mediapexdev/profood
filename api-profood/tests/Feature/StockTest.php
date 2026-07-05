@@ -48,6 +48,25 @@ class StockTest extends TestCase
         ]);
     }
 
+    private function makeLivreur(string $phone): \App\Models\Livreur
+    {
+        $roleId = Role::where('code', Role::LIVREUR)->firstOrFail()->id;
+
+        $user = User::create([
+            'first_name'    => 'Test',
+            'last_name'     => 'Livreur',
+            'phone_number'  => $phone,
+            'email'         => null,
+            'password'      => Hash::make('Test1234!'),
+            'role_id'       => $roleId,
+            'active'        => true,
+            'logged'        => false,
+            'session_count' => 0,
+        ]);
+
+        return \App\Models\Livreur::create(['user_id' => $user->id]);
+    }
+
     /**
      * Guest-order payload ordering slice A twice inside a box and three times
      * standalone (5 total), plus slice B once inside the box.
@@ -163,6 +182,55 @@ class StockTest extends TestCase
             ->assertStatus(200);
 
         $this->assertSame(100, $a->fresh()->stock_quantity);
+    }
+
+    public function test_livreur_cancelling_a_delivery_restores_stock_like_a_manager()
+    {
+        Mail::fake();
+
+        $boxType = BoxType::first();
+        $slices = Slice::take(2)->get();
+        $a = $slices[0];
+        $b = $slices[1];
+
+        $a->update(['stock_quantity' => 100]);
+        $b->update(['stock_quantity' => null]);
+
+        $reference = $this->postJson('/api/guest-order', $this->guestOrderPayload($a, $b, $boxType))
+            ->assertStatus(201)
+            ->json('order.string_id');
+
+        $this->assertSame(95, $a->fresh()->stock_quantity);
+
+        $order = Order::where('string_id', $reference)->firstOrFail();
+
+        // Assign the order to a livreur and authenticate as them.
+        $livreur = $this->makeLivreur('770000098');
+        $order->livreur_id = $livreur->id;
+        $order->save();
+
+        $cancelled = OrderStatus::where('code', OrderStatus::CANCELLED)->firstOrFail();
+        $delivered = OrderStatus::where('code', OrderStatus::DELIVERED)->firstOrFail();
+
+        $cancelPayload = ['order_id' => $order->id, 'status_id' => $cancelled->id];
+
+        // Livreur cancels -> stock is released back to its pre-order level.
+        $this->actingAs($livreur->user, 'api')
+            ->postJson('/api/livreur-update-order-status', $cancelPayload)
+            ->assertStatus(200);
+        $this->assertSame(100, $a->fresh()->stock_quantity);
+
+        // Cancelling again must not restore a second time.
+        $this->actingAs($livreur->user, 'api')
+            ->postJson('/api/livreur-update-order-status', $cancelPayload)
+            ->assertStatus(200);
+        $this->assertSame(100, $a->fresh()->stock_quantity);
+
+        // Re-opening the delivery (cancelled -> delivered) re-reserves the stock.
+        $this->actingAs($livreur->user, 'api')
+            ->postJson('/api/livreur-update-order-status', ['order_id' => $order->id, 'status_id' => $delivered->id])
+            ->assertStatus(200);
+        $this->assertSame(95, $a->fresh()->stock_quantity);
     }
 
     public function test_stock_status_accessor_reflects_thresholds()

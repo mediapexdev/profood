@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Models\OrderStatus;
 use App\Models\Role;
+use App\Services\StockService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -117,8 +118,23 @@ class LivreurController extends Controller
         if(!OrderHistory::where($cond)->exists()){
             OrderHistory::create($cond);
         }
+
+        // Capture the previous status so inventory is only released or
+        // re-reserved on an actual transition in or out of the cancelled state.
+        // A livreur-driven cancellation must restore stock exactly like a
+        // manager-driven one (OrderController::updateOrderStatus).
+        $previousStatusCode = optional(OrderStatus::find($order->order_status_id))->code;
+        $newIsCancelled = ((int) $status->code === OrderStatus::CANCELLED);
+        $wasCancelled = ($previousStatusCode !== null && (int) $previousStatusCode === OrderStatus::CANCELLED);
+
         $order->order_status_id = $status->id;
         $order->save();
+
+        if ($newIsCancelled && !$wasCancelled) {
+            app(StockService::class)->applyDelta($order->cart_id, 1);
+        } elseif (!$newIsCancelled && $wasCancelled) {
+            app(StockService::class)->applyDelta($order->cart_id, -1);
+        }
 
         Log::info('Order status updated by livreur', [
             'order_id'   => $order->id,

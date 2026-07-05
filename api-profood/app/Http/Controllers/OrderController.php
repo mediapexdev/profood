@@ -28,6 +28,7 @@ use App\Models\PromotionUsage;
 use App\Models\Role;
 use App\Models\Slice;
 use App\Models\User;
+use App\Services\StockService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -491,45 +492,23 @@ class OrderController extends Controller
      * Total ordered quantity per slice for a cart snapshot, folding together
      * standalone retail slices and slices contained in boxes.
      *
+     * Delegates to {@see StockService} so the manager, guest, customer and
+     * livreur paths all share one inventory implementation.
+     *
      * @param  int|null  $cartId
      * @return array<int,int>  slice_id => quantity
      */
     private function computeSliceQuantities($cartId): array
     {
-        $quantities = [];
-
-        if ($cartId === null) {
-            return $quantities;
-        }
-
-        foreach (CartSlice::where('cart_id', $cartId)->get(['slice_id', 'quantity']) as $cartSlice) {
-            if ($cartSlice->slice_id === null) {
-                continue;
-            }
-            $quantities[$cartSlice->slice_id] = ($quantities[$cartSlice->slice_id] ?? 0) + (int) $cartSlice->quantity;
-        }
-
-        $boxIds = Box::where('cart_id', $cartId)->pluck('id');
-        if ($boxIds->isNotEmpty()) {
-            foreach (BoxSlice::whereIn('box_id', $boxIds)->get(['slice_id', 'quantity']) as $boxSlice) {
-                if ($boxSlice->slice_id === null) {
-                    continue;
-                }
-                $quantities[$boxSlice->slice_id] = ($quantities[$boxSlice->slice_id] ?? 0) + (int) $boxSlice->quantity;
-            }
-        }
-
-        return $quantities;
+        return app(StockService::class)->computeSliceQuantities($cartId);
     }
 
     /**
      * Apply a stock movement for every tracked slice in a cart snapshot.
      *
      * $sign < 0 reserves stock (order placed), $sign > 0 restores it (order
-     * cancelled). Only products with stock tracking on (non-null stock_quantity)
-     * are touched, and each update is atomic to avoid lost updates under
-     * concurrent orders. Stock is allowed to go negative — the "allow + alert"
-     * policy warns the manager rather than blocking the sale.
+     * cancelled). Delegates to the shared {@see StockService} so cancellations
+     * behave identically no matter which app triggers them.
      *
      * @param  int|null  $cartId
      * @param  int  $sign  negative to decrement, positive to increment
@@ -537,23 +516,7 @@ class OrderController extends Controller
      */
     private function applyStockDelta($cartId, int $sign): void
     {
-        if ($cartId === null || $sign === 0) {
-            return;
-        }
-
-        foreach ($this->computeSliceQuantities($cartId) as $sliceId => $quantity) {
-            if ($quantity <= 0) {
-                continue;
-            }
-
-            $query = Slice::where('id', $sliceId)->whereNotNull('stock_quantity');
-
-            if ($sign < 0) {
-                $query->decrement('stock_quantity', $quantity);
-            } else {
-                $query->increment('stock_quantity', $quantity);
-            }
-        }
+        app(StockService::class)->applyDelta($cartId, $sign);
     }
 
     /**
