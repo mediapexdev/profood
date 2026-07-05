@@ -29,6 +29,8 @@ import { useCartContext } from "../contexts/CartProvider";
 import { useOrdersContext } from "../../../orders/components/contexts/OrdersProvider";
 import useGoToOrders from "../../../../components/hooks/useGoToOrders";
 import { useDataContext } from "../../../../contexts/DataProvider";
+import PromoCodeInput from "../../../../components/promotions/PromoCodeInput";
+import { PromoValidationResult } from "../../../../types/Promotion";
 
 import './OrderSummary.css';
 
@@ -83,7 +85,23 @@ const OrderSummary: React.FC = () => {
     const goToOrders = useGoToOrders();
 
     /**
-     * 
+     * Applied promo, restored from local storage so it survives navigation to
+     * the locality / order-finalization modals. The discount is cosmetic on the
+     * client — the server re-validates the code and recomputes the discount from
+     * real prices on order creation (the client montant is ignored server-side).
+     */
+    type AppliedPromo = NonNullable<PromoValidationResult['promotion']>;
+    const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(() => {
+        const stored = localStorage.getItem('appliedPromoCode');
+        return stored ? JSON.parse(stored) : null;
+    });
+    const discount = appliedPromo
+        ? (appliedPromo.discount_amount ?? appliedPromo.calculated_discount ?? 0)
+        : 0;
+    const grandTotal = Math.max(0, totalBoxes + totalSlices - discount);
+
+    /**
+     *
      */
     const addOrder = async () => {
         setShowSpinner(true);
@@ -91,14 +109,19 @@ const OrderSummary: React.FC = () => {
         const address = localStorage.getItem('selectedLocality');
         localStorage.removeItem('selectedLocality');
         const coords = await captureDeliveryCoordinates();
-        const data = {
+        const data: any = {
             // command_id: 1,
             customer_id: id,
             address: address,
-            montant: totalBoxes + totalSlices,
+            montant: grandTotal,
             order_id: orderStringId,
             ...(coords ?? {}),
         };
+        if (appliedPromo) {
+            // Server re-validates the code and recomputes the discount from real
+            // prices; this client montant is ignored server-side.
+            data.promotion_code = appliedPromo.code;
+        }
         const token = localStorage.getItem('token');
 
         api.post('/add-order-without-payment', data,
@@ -114,6 +137,8 @@ const OrderSummary: React.FC = () => {
                 showToast(t(res.data.message));
                 updateBoxes([]);
                 updateSlices([]);
+                localStorage.removeItem('appliedPromoCode');
+                setAppliedPromo(null);
                 fetchOrders();
                 goToOrders();
             }
@@ -143,15 +168,23 @@ const OrderSummary: React.FC = () => {
             'https://api.profood-app.com/api/add-order-with-payment' :
             'http://localhost:8000/api/add-order-with-payment';
 
-        new window.PayTech({
+        const paymentPayload: any = {
             // command_id: 1,
             customer_id: id,
             address: address,
-            montant: totalBoxes + totalSlices,
+            montant: grandTotal,
             order_id: orderStringId,
             ...(coords ?? {}),
             //will be sent to paiement.php page
-        })
+        };
+        if (appliedPromo) {
+            // Server re-validates and recomputes the discount authoritatively.
+            // An invalid code makes add-order-with-payment return 422 BEFORE any
+            // PayTech token is issued, so payment is blocked on a bad code.
+            paymentPayload.promotion_code = appliedPromo.code;
+        }
+
+        new window.PayTech(paymentPayload)
         .withOption({
             requestTokenUrl: requestTokenUrl,
             method: "POST",
@@ -167,6 +200,9 @@ const OrderSummary: React.FC = () => {
             },
             didGetToken: function (pt_token: string, redirectUrl: string) {
                 localStorage.removeItem('selectedLocality');
+                // The order (with its promo usage) is already persisted once the
+                // token is issued, so drop the applied code from local storage.
+                localStorage.removeItem('appliedPromoCode');
                 // localStorage.setItem('pt_token', pt_token);
                 localStorage.setItem('order_id', orderStringId);
                 console.log(pt_token + " " + redirectUrl);
@@ -350,6 +386,27 @@ const OrderSummary: React.FC = () => {
                             <small className="ms-1">Fcfa</small>
                         </IonCol>
                     </IonRow>
+                    <IonRow className="row-promo-code">
+                        <IonCol size="12" className="px-0">
+                            <PromoCodeInput
+                                subtotal={totalBoxes + totalSlices}
+                                applied={appliedPromo}
+                                onApplied={setAppliedPromo}
+                                onRemoved={() => setAppliedPromo(null)}
+                            />
+                        </IonCol>
+                    </IonRow>
+                    {appliedPromo && (
+                        <IonRow className="row-discount content-color font-sm">
+                            <IonCol size="6" className="col-wording ps-0">
+                                <span>{t('Réduction')} ({appliedPromo.code})</span>
+                            </IonCol>
+                            <IonCol size="6" className="col-amount pe-0">
+                                <span>- {formatNumber(discount)}</span>
+                                <small className="ms-1">Fcfa</small>
+                            </IonCol>
+                        </IonRow>
+                    )}
                     <IonRow className="row-total-amount title-color font-md">
                         <IonCol
                             size="6"
@@ -361,7 +418,7 @@ const OrderSummary: React.FC = () => {
                             size="6"
                             className="col-amount pe-0"
                         >
-                            <span>{formatNumber(totalBoxes + totalSlices)}</span>
+                            <span>{formatNumber(grandTotal)}</span>
                             <small className="ms-1">Fcfa</small>
                         </IonCol>
                     </IonRow>

@@ -29,11 +29,17 @@ export const validatePromoCode = async (
     orderAmount: number
 ): Promise<PromoValidationResult> => {
     try {
-        // Send validation request to backend
+        // Send validation request to backend. Attach the auth token when the
+        // customer is logged in so the backend evaluates first_order_only and
+        // per-user usage limits against the real user. The shared api instance
+        // has no request interceptor, so without this the validate call runs as
+        // a guest (Auth::user()=null) and can disagree with the authoritative
+        // re-check at order creation.
+        const token = localStorage.getItem('token');
         const response = await api.post('/validate-promo-code', {
             code: code.toUpperCase(), // Normalize to uppercase
             order_amount: orderAmount
-        });
+        }, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
 
         // Backend should return a PromoValidationResult structure
         return response.data;
