@@ -264,9 +264,10 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                 color={itemColor('firstName', firstNameError)}
                 style={{ marginBottom: '0.5rem' }}
             >
-                <IonLabel position="floating">{t('Prénom')} *</IonLabel>
                 <IonInput
                     type="text"
+                    label={`${t('Prénom')} *`}
+                    labelPlacement="floating"
                     value={firstName}
                     autocomplete="given-name"
                     inputmode="text"
@@ -284,9 +285,10 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                 color={itemColor('lastName', lastNameError)}
                 style={{ marginBottom: '0.5rem' }}
             >
-                <IonLabel position="floating">{t('Nom')} *</IonLabel>
                 <IonInput
                     type="text"
+                    label={`${t('Nom')} *`}
+                    labelPlacement="floating"
                     value={lastName}
                     autocomplete="family-name"
                     inputmode="text"
@@ -304,9 +306,10 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                 color={itemColor('phoneNumber', phoneError)}
                 style={{ marginBottom: '0.5rem' }}
             >
-                <IonLabel position="floating">{t('Numéro de téléphone')} *</IonLabel>
                 <IonInput
                     type="tel"
+                    label={`${t('Numéro de téléphone')} *`}
+                    labelPlacement="floating"
                     value={phoneNumber}
                     autocomplete="tel-national"
                     inputmode="tel"
@@ -330,9 +333,10 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                 color={itemColor('email', emailError)}
                 style={{ marginBottom: '0.5rem' }}
             >
-                <IonLabel position="floating">{t('Adresse e-mail (optionnel)')}</IonLabel>
                 <IonInput
                     type="email"
+                    label={t('Adresse e-mail (optionnel)')}
+                    labelPlacement="floating"
                     value={email}
                     autocomplete="email"
                     inputmode="email"
@@ -350,9 +354,10 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                 color={itemColor('address', addressError)}
                 style={{ marginBottom: '0.5rem' }}
             >
-                <IonLabel position="floating">{t('Adresse de livraison')} *</IonLabel>
                 <IonInput
                     type="text"
+                    label={`${t('Adresse de livraison')} *`}
+                    labelPlacement="floating"
                     value={address}
                     maxlength={255}
                     placeholder={t('Rechercher votre localité')}
