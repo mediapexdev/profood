@@ -27,6 +27,22 @@ class SignupRequest extends FormRequest
     }
 
     /**
+     * Normalize the phone number (strip spaces) before validation so the
+     * unique:users check runs against the stored, space-free format instead
+     * of a spaced value that never matches an existing row.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('phone_number')) {
+            $this->merge([
+                'phone_number' => preg_replace('/\s+/', '', (string) $this->phone_number),
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * Rules enforce:
@@ -41,8 +57,8 @@ class SignupRequest extends FormRequest
     public function rules()
     {
         return [
-            'first_name'            => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
-            'last_name'             => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
+            'first_name'            => ['required', 'regex:#^\p{L}[\p{L} \'\x{2019}\-]*$#u', 'max:255'],
+            'last_name'             => ['required', 'regex:#^\p{L}[\p{L} \'\x{2019}\-]*$#u', 'max:255'],
             'email'                 => ['nullable', 'regex:#^[^\s@]+@[^\s@]+\.[^\s@]+$#', 'unique:users'],
             'phone_number'          => ['required', 'regex:#(^3[3]|^7[5-80])[ ]?[0-9]{3}([ ]?[0-9]{2}){2}$#', 'unique:users'],
             'password'              => ['required', 'string', 'confirmed', Password::min(8)],
@@ -62,10 +78,10 @@ class SignupRequest extends FormRequest
     {
         return [
             'first_name.required'           => 'Le prénom est obligatoire',
-            'first_name.regex'              => 'Le prénom ne doit contenir que des lettres',
+            'first_name.regex'              => 'Le prénom contient des caractères non autorisés',
             'first_name.max'                => 'Le prénom ne doit pas dépasser 255 caractères',
             'last_name.required'            => 'Le nom est obligatoire',
-            'last_name.regex'               => 'Le nom ne doit contenir que des lettres',
+            'last_name.regex'               => 'Le nom contient des caractères non autorisés',
             'last_name.max'                 => 'Le nom ne doit pas dépasser 255 caractères',
             'email.regex'                   => "L'adresse e-mail n'est pas valide",
             'email.unique'                  => "L'adresse e-mail a déjà été prise",

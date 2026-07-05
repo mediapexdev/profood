@@ -111,6 +111,11 @@ class OrderController extends Controller
             return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 401);
         }
         $cart       = Cart::where(['customer_id' => $customer->id, 'is_current' => true])->first();
+
+        if(!isset($cart)){
+            return response()->json(['message' => 'Votre panier est vide'], 422);
+        }
+
         $montant    = 0;
         $order      = Order::where('cart_id', $cart->id)->first();
 
@@ -281,14 +286,14 @@ class OrderController extends Controller
                 ]);
             }
             catch(\Exception $exception) {
-                // Log email notification failure
+                // Log email notification failure — the order is already persisted,
+                // so a notification failure must NOT fail the whole request.
                 Log::error('Failed to queue order notification emails for managers', [
                     'order_id' => $order->id,
                     'order_ref' => $code,
                     'error' => $exception->getMessage(),
                     'action' => 'addOrder'
                 ]);
-                return response()->json(['message' => $exception->getMessage()], 500);
             }
             // Envoi de l'accusé de réception au client
 
@@ -337,7 +342,8 @@ class OrderController extends Controller
                 ]);
             }
             catch(\Exception $exception) {
-                // Log SMS sending failure
+                // Log SMS sending failure — the order is already persisted, so a
+                // notification failure must NOT fail the whole request.
                 Log::error('Failed to send order confirmation SMS to customer', [
                     'order_id' => $order->id,
                     'order_ref' => $order->string_id,
@@ -345,7 +351,6 @@ class OrderController extends Controller
                     'error' => $exception->getMessage(),
                     'action' => 'addOrder'
                 ]);
-                return response()->json(['message' => $exception->getMessage()], 500);
             }
         }
         else {
@@ -1113,6 +1118,24 @@ class OrderController extends Controller
 
         if(!isset($customer)){
             return response()->json(['message' => 'Client inexistant'], 404);
+        }
+
+        // Authorization: a customer may only read their OWN order history.
+        // Elevated roles (manager/admin/super-admin) may read anyone's.
+        // Without this, the {id} in the URL let any authenticated caller
+        // enumerate other customers' full order history (IDOR).
+        $authUser = Auth::user();
+        $elevatedRoles = [Role::MANAGER, Role::ADMIN, Role::SUPER_ADMIN];
+        $isElevated = isset($authUser->role) && in_array($authUser->role->code, $elevatedRoles, true);
+
+        if(!$isElevated && (int)optional($authUser)->id !== (int)$user_id){
+            Log::warning('Unauthorized order history access attempt', [
+                'auth_user_id' => optional($authUser)->id,
+                'requested_user_id' => $user_id,
+                'ip' => request()->ip(),
+                'action' => 'getCustomerOrdersByUser'
+            ]);
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 403);
         }
 
         // Get the customer's phone number (normalized - without spaces)

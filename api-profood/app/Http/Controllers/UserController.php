@@ -1141,12 +1141,26 @@ class UserController extends Controller
     public function checkRegistrationRequestData(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'first_name'            => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
-            'last_name'             => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
+            // Allow letters, spaces, apostrophes (straight and typographic) and
+            // hyphens so common Senegalese/French names (N'Diaye, M'Baye,
+            // Anne-Marie) are accepted. Must start with a letter.
+            'first_name'            => ['required', 'regex:#^\p{L}[\p{L} \'\x{2019}\-]*$#u', 'max:255'],
+            'last_name'             => ['required', 'regex:#^\p{L}[\p{L} \'\x{2019}\-]*$#u', 'max:255'],
             'email'                 => ['nullable', 'regex:#^[^\s@]+@[^\s@]+\.[^\s@]+$#', 'unique:users'],
             'phone_number'          => ['required', 'regex:#(^3[3]|^7[5-80])[ ]?[0-9]{3}([ ]?[0-9]{2}){2}$#'],
             'avatar'                => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:1024', 'dimensions:min_width=200,min_height=200'],
             'avatar_input_action'   => ['required', 'regex:#(none|change|remove){1}#']
+        ], [
+            'first_name.required'   => 'Le prénom est obligatoire',
+            'first_name.regex'      => 'Le prénom contient des caractères non autorisés',
+            'first_name.max'        => 'Le prénom ne doit pas dépasser 255 caractères',
+            'last_name.required'    => 'Le nom est obligatoire',
+            'last_name.regex'       => 'Le nom contient des caractères non autorisés',
+            'last_name.max'         => 'Le nom ne doit pas dépasser 255 caractères',
+            'email.regex'           => "L'adresse e-mail n'est pas valide",
+            'email.unique'          => "L'adresse e-mail a déjà été prise",
+            'phone_number.required' => 'Le numéro de téléphone est obligatoire',
+            'phone_number.regex'    => "Le numéro de téléphone n'est pas valide",
         ]);
         if($validator->fails()) {
             return response()->json(['message' => $validator->errors()->first()], 422);
@@ -1155,6 +1169,8 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'phone_number' => ['unique:users']
+        ], [
+            'phone_number.unique' => 'Le numéro de téléphone a déjà été pris',
         ]);
         if($validator->fails()) {
             return response()->json(['message' => $validator->errors()->first()], 422);
