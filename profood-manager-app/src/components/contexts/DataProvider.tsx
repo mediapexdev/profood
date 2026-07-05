@@ -565,12 +565,13 @@ const DataProvider = ({ children }: Props) => {
             fetchOrders(false);
             fetchOrderPaymentStatuses(false);
             fetchOrdersStatisticsDetails(null, null, false);
+            fetchBestSellers(null, null);
             fetchOrderStatuses(false);
             fetchPromotions(false);
             fetchUserRoles(false);
             fetchUsers(true, 300);
         }
-    }, [fetchBoxTypes, fetchCategories, fetchCustomers, fetchLivreurs, fetchOrderPaymentStatuses, fetchOrderStatuses, fetchOrders, fetchOrdersStatisticsDetails, fetchPromotions, fetchSlices, fetchUserRoles, fetchUsers]);
+    }, [fetchBoxTypes, fetchCategories, fetchCustomers, fetchLivreurs, fetchOrderPaymentStatuses, fetchOrderStatuses, fetchOrders, fetchOrdersStatisticsDetails, fetchBestSellers, fetchPromotions, fetchSlices, fetchUserRoles, fetchUsers]);
 
     /**
      * 
