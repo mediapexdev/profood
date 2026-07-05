@@ -10,7 +10,7 @@ import {
     CardTitle
 } from 'reactstrap';
 
-import { ExclamationTriangleFill, CreditCard2BackFill, TruckFront, ArrowRight } from 'react-bootstrap-icons';
+import { ExclamationTriangleFill, CreditCard2BackFill, TruckFront, ArrowRight, BoxSeam } from 'react-bootstrap-icons';
 
 import moment from 'moment';
 import 'moment/locale/fr';
@@ -30,9 +30,12 @@ import './UrgentActionsView.css';
 const UrgentActionsView: React.FC = () => {
     const { t } = useTranslation();
     const goTo = useGoTo();
-    const { orders } = useDataContext();
+    const { orders, slices } = useDataContext();
 
     moment.locale(i18n.language);
+
+    // Mirror of the backend default low-stock threshold.
+    const DEFAULT_LOW_STOCK_THRESHOLD = 5;
 
     const urgentData = useMemo(() => {
         const pendingOrders = orders.filter(o => o.status.code === 8);
@@ -44,13 +47,24 @@ const UrgentActionsView: React.FC = () => {
             .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
             .slice(0, 8);
 
+        // Tracked products that are out of stock or at/below their threshold.
+        const tracked = slices.filter(s => s.stock_quantity !== null && s.stock_quantity !== undefined);
+        const outOfStockCount = tracked.filter(s => (s.stock_quantity as number) <= 0).length;
+        const lowStockCount = tracked.filter(s => {
+            const qty = s.stock_quantity as number;
+            const threshold = s.low_stock_threshold ?? DEFAULT_LOW_STOCK_THRESHOLD;
+            return qty > 0 && qty <= threshold;
+        }).length;
+
         return {
             pendingCount: pendingOrders.length,
             unpaidCount: unpaidDelivered.length,
             inDeliveryCount: inDelivery.length,
+            outOfStockCount,
+            restockCount: outOfStockCount + lowStockCount,
             topPending
         };
-    }, [orders]);
+    }, [orders, slices]);
 
     return (
         <Card className='urgent-actions-view border-0 h-100'>
@@ -82,6 +96,16 @@ const UrgentActionsView: React.FC = () => {
                         <TruckFront size={14} />
                         <span>{urgentData.inDeliveryCount} {t('Commandes en livraison')}</span>
                     </Badge>
+                    {urgentData.restockCount > 0 && (
+                        <Badge
+                            role='button'
+                            onClick={() => goTo('/produits')}
+                            className={`urgent-badge ${urgentData.outOfStockCount > 0 ? 'bg-light-danger text-danger' : 'bg-light-warning text-warning'} d-inline-flex align-items-center gap-2 px-3 py-2 fs-8`}
+                        >
+                            <BoxSeam size={14} />
+                            <span>{urgentData.restockCount} {t('Produits à réassortir')}</span>
+                        </Badge>
+                    )}
                 </div>
             </CardHeader>
             <CardBody className='pt-0'>

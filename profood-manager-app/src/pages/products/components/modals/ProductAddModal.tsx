@@ -80,6 +80,10 @@ const ProductAddModal: React.FC<ProductAddModalProps> = ({show, setShow, toggle}
     const [promotionalPrice, setPromotionalPrice] = useState<number | undefined>(undefined);
     const [promotionStartsAt, setPromotionStartsAt] = useState('');
     const [promotionEndsAt, setPromotionEndsAt] = useState('');
+    // Inventory (optional). Kept as strings so an empty field ("not tracked")
+    // is distinct from an explicit 0 ("out of stock").
+    const [stockQuantity, setStockQuantity] = useState<string>('');
+    const [lowStockThreshold, setLowStockThreshold] = useState<string>('');
 
     /**
      *
@@ -244,6 +248,14 @@ const ProductAddModal: React.FC<ProductAddModalProps> = ({show, setShow, toggle}
             data.promotional_price = promotionalPrice;
             data.promotion_starts_at = promotionStartsAt || null;
             data.promotion_ends_at = promotionEndsAt || null;
+        }
+        // Only send inventory fields when a stock is entered; an empty stock
+        // leaves the product untracked (unlimited).
+        if (stockQuantity.trim() !== '') {
+            data.stock_quantity = parseInt(stockQuantity, 10);
+            if (lowStockThreshold.trim() !== '') {
+                data.low_stock_threshold = parseInt(lowStockThreshold, 10);
+            }
         }
         api.post('/add-slice', data,
             {
@@ -498,6 +510,41 @@ const ProductAddModal: React.FC<ProductAddModalProps> = ({show, setShow, toggle}
                                             </FormGroup>
                                         </div>
                                         <FormFeedback invalid='true'>{t('Veuillez renseigner ce champ')} !</FormFeedback>
+                                    </div>
+                                </Col>
+                            </Row>
+                            {/*  */}
+                            <Row className='gx-4 align-items-center'>
+                                <Col md={6}>
+                                    <div className='form-group-wrapper mb-1'>
+                                        <FormGroup floating={true} className='form-group mb-0'>
+                                            <Input
+                                                type='number'
+                                                name='stock_quantity'
+                                                id='stockQuantityInput'
+                                                placeholder={t('Stock')}
+                                                value={stockQuantity}
+                                                onInput={(e: React.FormEvent<HTMLInputElement>) => setStockQuantity(e.currentTarget.value)}
+                                            />
+                                            <Label for='stockQuantityInput'>{t('Stock')}</Label>
+                                        </FormGroup>
+                                        <div className='form-text text-gray-700'>{t('Laisser vide = non suivi')}</div>
+                                    </div>
+                                </Col>
+                                <Col md={6}>
+                                    <div className='form-group-wrapper mb-1'>
+                                        <FormGroup floating={true} className='form-group mb-0'>
+                                            <Input
+                                                type='number'
+                                                name='low_stock_threshold'
+                                                id='lowStockThresholdInput'
+                                                placeholder={t('Seuil de stock bas')}
+                                                min={0}
+                                                value={lowStockThreshold}
+                                                onInput={(e: React.FormEvent<HTMLInputElement>) => setLowStockThreshold(e.currentTarget.value)}
+                                            />
+                                            <Label for='lowStockThresholdInput'>{t('Seuil de stock bas')}</Label>
+                                        </FormGroup>
                                     </div>
                                 </Col>
                             </Row>

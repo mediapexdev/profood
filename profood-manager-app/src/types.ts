@@ -154,6 +154,10 @@ export interface SliceProps extends EnumDataType {
     is_on_promotion?: boolean;
     effective_price?: number;
     discount_percentage?: number | null;
+    // Inventory — null stock means the product is not tracked (unlimited).
+    stock_quantity: number | null;
+    low_stock_threshold: number | null;
+    stock_status?: 'untracked' | 'out_of_stock' | 'low_stock' | 'in_stock';
 }
 
 /**

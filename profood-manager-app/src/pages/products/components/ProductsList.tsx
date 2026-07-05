@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 
 import NoProduct from './NoProduct';
 import ProductChip from './ProductChip';
+import StockBadge from './StockBadge';
 import { formatDate, formatNumber } from '../../../helpers/AssetHelpers';
 import usePagination from '../../../components/hooks/usePagination';
 import Pagination from '../../../components/widgets/Pagination';
@@ -131,6 +132,7 @@ const ProductsList: React.FC<ProductsListProps> = ({products, fromSearch = false
                         <th className='price'>{t('Prix au détail')}</th>
                         <th className='weight'>{t('Poids')}</th>
                         <th className='available-in-box'>{'Profood Box'}</th>
+                        <th className='stock'>{t('Stock')}</th>
                         <th className='date-added'>{t("Date d'ajout")}</th>
                         <th className='action pe-4'>{t('Action')}</th>
                     </tr>
@@ -188,6 +190,9 @@ const ProductsList: React.FC<ProductsListProps> = ({products, fromSearch = false
                                         <span>{t('Non')}</span>
                                     </Badge>
                                 }
+                                </td>
+                                <td className='stock-cell'>
+                                    <StockBadge product={product} />
                                 </td>
                                 <td className='date-cell'>{formatDate(new Date(product.created_at), 'long', '-', false)}</td>
                                 <td className='action-cell pe-4'>
