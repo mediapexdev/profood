@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Table } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faListUl, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from 'react-i18next';
 import NoPromotion from './NoPromotion';
 import PromotionStatusBadge from './PromotionStatusBadge';
@@ -11,6 +11,7 @@ import Pagination from '../../../components/widgets/Pagination';
 import { PromotionProps } from '../../../types';
 import PromotionEditModal from './modals/PromotionEditModal';
 import PromotionDeleteModal from './modals/PromotionDeleteModal';
+import PromotionUsagesModal from './modals/PromotionUsagesModal';
 
 import './PromotionsList.css';
 
@@ -71,6 +72,12 @@ const PromotionsList: React.FC<PromotionsListProps> = ({ promotions, fromSearch 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const toggleDeleteModal = () => setShowDeleteModal((prev) => !prev);
     const onClosedDeleteModal = () => setPromoToDelete(null);
+
+    // Usages modal state — read-only redemption history for a promotion.
+    const [promoToView, setPromoToView] = useState<PromotionProps | null>(null);
+    const [showUsagesModal, setShowUsagesModal] = useState(false);
+    const toggleUsagesModal = () => setShowUsagesModal((prev) => !prev);
+    const onClosedUsagesModal = () => setPromoToView(null);
 
     // ---------------------------------------------------------------------------
     // Cell formatters
@@ -175,6 +182,21 @@ const PromotionsList: React.FC<PromotionsListProps> = ({ promotions, fromSearch 
                                             type='button'
                                             size='sm'
                                             color='none'
+                                            className='bg-hover-light-info text-gray-700 btn-usages border-0'
+                                            title={t('Utilisations')}
+                                            onClick={() => {
+                                                setPromoToView(promo);
+                                                // Deferred open so state is set before the modal mounts
+                                                setTimeout(() => setShowUsagesModal(true), 0);
+                                            }}
+                                        >
+                                            <FontAwesomeIcon icon={faListUl} />
+                                        </Button>
+                                        <Button
+                                            tag='button'
+                                            type='button'
+                                            size='sm'
+                                            color='none'
                                             className='bg-hover-light-primary text-info2 btn-edit border-0'
                                             title={t('Modifier')}
                                             onClick={() => {
@@ -236,6 +258,15 @@ const PromotionsList: React.FC<PromotionsListProps> = ({ promotions, fromSearch 
                     toggle={toggleDeleteModal}
                     onClosed={onClosedDeleteModal}
                     promotion={promoToDelete}
+                />
+            )}
+            {promoToView && (
+                <PromotionUsagesModal
+                    show={showUsagesModal}
+                    setShow={setShowUsagesModal}
+                    toggle={toggleUsagesModal}
+                    onClosed={onClosedUsagesModal}
+                    promotion={promoToView}
                 />
             )}
         </div>
