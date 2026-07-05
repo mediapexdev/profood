@@ -237,7 +237,10 @@ const SignInForm: React.FC = () => {
                         setShowSpinner(false);
                     }
                 }).catch((error) => {
-                    showToast(error.response.data.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
+                    // Clear the spinner even when /customer fails with no HTTP
+                    // response, otherwise the user is stuck on a loading screen.
+                    setShowSpinner(false);
+                    showToast(error.response?.data?.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
                     console.dir(error);
                 });
             }
@@ -247,8 +250,10 @@ const SignInForm: React.FC = () => {
             }
         })
         .catch((error) => {
+            // Optional chaining so a network error (no error.response) still shows
+            // a message instead of throwing inside the handler (silent failure).
             setShowSpinner(false);
-            showToast(error.response.data.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
+            showToast(error.response?.data?.message ? t(error.response.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
             console.log(error);
         });
     };

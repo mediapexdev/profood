@@ -301,8 +301,9 @@ const SignUpForm: React.FC = () => {
         if(verficationCcode !== _code){
             showToast(`${t('Code invalide')} !`)
             setShowSpinner(false);
+            return;
         }
-        showToast(`${t('Numéro vérifié avec succès')} !`)            
+        showToast(`${t('Numéro vérifié avec succès')} !`)
         setTimeout(() => {
             sessionStorage.removeItem('signUpVerificationCode');
             setShowPasswordForm(true);

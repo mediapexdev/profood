@@ -225,6 +225,15 @@ const GuestCheckoutPage: React.FC = () => {
         // Store order info for after payment
         localStorage.setItem('guest_order_id', orderStringId);
 
+        // The PayTech browser library only exists when paytech.min.js is loaded
+        // (public/index.html). Guard so, when online payment isn't wired up, the
+        // path degrades gracefully instead of throwing "PayTech is not a function".
+        if (typeof window.PayTech !== 'function') {
+            setShowSpinner(false);
+            showToast(t('Le paiement en ligne est momentanément indisponible. Veuillez choisir le paiement à la livraison.'));
+            return;
+        }
+
         new window.PayTech(paymentData)
             .withOption({
                 requestTokenUrl: requestTokenUrl,
