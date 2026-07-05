@@ -5,6 +5,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\LivreurController;
 use App\Http\Controllers\LocaliteController;
 use App\Http\Controllers\OrderController;
@@ -54,6 +55,9 @@ Route::get('get-localites-with-full-info', [LocaliteController::class, 'getLocal
 
 // Public delivery fee quote for the storefront checkout.
 Route::post('quote-delivery-fee', [DeliveryController::class, 'quoteDeliveryFee']);
+
+// Public: serve product illustrations stored on disk.
+Route::get('image/{path}', [ImageController::class, 'show'])->where('path', '.*');
 
 // Public order-creation endpoints: tighter per-IP throttle than the global
 // api limiter because each request writes an order plus its cart snapshot.

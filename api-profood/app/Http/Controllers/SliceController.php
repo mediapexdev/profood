@@ -39,7 +39,7 @@ class SliceController extends Controller
         }
         $illustration = $request->file('illustration');
         $imageService = new ImageService();
-        $s_illustration = $imageService->processToBase64($illustration, 256, 256);
+        $s_illustration = $imageService->processToDisk($illustration, 'slices', 256, 256);
 
         $slice = Slice::create([
             'wording'              => Str::of($request->wording)->stripTags()->trim()->ucfirst(),
@@ -148,7 +148,7 @@ class SliceController extends Controller
         if($request->hasFile('illustration')) {
             $illustration = $request->file('illustration');
             $imageService = new ImageService();
-            $s_illustration = $imageService->processToBase64($illustration, 256, 256);
+            $s_illustration = $imageService->processToDisk($illustration, 'slices', 256, 256);
 
             // Mis à jour de l'image d'illustration
 

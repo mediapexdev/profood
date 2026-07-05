@@ -38,7 +38,7 @@ class CategoryController extends Controller
         }
         $illustration = $request->file('illustration');
         $imageService = new ImageService();
-        $c_illustration = $imageService->processToBase64($illustration, 256, 256);
+        $c_illustration = $imageService->processToDisk($illustration, 'categories', 256, 256);
 
         $category = Category::create([
             'wording'       => Str::of($request->wording)->stripTags()->trim()->ucfirst(),
@@ -83,7 +83,7 @@ class CategoryController extends Controller
         if($request->hasFile('illustration')) {
             $illustration = $request->file('illustration');
             $imageService = new ImageService();
-            $c_illustration = $imageService->processToBase64($illustration, 256, 256);
+            $c_illustration = $imageService->processToDisk($illustration, 'categories', 256, 256);
 
             // Mis à jour de l'image d'illustration
 
