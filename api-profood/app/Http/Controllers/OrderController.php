@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Core\PayTech;
 use App\Http\Requests\CancelOrderRequest;
 use App\Http\Requests\StoreGuestOrderRequest;
+use App\Http\Requests\StoreManualOrderRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Mail\CustomerOrderStatusNotificationEmail;
@@ -23,6 +24,7 @@ use App\Models\OrderStatus;
 use App\Models\Promotion;
 use App\Models\PromotionUsage;
 use App\Models\Role;
+use App\Models\Slice;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -1277,6 +1279,273 @@ class OrderController extends Controller
             }
         }
         return response()->json($order_status_details, 200);
+    }
+
+    /**
+     * Create an order manually on behalf of a caller / walk-in customer.
+     *
+     * Authenticated + staff-gated. Reuses the guest-order machinery: the total
+     * is computed SERVER-SIDE from cart_items, the content is persisted as a
+     * cart snapshot, and the order enters the normal AWAITING_PROCESSING
+     * pipeline. It never touches PayTech / the payment webhook — it defaults to
+     * cash on delivery (UNPAID), or PAID if the cash was collected in person.
+     *
+     * @param  \App\Http\Requests\StoreManualOrderRequest  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addManualOrder(StoreManualOrderRequest $request)
+    {
+        // Defense in depth: re-assert the staff role against the authenticated
+        // caller (FormRequest::authorize already gates, this guards regressions).
+        $staff = User::with('role')->find(Auth::user()->getAuthIdentifier());
+        if (!isset($staff->role) || !in_array($staff->role->code, [Role::MANAGER, Role::ADMIN, Role::SUPER_ADMIN], true)) {
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 403);
+        }
+
+        $cart_items = $request->cart_items;
+
+        // Server-authoritative total — never trust a client-displayed amount.
+        $montant = 0;
+        foreach ($cart_items as $item) {
+            if (($item['type'] ?? null) === 'box') {
+                $boxType = BoxType::find($item['box_type_id']);
+                if (!isset($boxType)) {
+                    return response()->json(['message' => "Type de coffret inexistant (ID: {$item['box_type_id']})"], 404);
+                }
+                $montant += $boxType->price * (isset($item['quantity']) ? (int) $item['quantity'] : 1);
+            } elseif (($item['type'] ?? null) === 'slice') {
+                $slice = Slice::find($item['slice_id']);
+                if (!isset($slice)) {
+                    return response()->json(['message' => "Tranche inexistante (ID: {$item['slice_id']})"], 404);
+                }
+                $montant += $slice->price * (int) $item['quantity'];
+            }
+        }
+
+        $order_status = OrderStatus::where('code', OrderStatus::AWAITING_PROCESSING)->first();
+        $paid = filter_var($request->input('mark_paid', false), FILTER_VALIDATE_BOOLEAN);
+        $payment_status = OrderPaymentStatus::where('code', $paid ? OrderPaymentStatus::PAID : OrderPaymentStatus::UNPAID)->first();
+        if (!isset($order_status) || !isset($payment_status)) {
+            return response()->json(['message' => "Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur"], 500);
+        }
+
+        // Resolve the customer link (known customer) vs walk-in guest details.
+        $customer = null;
+        if ($request->filled('customer_id')) {
+            $customer = Customer::find($request->customer_id);
+            if (!isset($customer)) {
+                return response()->json(['message' => 'Client inexistant'], 404);
+            }
+        }
+
+        $notifyCustomer = filter_var($request->input('notify_customer', false), FILTER_VALIDATE_BOOLEAN);
+        $payment_method = $request->payment_method ? Str::of($request->payment_method)->stripTags()->trim() : 'À la livraison';
+        $address = Str::of($request->address)->stripTags()->trim();
+
+        try {
+            $order = DB::transaction(function () use (
+                $cart_items, $customer, $order_status, $payment_status, $payment_method, $address, $montant, $request
+            ) {
+                $cart = $this->createGuestCartSnapshot($cart_items);
+
+                $attributes = [
+                    'address'                 => (string) $address,
+                    'montant'                 => $montant,
+                    'order_status_id'         => $order_status->id,
+                    'order_payment_status_id' => $payment_status->id,
+                    'payment_method'          => (string) $payment_method,
+                    'cart_id'                 => $cart->id,
+                ];
+
+                if ($customer) {
+                    $attributes['customer_id'] = $customer->id;
+                    $attributes['is_guest_order'] = false;
+                } else {
+                    $attributes['customer_id'] = null;
+                    $attributes['is_guest_order'] = true;
+                    $attributes['guest_first_name'] = (string) Str::of($request->guest_first_name)->stripTags()->trim();
+                    $attributes['guest_last_name'] = (string) Str::of($request->guest_last_name)->stripTags()->trim();
+                    $attributes['guest_phone_number'] = (string) Str::of($request->guest_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
+                    $attributes['guest_email'] = $request->guest_email ? (string) Str::of($request->guest_email)->stripTags()->trim() : null;
+                }
+
+                $order = Order::create($attributes);
+                $order->string_id = $this->generateReferenceNumber($order);
+                $order->save();
+
+                OrderHistory::create([
+                    'order_id'        => $order->id,
+                    'order_status_id' => $order_status->id,
+                ]);
+
+                return $order;
+            });
+        } catch (\Throwable $exception) {
+            Log::error('Manual order creation failed', [
+                'error'  => $exception->getMessage(),
+                'staff'  => $staff->id,
+                'action' => 'addManualOrder',
+            ]);
+
+            return response()->json(['message' => "Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur"], 500);
+        }
+
+        // Optional: notify a walk-in guest by SMS (non-blocking, opt-in).
+        if ($notifyCustomer && !$customer && !empty($order->guest_phone_number)) {
+            try {
+                $order_date = (new \IntlDateFormatter(
+                    'fr_SN',
+                    \IntlDateFormatter::FULL,
+                    \IntlDateFormatter::SHORT,
+                    'Africa/Dakar',
+                    \IntlDateFormatter::GREGORIAN
+                ))->format(new \DateTime($order->created_at));
+
+                $client = new TwilioClient(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+                $client->messages->create(
+                    "+221{$order->guest_phone_number}",
+                    [
+                        'from' => 'Profood',
+                        'body' => "{$order->string_id} est votre numéro de commande Profood du {$order_date}. Merci pour votre commande.",
+                    ]
+                );
+            } catch (\Throwable $exception) {
+                Log::error('Failed to send manual order SMS', [
+                    'order_id' => $order->id,
+                    'error'    => $exception->getMessage(),
+                    'action'   => 'addManualOrder',
+                ]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Commande créée',
+            'order'   => $order->fresh(['cart', 'status', 'paymentStatus', 'customer']),
+        ], 201);
+    }
+
+    /**
+     * Best-selling products (box types + slices) over a date range.
+     *
+     * Read-only aggregation over the immutable cart snapshots of the orders in
+     * range. CANCELLED orders are excluded unless include_cancelled is set.
+     * Staff-only (MANAGER / ADMIN / SUPER_ADMIN).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getBestSellers(Request $request)
+    {
+        $manager = User::with('role')->find(Auth::user()->getAuthIdentifier());
+        if (!isset($manager->role) || !in_array($manager->role->code, [Role::MANAGER, Role::ADMIN, Role::SUPER_ADMIN], true)) {
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'start_date'        => ['nullable', 'date', 'date_format:Y-m-d', 'before:tomorrow'],
+            'end_date'          => ['nullable', 'date', 'date_format:Y-m-d', 'after:start_date', 'before:tomorrow'],
+            'limit'             => ['nullable', 'integer', 'min:1', 'max:100'],
+            'include_cancelled' => ['nullable', 'boolean'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $limit = (int) $request->input('limit', 10);
+        $includeCancelled = filter_var($request->input('include_cancelled', false), FILTER_VALIDATE_BOOLEAN);
+
+        $start_date = (!isset($request->start_date)) ? null :
+            Carbon::createFromFormat('Y-m-d', $request->start_date)->startOfDay();
+        $end_date = (!isset($request->end_date)) ? null :
+            Carbon::createFromFormat('Y-m-d', $request->end_date)->endOfDay();
+
+        // Orders in range (optionally excluding cancelled), reduced to cart ids.
+        $ordersQuery = Order::query();
+        if ($start_date) {
+            $ordersQuery->where('created_at', '>=', $start_date);
+        }
+        if ($end_date) {
+            $ordersQuery->where('created_at', '<=', $end_date);
+        }
+        if (!$includeCancelled) {
+            $cancelled = OrderStatus::where('code', OrderStatus::CANCELLED)->first();
+            if ($cancelled) {
+                $ordersQuery->where('order_status_id', '!=', $cancelled->id);
+            }
+        }
+        $cart_ids = $ordersQuery->pluck('cart_id')->filter()->unique()->values();
+
+        // Box-type units: each Box row is one sold box.
+        $box_type_rows = Box::whereIn('cart_id', $cart_ids)
+            ->select('box_type_id', DB::raw('count(*) as units'))
+            ->groupBy('box_type_id')
+            ->get();
+
+        // Standalone (retail) slice units.
+        $standalone_rows = CartSlice::whereIn('cart_id', $cart_ids)
+            ->select('slice_id', DB::raw('SUM(quantity) as qty'))
+            ->groupBy('slice_id')
+            ->get();
+
+        // Slice units sold inside boxes.
+        $in_box_rows = BoxSlice::whereIn('box_id', function ($q) use ($cart_ids) {
+            $q->select('id')->from('boxes')->whereIn('cart_id', $cart_ids);
+        })
+            ->select('slice_id', DB::raw('SUM(quantity) as qty'))
+            ->groupBy('slice_id')
+            ->get();
+
+        // Resolve names/prices in PHP (keeps GROUP BY ONLY_FULL_GROUP_BY-safe);
+        // withTrashed so a since-deleted product still shows a label.
+        $type_ids = $box_type_rows->pluck('box_type_id')->filter()->unique();
+        $box_types = BoxType::withTrashed()->whereIn('id', $type_ids)->get()->keyBy('id');
+
+        $slice_ids = $standalone_rows->pluck('slice_id')
+            ->merge($in_box_rows->pluck('slice_id'))
+            ->filter()->unique()->values();
+        $slices = Slice::withTrashed()->whereIn('id', $slice_ids)->get()->keyBy('id');
+
+        $box_types_result = $box_type_rows->map(function ($row) use ($box_types) {
+            $type = $box_types->get($row->box_type_id);
+            $units = (int) $row->units;
+            $price = $type ? (float) $type->price : 0;
+            return [
+                'box_type_id' => (int) $row->box_type_id,
+                'wording'     => $type ? $type->wording : 'Produit supprimé',
+                'units'       => $units,
+                'revenue'     => $units * $price,
+            ];
+        })->sortByDesc('units')->take($limit)->values();
+
+        $standalone_by_id = $standalone_rows->keyBy('slice_id');
+        $in_box_by_id = $in_box_rows->keyBy('slice_id');
+        $slices_result = $slice_ids->map(function ($id) use ($standalone_by_id, $in_box_by_id, $slices) {
+            $standalone = (int) (optional($standalone_by_id->get($id))->qty ?? 0);
+            $in_box = (int) (optional($in_box_by_id->get($id))->qty ?? 0);
+            $slice = $slices->get($id);
+            $price = $slice ? (float) $slice->price : 0;
+            return [
+                'slice_id'         => (int) $id,
+                'wording'          => $slice ? $slice->wording : 'Produit supprimé',
+                'standalone_units' => $standalone,
+                'in_box_units'     => $in_box,
+                'units'            => $standalone + $in_box,
+                // Revenue only on standalone units — box-contained slices are
+                // paid via the box, so they are reported as units only.
+                'revenue'          => $standalone * $price,
+            ];
+        })->sortByDesc('units')->take($limit)->values();
+
+        return response()->json([
+            'range' => [
+                'start_date' => $start_date ? $start_date->format('Y-m-d') : null,
+                'end_date'   => $end_date ? $end_date->format('Y-m-d') : null,
+            ],
+            'box_types' => $box_types_result,
+            'slices'    => $slices_result,
+        ], 200);
     }
 
     /**

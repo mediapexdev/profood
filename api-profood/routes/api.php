@@ -257,6 +257,7 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     Route::get('get-customer-orders-by-user/{id}', [OrderController::class, 'getCustomerOrdersByUser']);
     Route::post('add-order-with-payment', [OrderController::class, 'addOrderWithPayment']);
     Route::post('add-order-without-payment', [OrderController::class, 'addOrderWithoutPayment']);
+    Route::post('add-manual-order', [OrderController::class, 'addManualOrder']);
     Route::post('cancel-order', [OrderController::class, 'cancelOrder']);
     
     // Route::get('get-customers', [CustomerController::class, 'getCustomers']);
@@ -291,6 +292,7 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     Route::get('get-order-statuses', [OrderController::class, 'getOrderStatuses']);
     Route::get('get-order-statuses-details', [OrderController::class, 'getOrderStatusesDetails']);
     Route::get('get-orders-statistics-details', [OrderController::class, 'getOrdersStatisticsDetails']);
+    Route::get('get-best-sellers', [OrderController::class, 'getBestSellers']);
 
     Route::post('approve-order/{id}', [OrderController::class, 'approveOrder']);
     Route::post('update-order-status', [OrderController::class, 'updateOrderStatus']);
