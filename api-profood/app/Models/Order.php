@@ -74,6 +74,14 @@ class Order extends Model
     }
 
     /**
+     * Recorded refunds (source of truth for money returned).
+     */
+    public function refunds()
+    {
+        return $this->hasMany(Refund::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
      * 
      */
     public function histories()

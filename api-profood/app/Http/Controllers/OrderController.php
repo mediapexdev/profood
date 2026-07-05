@@ -23,6 +23,7 @@ use App\Models\OrderPaymentStatus;
 use App\Models\OrderStatus;
 use App\Models\DeliverySettings;
 use App\Models\Promotion;
+use App\Models\Refund;
 use App\Models\PromotionUsage;
 use App\Models\Role;
 use App\Models\Slice;
@@ -1288,7 +1289,7 @@ class OrderController extends Controller
         if(!isset($order_status)){
             return response()->json(['message' => "Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur."], 500);
         }
-        $orders = Order::with('cart', 'customer', 'histories', 'paymentStatus', 'status', 'livreur')
+        $orders = Order::with('cart', 'customer', 'histories', 'paymentStatus', 'status', 'livreur', 'refunds')
         ->where('order_status_id', $order_status->id)->orderByDesc('created_at')->get();
 
         return response()->json($orders, 200);
@@ -1301,7 +1302,7 @@ class OrderController extends Controller
      */
     public function getOrders()
     {
-        $orders = Order::with('cart', 'customer', 'histories', 'paymentStatus', 'status', 'livreur')->orderBy('created_at', 'desc')->get();
+        $orders = Order::with('cart', 'customer', 'histories', 'paymentStatus', 'status', 'livreur', 'refunds')->orderBy('created_at', 'desc')->get();
 
         return response()->json($orders, 200);
     }
@@ -1537,6 +1538,167 @@ class OrderController extends Controller
             'message' => 'Commande créée',
             'order'   => $order->fresh(['cart', 'status', 'paymentStatus', 'customer']),
         ], 201);
+    }
+
+    /**
+     * Whether the authenticated caller is staff (manager/admin/super admin).
+     *
+     * @return \App\Models\User|null  the staff user, or null when not staff
+     */
+    private function resolveStaffUser()
+    {
+        $user = User::with('role')->find(Auth::user()->getAuthIdentifier());
+
+        if ($user === null || !in_array((int) optional($user->role)->code, [
+            Role::MANAGER, Role::ADMIN, Role::SUPER_ADMIN,
+        ], true)) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    /**
+     * Record a refund on an order (staff). The app never moves funds — it only
+     * stores the refund for traceability; the actual money return is performed
+     * by staff in the payment provider. The recorded amount cannot exceed what
+     * is still refundable (order total minus already-recorded refunds).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addRefund(Request $request)
+    {
+        $staff = $this->resolveStaffUser();
+        if ($staff === null) {
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'order_id' => ['required', 'integer', 'exists:orders,id'],
+            'amount'   => ['required', 'integer', 'min:1'],
+            'reason'   => ['nullable', 'string', 'max:255'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $order = Order::find((int) $request->order_id);
+        $alreadyRefunded = (int) $order->refunds()->sum('amount');
+        $remaining = max(0, (int) $order->montant - $alreadyRefunded);
+
+        if ((int) $request->amount > $remaining) {
+            return response()->json([
+                'message' => 'Le montant du remboursement dépasse le montant remboursable (' .
+                    number_format($remaining, 0, ',', ' ') . ' Fcfa).',
+            ], 422);
+        }
+
+        $refund = Refund::create([
+            'order_id'    => $order->id,
+            'amount'      => (int) $request->amount,
+            'reason'      => $request->reason ? (string) Str::of($request->reason)->stripTags()->trim() : null,
+            'refunded_by' => $staff->id,
+        ]);
+
+        Log::info('Refund recorded', [
+            'order_id'  => $order->id,
+            'order_ref' => $order->string_id,
+            'amount'    => $refund->amount,
+            'staff_id'  => $staff->id,
+            'action'    => 'addRefund',
+        ]);
+
+        return response()->json([
+            'message' => 'Remboursement enregistré',
+            'refund'  => $refund,
+            'order'   => $order->fresh(['cart', 'status', 'paymentStatus', 'customer', 'refunds']),
+        ], 201);
+    }
+
+    /**
+     * Edit an order's delivery/contact details (staff). Item editing is out of
+     * scope; this covers the common corrections (wrong address, locality,
+     * guest contact, payment method). Changing the locality re-resolves the
+     * delivery zone fee and recomputes the total, keeping the discount intact.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateOrderDetails(Request $request)
+    {
+        $staff = $this->resolveStaffUser();
+        if ($staff === null) {
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'order_id'           => ['required', 'integer', 'exists:orders,id'],
+            'address'            => ['required', 'string', 'max:255'],
+            'localite_id'        => ['nullable', 'integer', 'exists:localites,id'],
+            'payment_method'     => ['nullable', 'string', 'max:255'],
+            'guest_first_name'   => ['nullable', 'string', 'max:255'],
+            'guest_last_name'    => ['nullable', 'string', 'max:255'],
+            'guest_phone_number' => ['nullable', 'regex:#^(3[3]|7[5-80])[ ]?[0-9]{3}([ ]?[0-9]{2}){2}$#'],
+            'guest_email'        => ['nullable', 'email', 'max:255'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $order = Order::find((int) $request->order_id);
+
+        $order->address = (string) Str::of($request->address)->stripTags()->trim();
+        if ($request->filled('payment_method')) {
+            $order->payment_method = (string) Str::of($request->payment_method)->stripTags()->trim();
+        }
+
+        // Guest contact is only editable on guest orders (customer orders derive
+        // their contact from the linked customer).
+        if ($order->is_guest_order) {
+            if ($request->filled('guest_first_name')) {
+                $order->guest_first_name = (string) Str::of($request->guest_first_name)->stripTags()->trim();
+            }
+            if ($request->filled('guest_last_name')) {
+                $order->guest_last_name = (string) Str::of($request->guest_last_name)->stripTags()->trim();
+            }
+            if ($request->filled('guest_phone_number')) {
+                $order->guest_phone_number = (string) Str::of($request->guest_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
+            }
+            if ($request->filled('guest_email')) {
+                $order->guest_email = (string) Str::of($request->guest_email)->stripTags()->trim();
+            }
+        }
+
+        // Locality change re-resolves the delivery fee and recomputes the total.
+        // The subtotal is derived from the stored fields so the cart snapshot is
+        // never re-read: montant = subtotal + delivery - discount.
+        $newLocaliteId = $request->filled('localite_id') ? (int) $request->localite_id : null;
+        if ($newLocaliteId !== $order->localite_id) {
+            $discount = (int) ($order->discount_amount ?? 0);
+            $subtotal = max(0, (int) $order->montant - (int) $order->delivery_fee + $discount);
+            $newFee = DeliverySettings::resolveFee($newLocaliteId, $subtotal);
+
+            $order->localite_id = $newLocaliteId;
+            $order->delivery_fee = $newFee;
+            $order->montant = max(0, $subtotal + $newFee - $discount);
+        }
+
+        $order->save();
+
+        Log::info('Order details updated', [
+            'order_id'  => $order->id,
+            'order_ref' => $order->string_id,
+            'staff_id'  => $staff->id,
+            'action'    => 'updateOrderDetails',
+        ]);
+
+        return response()->json([
+            'message' => 'Commande mise à jour',
+            'order'   => $order->fresh(['cart', 'status', 'paymentStatus', 'customer', 'refunds']),
+        ], 200);
     }
 
     /**

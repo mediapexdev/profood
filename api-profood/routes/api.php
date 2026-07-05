@@ -307,6 +307,8 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     Route::post('approve-order/{id}', [OrderController::class, 'approveOrder']);
     Route::post('update-order-status', [OrderController::class, 'updateOrderStatus']);
     Route::post('update-order-payment-status', [OrderController::class, 'updateOrderPaymentStatus']);
+    Route::post('update-order-details', [OrderController::class, 'updateOrderDetails']);
+    Route::post('add-refund', [OrderController::class, 'addRefund']);
 
     // Receipt exposes customer PII; authenticated + authorized only (see getPublicReceipt).
     Route::get('receipt/{string_id}', [OrderController::class, 'getPublicReceipt']);
