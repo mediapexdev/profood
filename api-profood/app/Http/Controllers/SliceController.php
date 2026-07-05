@@ -52,6 +52,9 @@ class SliceController extends Controller
             'promotional_price'    => $request->promotional_price ? Str::of($request->promotional_price)->stripTags()->trim() : null,
             'promotion_starts_at'  => $request->promotion_starts_at,
             'promotion_ends_at'    => $request->promotion_ends_at,
+            // Inventory: null means the product is not tracked (unlimited).
+            'stock_quantity'       => $request->filled('stock_quantity') ? (int)Str::of($request->stock_quantity)->stripTags()->trim() : null,
+            'low_stock_threshold'  => $request->filled('low_stock_threshold') ? (int)Str::of($request->low_stock_threshold)->stripTags()->trim() : null,
         ]);
         return response()->json(['message' => 'Produit créé !', 'slice' => $slice], 200); 
     }
@@ -124,6 +127,21 @@ class SliceController extends Controller
         $currentEndsAt = $slice->promotion_ends_at ? $slice->promotion_ends_at->toDateTimeString() : null;
         if($newEndsAt != $currentEndsAt) {
             $slice->promotion_ends_at = $newEndsAt;
+            $changes_made = true;
+        }
+
+        // Inventory fields — null means the product is not tracked (unlimited).
+        $newStock = $request->filled('stock_quantity') ? (int)$request->stock_quantity : null;
+        $currentStock = $slice->stock_quantity !== null ? (int)$slice->stock_quantity : null;
+        if($newStock !== $currentStock) {
+            $slice->stock_quantity = $newStock;
+            $changes_made = true;
+        }
+
+        $newThreshold = $request->filled('low_stock_threshold') ? (int)$request->low_stock_threshold : null;
+        $currentThreshold = $slice->low_stock_threshold !== null ? (int)$slice->low_stock_threshold : null;
+        if($newThreshold !== $currentThreshold) {
+            $slice->low_stock_threshold = $newThreshold;
             $changes_made = true;
         }
 

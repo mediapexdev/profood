@@ -226,6 +226,11 @@ class OrderController extends Controller
             $order->string_id = $code;
             $order->save();
 
+            // Reserve inventory: stock leaves the shelf as soon as the order is
+            // placed (this is a cash-on-delivery business, so we cannot wait for
+            // a payment webhook). It is restored if the order is cancelled.
+            $this->applyStockDelta($cart->id, -1);
+
             // Create promotion usage record and increment usage count
             if ($promotion && $discountAmount > 0) {
                 PromotionUsage::create([
@@ -477,6 +482,75 @@ class OrderController extends Controller
     }
 
     /**
+     * Total ordered quantity per slice for a cart snapshot, folding together
+     * standalone retail slices and slices contained in boxes.
+     *
+     * @param  int|null  $cartId
+     * @return array<int,int>  slice_id => quantity
+     */
+    private function computeSliceQuantities($cartId): array
+    {
+        $quantities = [];
+
+        if ($cartId === null) {
+            return $quantities;
+        }
+
+        foreach (CartSlice::where('cart_id', $cartId)->get(['slice_id', 'quantity']) as $cartSlice) {
+            if ($cartSlice->slice_id === null) {
+                continue;
+            }
+            $quantities[$cartSlice->slice_id] = ($quantities[$cartSlice->slice_id] ?? 0) + (int) $cartSlice->quantity;
+        }
+
+        $boxIds = Box::where('cart_id', $cartId)->pluck('id');
+        if ($boxIds->isNotEmpty()) {
+            foreach (BoxSlice::whereIn('box_id', $boxIds)->get(['slice_id', 'quantity']) as $boxSlice) {
+                if ($boxSlice->slice_id === null) {
+                    continue;
+                }
+                $quantities[$boxSlice->slice_id] = ($quantities[$boxSlice->slice_id] ?? 0) + (int) $boxSlice->quantity;
+            }
+        }
+
+        return $quantities;
+    }
+
+    /**
+     * Apply a stock movement for every tracked slice in a cart snapshot.
+     *
+     * $sign < 0 reserves stock (order placed), $sign > 0 restores it (order
+     * cancelled). Only products with stock tracking on (non-null stock_quantity)
+     * are touched, and each update is atomic to avoid lost updates under
+     * concurrent orders. Stock is allowed to go negative — the "allow + alert"
+     * policy warns the manager rather than blocking the sale.
+     *
+     * @param  int|null  $cartId
+     * @param  int  $sign  negative to decrement, positive to increment
+     * @return void
+     */
+    private function applyStockDelta($cartId, int $sign): void
+    {
+        if ($cartId === null || $sign === 0) {
+            return;
+        }
+
+        foreach ($this->computeSliceQuantities($cartId) as $sliceId => $quantity) {
+            if ($quantity <= 0) {
+                continue;
+            }
+
+            $query = Slice::where('id', $sliceId)->whereNotNull('stock_quantity');
+
+            if ($sign < 0) {
+                $query->decrement('stock_quantity', $quantity);
+            } else {
+                $query->increment('stock_quantity', $quantity);
+            }
+        }
+    }
+
+    /**
      * Add a guest order (unauthenticated customer).
      *
      * This endpoint allows customers to place orders without creating an account.
@@ -638,6 +712,9 @@ class OrderController extends Controller
         $code = $this->generateReferenceNumber($order);
         $order->string_id = $code;
         $order->save();
+
+        // Reserve inventory for the ordered products (restored on cancellation).
+        $this->applyStockDelta($guest_cart->id, -1);
 
         // Create promotion usage record and increment usage count (for guest orders, user_id is null)
         if ($promotion && $discountAmount > 0) {
@@ -892,6 +969,9 @@ class OrderController extends Controller
         $order->string_id = $code;
         $order->save();
 
+        // Reserve inventory for the ordered products (restored on cancellation).
+        $this->applyStockDelta($guest_cart->id, -1);
+
         // Create promotion usage record
         if ($promotion && $discountAmount > 0) {
             PromotionUsage::create([
@@ -1018,8 +1098,17 @@ class OrderController extends Controller
         if(!OrderHistory::where($cond)->exists()){
             OrderHistory::create($cond);
         }
+        // Whether the order was already cancelled before this call — used to
+        // avoid restoring the reserved inventory twice.
+        $alreadyCancelled = ((int) $order->order_status_id === (int) $status->id);
+
         $order->order_status_id = $status->id;
         $order->save();
+
+        // Return the reserved inventory to stock on the transition into cancelled.
+        if (!$alreadyCancelled) {
+            $this->applyStockDelta($order->cart_id, 1);
+        }
 
         // Envoi de la notification au client
 
@@ -1373,6 +1462,9 @@ class OrderController extends Controller
                 $order = Order::create($attributes);
                 $order->string_id = $this->generateReferenceNumber($order);
                 $order->save();
+
+                // Reserve inventory for the ordered products (restored on cancellation).
+                $this->applyStockDelta($cart->id, -1);
 
                 OrderHistory::create([
                     'order_id'        => $order->id,
@@ -1798,8 +1890,22 @@ class OrderController extends Controller
         if(!OrderHistory::where($cond)->exists()){
             OrderHistory::create($cond);
         }
+
+        // Capture the previous status so inventory is only restored or re-reserved
+        // on an actual transition in or out of the cancelled state.
+        $previousStatusCode = optional(OrderStatus::find($order->order_status_id))->code;
+        $newIsCancelled = ((int) $status->code === OrderStatus::CANCELLED);
+        $wasCancelled = ($previousStatusCode !== null && (int) $previousStatusCode === OrderStatus::CANCELLED);
+
         $order->order_status_id = $status->id;
         $order->save();
+
+        // Keep the stock reservation in sync with the cancelled state.
+        if ($newIsCancelled && !$wasCancelled) {
+            $this->applyStockDelta($order->cart_id, 1);
+        } elseif (!$newIsCancelled && $wasCancelled) {
+            $this->applyStockDelta($order->cart_id, -1);
+        }
 
         // Log order status update
         Log::info('Order status updated', [

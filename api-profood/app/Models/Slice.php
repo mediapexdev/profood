@@ -38,6 +38,8 @@ class Slice extends Model
         'promotion_ends_at',
         'weight',
         'available_in_box',
+        'stock_quantity',
+        'low_stock_threshold',
         'illustration'
     ];
 
@@ -53,6 +55,8 @@ class Slice extends Model
         'promotion_ends_at' => 'datetime',
         'weight' => 'decimal:2',
         'available_in_box' => 'boolean',
+        'stock_quantity' => 'integer',
+        'low_stock_threshold' => 'integer',
     ];
 
     /**
@@ -64,7 +68,14 @@ class Slice extends Model
         'is_on_promotion',
         'effective_price',
         'discount_percentage',
+        'stock_status',
     ];
+
+    /**
+     * Default low-stock threshold used when a product has stock tracking on but
+     * no explicit threshold set.
+     */
+    const DEFAULT_LOW_STOCK_THRESHOLD = 5;
 
     /**
      * Check if the product is currently on promotion.
@@ -163,7 +174,66 @@ class Slice extends Model
     }
 
     /**
-     * 
+     * Whether inventory is tracked for this product. A NULL stock_quantity
+     * means "not tracked" (unlimited) — the default for legacy products.
+     *
+     * @return bool
+     */
+    public function isStockTracked(): bool
+    {
+        return $this->stock_quantity !== null;
+    }
+
+    /**
+     * Out of stock: tracked and at or below zero. Ordering is still allowed
+     * ("allow + alert"), so this is a warning flag, not a hard block.
+     *
+     * @return bool
+     */
+    public function isOutOfStock(): bool
+    {
+        return $this->isStockTracked() && $this->stock_quantity <= 0;
+    }
+
+    /**
+     * Low stock: tracked, still positive, but at or below the threshold.
+     *
+     * @return bool
+     */
+    public function isLowStock(): bool
+    {
+        if (!$this->isStockTracked() || $this->stock_quantity <= 0) {
+            return false;
+        }
+
+        $threshold = $this->low_stock_threshold ?? self::DEFAULT_LOW_STOCK_THRESHOLD;
+
+        return $this->stock_quantity <= $threshold;
+    }
+
+    /**
+     * Accessor for stock_status attribute — a single value the UIs can switch
+     * on: 'untracked' | 'out_of_stock' | 'low_stock' | 'in_stock'.
+     *
+     * @return string
+     */
+    public function getStockStatusAttribute(): string
+    {
+        if (!$this->isStockTracked()) {
+            return 'untracked';
+        }
+        if ($this->isOutOfStock()) {
+            return 'out_of_stock';
+        }
+        if ($this->isLowStock()) {
+            return 'low_stock';
+        }
+
+        return 'in_stock';
+    }
+
+    /**
+     *
      */
     public function category()
     {

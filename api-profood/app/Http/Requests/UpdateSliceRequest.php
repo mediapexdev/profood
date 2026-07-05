@@ -67,6 +67,9 @@ class UpdateSliceRequest extends FormRequest
             'promotional_price'         => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'lt:price'],
             'promotion_starts_at'       => ['nullable', 'date'],
             'promotion_ends_at'         => ['nullable', 'date', 'after:promotion_starts_at'],
+            // Inventory (optional): omit to leave the product untracked.
+            'stock_quantity'            => ['nullable', 'integer'],
+            'low_stock_threshold'       => ['nullable', 'integer', 'min:0'],
         ];
     }
 
