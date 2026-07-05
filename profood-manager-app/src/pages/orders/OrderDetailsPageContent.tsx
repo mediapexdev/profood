@@ -34,6 +34,9 @@ import OrderCustomerDetails from "./components/OrderCustomerDetails";
 import OrderPaymentDetails from "./components/OrderPaymentDetails";
 import OrderDeliveryAddressDetails from "./components/OrderDeliveryAddressDetails";
 import OrderStatusesView from "./components/OrderStatusesView";
+import OrderRefundsView from "./components/OrderRefundsView";
+import OrderEditModal from "./components/modals/OrderEditModal";
+import RefundModal from "./components/modals/RefundModal";
 import LivreurLiveLocation from "./components/LivreurLiveLocation";
 import { useDataContext } from "../../components/contexts/DataProvider";
 import { useLoadingSpinnerContext } from "../../components/contexts/LoadingSpinnerProvider";
@@ -240,7 +243,15 @@ const OrderDetailsPageContent: React.FC<OrderProps> = (order: OrderProps) => {
     const toggleOrderPaymentConfirmationModal = () => setShowOrderPaymentConfirmationModal(!showOrderPaymentConfirmationModal);
 
     /**
-     * 
+     * Edit-details and refund modals.
+     */
+    const [showEditModal, setShowEditModal] = useState<boolean>(false);
+    const toggleEditModal = () => setShowEditModal((prev) => !prev);
+    const [showRefundModal, setShowRefundModal] = useState<boolean>(false);
+    const toggleRefundModal = () => setShowRefundModal((prev) => !prev);
+
+    /**
+     *
      */
     return (
         <div
@@ -270,6 +281,30 @@ const OrderDetailsPageContent: React.FC<OrderProps> = (order: OrderProps) => {
                                         </Button>
                                     </div>
                                     <div className='d-flex align-items-center gap-2'>
+                                    {
+                                        order.status.wording.toLowerCase() !== 'cancelled' &&
+                                        <Button
+                                            tag='button'
+                                            type='button'
+                                            color='none'
+                                            className="border-0 rounded-1 bs-bg-hover-light-info text-gray-700"
+                                            onClick={() => setShowEditModal(true)}
+                                        >
+                                            <span>{t('Modifier')}</span>
+                                        </Button>
+                                    }
+                                    {
+                                        order.payment_status.code === 8 &&
+                                        <Button
+                                            tag='button'
+                                            type='button'
+                                            color='none'
+                                            className="border-0 rounded-1 bs-bg-hover-light-warning text-warning"
+                                            onClick={() => setShowRefundModal(true)}
+                                        >
+                                            <span>{t('Rembourser')}</span>
+                                        </Button>
+                                    }
                                     {
                                         order.status.wording.toLowerCase() !== 'delivered' &&
                                         order.status.wording.toLowerCase() !== 'cancelled' &&
@@ -656,8 +691,20 @@ const OrderDetailsPageContent: React.FC<OrderProps> = (order: OrderProps) => {
                         <OrderStatusesView {...order} />
                     </Col>
                     {/* end::Status view  */}
+                    {/* begin::Refunds */}
+                    <Col xs={12}>
+                        <OrderRefundsView order={order} />
+                    </Col>
+                    {/* end::Refunds */}
                 </Row>
             </Container>
+
+            {showEditModal && (
+                <OrderEditModal show={showEditModal} setShow={setShowEditModal} toggle={toggleEditModal} order={order} />
+            )}
+            {showRefundModal && (
+                <RefundModal show={showRefundModal} setShow={setShowRefundModal} toggle={toggleRefundModal} order={order} />
+            )}
         </div>
     );
 };

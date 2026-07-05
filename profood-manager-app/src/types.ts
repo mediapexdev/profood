@@ -332,6 +332,20 @@ export interface OrderProps {
     created_at: string;
     /** Assigned delivery person — null when unassigned. Eager-loaded by the API. */
     livreur: Livreur | null;
+    /** Recorded refunds (source of truth for money returned). Eager-loaded. */
+    refunds?: RefundProps[];
+}
+
+/**
+ * A recorded refund on an order.
+ */
+export interface RefundProps {
+    id: number;
+    order_id: number;
+    amount: number;
+    reason: string | null;
+    refunded_by: number | null;
+    created_at: string;
 }
 
 /**
