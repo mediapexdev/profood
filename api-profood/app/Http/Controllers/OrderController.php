@@ -1252,7 +1252,7 @@ class OrderController extends Controller
         if(!isset($order_status)){
             return response()->json(['message' => "Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur."], 500);
         }
-        $orders = Order::with('cart', 'customer', 'histories', 'paymentStatus', 'status', 'livreur', 'refunds')
+        $orders = Order::with('cart', 'customer', 'histories', 'paymentStatus', 'status', 'livreur', 'refunds', 'deliveryProof')
         ->where('order_status_id', $order_status->id)->orderByDesc('created_at')->get();
 
         return response()->json($orders, 200);
@@ -1265,7 +1265,7 @@ class OrderController extends Controller
      */
     public function getOrders()
     {
-        $orders = Order::with('cart', 'customer', 'histories', 'paymentStatus', 'status', 'livreur', 'refunds')->orderBy('created_at', 'desc')->get();
+        $orders = Order::with('cart', 'customer', 'histories', 'paymentStatus', 'status', 'livreur', 'refunds', 'deliveryProof')->orderBy('created_at', 'desc')->get();
 
         return response()->json($orders, 200);
     }

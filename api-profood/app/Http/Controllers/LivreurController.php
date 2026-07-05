@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Box;
 use App\Models\CartSlice;
+use App\Models\DeliveryProof;
 use App\Models\Livreur;
 use App\Models\LivreurLocation;
 use App\Models\LivreurNotification;
@@ -11,6 +12,7 @@ use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Models\OrderStatus;
 use App\Models\Role;
+use App\Services\ImageService;
 use App\Services\StockService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -148,6 +150,101 @@ class LivreurController extends Controller
             'message'  => 'Statut de la commande mis à jour',
             'order_id' => $order->id,
             'status'   => $status
+        ], 200);
+    }
+
+    /**
+     * Confirm a delivery with proof, then mark the order DELIVERED in one call.
+     *
+     * Proof is NEVER required — a livreur can always confirm even without a
+     * photo (network hiccup, camera denied, customer in a hurry). Partial
+     * deliveries are record-only: the item checklist and note are stored for
+     * the manager to reconcile; the order amount is not recomputed here.
+     */
+    public function confirmDelivery(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id'    => ['required', 'integer'],
+            'is_complete' => ['nullable', 'boolean'],
+            'note'        => ['nullable', 'string', 'max:1000'],
+            'items'       => ['nullable', 'array', 'max:100'],
+            'photos'      => ['nullable', 'array', 'max:3'],
+            'photos.*'    => ['string', 'max:3000000'], // ~2MB base64 guard per photo
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $livreur = $this->currentLivreur();
+
+        if (!$livreur instanceof Livreur) {
+            return $livreur;
+        }
+        $order = Order::where('id', (int)$request->order_id)
+            ->where('livreur_id', $livreur->id)
+            ->first();
+
+        if (!isset($order)) {
+            return response()->json(['message' => 'Commande introuvable ou non assignée'], 404);
+        }
+
+        // Store proof photos (optional). A bad payload is a 422, never a 500.
+        $photoUrls = [];
+        foreach ((array)$request->input('photos', []) as $photo) {
+            if (!is_string($photo) || trim($photo) === '') {
+                continue;
+            }
+            try {
+                $photoUrls[] = app(ImageService::class)->storeBase64ToDisk($photo, 'delivery_proofs');
+            } catch (\InvalidArgumentException $e) {
+                return response()->json(['message' => 'Photo de preuve invalide'], 422);
+            }
+        }
+
+        $isComplete = $request->has('is_complete') ? $request->boolean('is_complete') : true;
+
+        $proof = DeliveryProof::updateOrCreate(
+            ['order_id' => $order->id],
+            [
+                'livreur_id'  => $livreur->id,
+                'photos'      => $photoUrls,
+                'is_complete' => $isComplete,
+                'items'       => $request->input('items'),
+                'note'        => $request->input('note'),
+            ]
+        );
+
+        // Mark the order DELIVERED. Mirror updateDeliveryStatus' stock handling
+        // so moving out of a cancelled state re-reserves inventory.
+        $delivered = OrderStatus::where('code', OrderStatus::DELIVERED)->first();
+        if (isset($delivered)) {
+            $cond = ['order_id' => $order->id, 'order_status_id' => $delivered->id];
+            if (!OrderHistory::where($cond)->exists()) {
+                OrderHistory::create($cond);
+            }
+            $previousStatusCode = optional(OrderStatus::find($order->order_status_id))->code;
+            $wasCancelled = ($previousStatusCode !== null && (int)$previousStatusCode === OrderStatus::CANCELLED);
+
+            $order->order_status_id = $delivered->id;
+            $order->save();
+
+            if ($wasCancelled) {
+                app(StockService::class)->applyDelta($order->cart_id, -1);
+            }
+        }
+
+        Log::info('Delivery confirmed with proof by livreur', [
+            'order_id'    => $order->id,
+            'order_ref'   => $order->string_id,
+            'livreur_id'  => $livreur->id,
+            'is_complete' => $isComplete,
+            'photo_count' => count($photoUrls),
+            'action'      => 'livreur:confirmDelivery',
+        ]);
+
+        return response()->json([
+            'message' => 'Livraison confirmée',
+            'proof'   => $proof,
         ], 200);
     }
 

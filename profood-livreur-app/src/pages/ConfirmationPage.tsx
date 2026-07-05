@@ -1,32 +1,34 @@
 /**
- * ConfirmationPage — collects proof of delivery before marking an order done.
+ * ConfirmationPage — captures proof of delivery, then marks the order done.
  *
  * Reached from DeliveryDetailsPage via /livraison/:id/confirmation.
  * The driver can:
  *   - Toggle between "Livraison complète" and "Livraison partielle"
- *   - Attach photo proof (placeholder squares — camera integration Phase 2)
- *   - Sign digitally (placeholder pad — canvas integration Phase 2)
- *   - Review and tick each item in the order
- *   - Submit → calls updateStatus(id, 'delivered') then navigates to /
+ *   - Attach photo proof (device camera / gallery, downscaled client-side)
+ *   - Review and tick each item actually handed over
+ *   - Add a note (useful for a partial delivery)
+ *   - Submit → POST /livreur-confirm-delivery (persists proof + marks delivered)
  *
- * If the delivery id cannot be resolved we show a "not found" state identical
- * to DeliveryDetailsPage to keep the UX consistent.
+ * Proof is optional: the driver can always confirm. Partial deliveries are
+ * record-only — the checklist + note are stored for the manager to reconcile.
  */
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Icon } from '../components/Icon'
 import { PageHeader } from '../components/PageHeader'
 import { useDeliveries } from '../hooks/useDeliveries'
+import { confirmDelivery } from '../api/orders'
+import { fileToDownscaledDataUrl } from '../lib/image'
 import { openDirections } from '../lib/navigation'
 
-// Number of photo proof slots to render.
-const PHOTO_SLOT_COUNT = 3
+// Maximum number of proof photos.
+const MAX_PHOTOS = 3
 
 export function ConfirmationPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { getDelivery, updateStatus, activeDeliveries } = useDeliveries()
+  const { getDelivery, updateStatus, refresh, activeDeliveries } = useDeliveries()
 
   const delivery = id ? getDelivery(id) : undefined
 
@@ -38,8 +40,12 @@ export function ConfirmationPage() {
     () => (delivery?.items ?? []).map(() => true)
   )
 
+  const [photos, setPhotos] = useState<string[]>([])
+  const [note, setNote] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [confirmed, setConfirmed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (!delivery) {
     return (
@@ -75,21 +81,55 @@ export function ConfirmationPage() {
     }
   }
 
-  // Persist the status change then surface the "next stop" prompt so
-  // the livreur can hop straight into Maps for the following delivery
-  // instead of bouncing back through the dashboard.
+  /** Capture one or more photos, downscaled client-side, capped at MAX_PHOTOS. */
+  const handlePhotoPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    const remaining = MAX_PHOTOS - photos.length
+    const picked = Array.from(files).slice(0, remaining)
+    try {
+      const urls = await Promise.all(picked.map((f) => fileToDownscaledDataUrl(f)))
+      setPhotos((prev) => [...prev, ...urls].slice(0, MAX_PHOTOS))
+    } catch {
+      setError("Impossible de traiter la photo. Réessayez.")
+    } finally {
+      // Reset so picking the same file again still fires onChange.
+      e.target.value = ''
+    }
+  }
+
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  // Persist proof + delivered status, then surface the "next stop" prompt.
   const handleConfirm = async () => {
     setSubmitting(true)
+    setError(null)
     try {
-      await updateStatus(delivery.id, 'delivered')
+      await confirmDelivery({
+        orderId: delivery.id,
+        isComplete,
+        note,
+        items: delivery.items.map((item, i) => ({
+          name: item.name,
+          quantity: item.quantity,
+          delivered: checkedItems[i] ?? true,
+        })),
+        photos,
+      })
+      // Keep the local list in sync so activeDeliveries drops this stop.
+      void refresh()
       setConfirmed(true)
+    } catch {
+      setError("La confirmation a échoué. Vérifiez votre connexion et réessayez.")
     } finally {
       setSubmitting(false)
     }
   }
 
-  // After the optimistic update marks this delivery `delivered`,
-  // activeDeliveries excludes it, so [0] is the actual next stop.
+  // After confirmation, activeDeliveries still holds this stop until the
+  // refetch lands, so exclude it explicitly to find the real next stop.
   const nextStop = confirmed
     ? activeDeliveries.find((d) => d.id !== delivery.id)
     : undefined
@@ -136,42 +176,43 @@ export function ConfirmationPage() {
 
         {/* ── Photo proof ────────────────────────────────────────────────── */}
         <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">
             Preuve photo
           </h2>
+          <p className="text-[11px] text-gray-400 mb-3">Optionnel — recommandé en cas de litige.</p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={handlePhotoPick}
+          />
           <div className="grid grid-cols-3 gap-3">
-            {Array.from({ length: PHOTO_SLOT_COUNT }).map((_, i) => (
+            {photos.map((src, i) => (
+              <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200">
+                <img src={src} alt={`Preuve ${i + 1}`} className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removePhoto(i)}
+                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center"
+                  aria-label="Retirer la photo"
+                >
+                  <Icon name="close" size="sm" />
+                </button>
+              </div>
+            ))}
+            {photos.length < MAX_PHOTOS && (
               <button
-                key={i}
                 type="button"
+                onClick={() => fileInputRef.current?.click()}
                 className="aspect-square border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-1 text-gray-400 hover:border-primary/50 hover:text-primary/60 transition-colors"
                 aria-label="Ajouter une photo"
               >
                 <Icon name="add_a_photo" size="md" />
                 <span className="text-[10px] font-semibold">Photo</span>
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Signature pad placeholder ──────────────────────────────────── */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400">
-              Signature client
-            </h2>
-            <button
-              type="button"
-              className="text-gray-400 hover:text-primary transition-colors"
-              aria-label="Effacer la signature"
-            >
-              <Icon name="refresh" size="sm" />
-            </button>
-          </div>
-          {/* Canvas will replace this placeholder in Phase 2 */}
-          <div className="h-32 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-400">
-            <Icon name="draw" size="lg" />
-            <span className="text-xs font-semibold">Signez ici</span>
+            )}
           </div>
         </div>
 
@@ -213,6 +254,28 @@ export function ConfirmationPage() {
             ))}
           </ul>
         </div>
+
+        {/* ── Note (especially for a partial delivery) ───────────────────── */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+            Note {isComplete ? '(optionnel)' : '(recommandé)'}
+          </h2>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={2}
+            placeholder={isComplete ? 'Remarque éventuelle…' : 'Précisez ce qui n’a pas été livré et pourquoi…'}
+            className="w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 focus:border-primary focus:outline-none resize-none"
+          />
+        </div>
+
+        {/* ── Error ──────────────────────────────────────────────────────── */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 flex items-start gap-2">
+            <Icon name="error" size="sm" className="mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         {/* ── Confirm button ─────────────────────────────────────────────── */}
         <button
@@ -274,7 +337,7 @@ export function ConfirmationPage() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => navigate('/carte')}
+                    onClick={() => navigate('/tournee/carte')}
                     className="flex items-center justify-center gap-1.5 bg-white text-gray-700 border border-gray-200 font-semibold py-2.5 rounded-xl text-sm hover:bg-gray-50"
                   >
                     <Icon name="map" size="sm" />

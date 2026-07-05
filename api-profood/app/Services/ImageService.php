@@ -74,6 +74,44 @@ class ImageService
     }
 
     /**
+     * Decode a base64 data URL (e.g. a delivery-proof photo captured on the
+     * device), scale it down to fit within the given bounds while preserving
+     * aspect ratio, store it as JPEG on the public disk and return its URL.
+     *
+     * Throws \InvalidArgumentException if the payload is not decodable image
+     * data, so the caller can reject a bad upload with a 422.
+     *
+     * @param  string  $dataUrl  "data:image/...;base64,...." or raw base64
+     * @param  string  $subdir   e.g. 'delivery_proofs'
+     * @param  int     $maxWidth
+     * @param  int     $maxHeight
+     *
+     * @return string  absolute URL to the serving route
+     */
+    public function storeBase64ToDisk(string $dataUrl, string $subdir, int $maxWidth = 1280, int $maxHeight = 1280): string
+    {
+        // Strip an optional "data:<mime>;base64," prefix.
+        if (Str::contains($dataUrl, 'base64,')) {
+            $dataUrl = Str::after($dataUrl, 'base64,');
+        }
+
+        $binary = base64_decode(trim($dataUrl), true);
+        if ($binary === false || $binary === '') {
+            throw new \InvalidArgumentException('Invalid base64 image payload.');
+        }
+
+        try {
+            $image = $this->manager->read($binary);
+            $image->scaleDown($maxWidth, $maxHeight);
+            $jpeg = (string) $image->toJpeg();
+        } catch (\Throwable $e) {
+            throw new \InvalidArgumentException('Unreadable image payload.', 0, $e);
+        }
+
+        return $this->storeBinary($jpeg, $subdir);
+    }
+
+    /**
      * Store a raw JPEG binary (used by the base64 backfill) and return its URL.
      *
      * @param  string  $binary  JPEG bytes

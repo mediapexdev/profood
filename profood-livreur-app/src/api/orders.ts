@@ -192,9 +192,33 @@ export async function fetchDelivery(id: string): Promise<Delivery | undefined> {
   try {
     const response = await apiClient.get<ApiOrder>(`/get-livreur-delivery/${id}`)
     return mapApiOrderToDelivery(response.data, 1)
-  } catch (e) {
+  } catch {
     return undefined
   }
+}
+
+export interface ConfirmDeliveryPayload {
+  orderId: string
+  isComplete: boolean
+  note?: string
+  items?: Array<{ name: string; quantity: number; delivered: boolean }>
+  /** Base64 JPEG data URLs (already downscaled client-side). */
+  photos?: string[]
+}
+
+/**
+ * Confirm a delivery with proof of delivery via POST /livreur-confirm-delivery.
+ * Persists the proof (photos, complete/partial, item checklist, note) and marks
+ * the order delivered server-side in a single call.
+ */
+export async function confirmDelivery(payload: ConfirmDeliveryPayload): Promise<void> {
+  await apiClient.post('/livreur-confirm-delivery', {
+    order_id: Number(payload.orderId),
+    is_complete: payload.isComplete,
+    note: payload.note && payload.note.trim() !== '' ? payload.note.trim() : undefined,
+    items: payload.items,
+    photos: payload.photos,
+  })
 }
 
 /**

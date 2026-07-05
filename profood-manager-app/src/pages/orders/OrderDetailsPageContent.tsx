@@ -35,6 +35,7 @@ import OrderPaymentDetails from "./components/OrderPaymentDetails";
 import OrderDeliveryAddressDetails from "./components/OrderDeliveryAddressDetails";
 import OrderStatusesView from "./components/OrderStatusesView";
 import OrderRefundsView from "./components/OrderRefundsView";
+import OrderProofView from "./components/OrderProofView";
 import OrderEditModal from "./components/modals/OrderEditModal";
 import RefundModal from "./components/modals/RefundModal";
 import LivreurLiveLocation from "./components/LivreurLiveLocation";
@@ -691,6 +692,11 @@ const OrderDetailsPageContent: React.FC<OrderProps> = (order: OrderProps) => {
                         <OrderStatusesView {...order} />
                     </Col>
                     {/* end::Status view  */}
+                    {/* begin::Proof of delivery */}
+                    <Col xs={12}>
+                        <OrderProofView order={order} />
+                    </Col>
+                    {/* end::Proof of delivery */}
                     {/* begin::Refunds */}
                     <Col xs={12}>
                         <OrderRefundsView order={order} />

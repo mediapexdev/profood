@@ -334,6 +334,8 @@ export interface OrderProps {
     livreur: Livreur | null;
     /** Recorded refunds (source of truth for money returned). Eager-loaded. */
     refunds?: RefundProps[];
+    /** Proof of delivery captured by the livreur at confirmation. Eager-loaded. */
+    deliveryProof?: DeliveryProofProps | null;
 }
 
 /**
@@ -345,6 +347,22 @@ export interface RefundProps {
     amount: number;
     reason: string | null;
     refunded_by: number | null;
+    created_at: string;
+}
+
+/**
+ * Proof of delivery captured by the livreur when confirming a drop-off.
+ */
+export interface DeliveryProofProps {
+    id: number;
+    order_id: number;
+    livreur_id: number | null;
+    /** Absolute URLs to the proof photos. */
+    photos: string[] | null;
+    is_complete: boolean;
+    /** Snapshot of the item checklist at confirmation. */
+    items: { name: string; quantity: number; delivered: boolean }[] | null;
+    note: string | null;
     created_at: string;
 }
 

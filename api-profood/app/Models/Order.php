@@ -82,6 +82,15 @@ class Order extends Model
     }
 
     /**
+     * Proof of delivery captured by the livreur at confirmation (photo,
+     * complete/partial, item checklist, note). Null until delivered.
+     */
+    public function deliveryProof()
+    {
+        return $this->hasOne(DeliveryProof::class);
+    }
+
+    /**
      * 
      */
     public function histories()
