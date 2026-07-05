@@ -156,6 +156,11 @@ const GuestCheckoutPage: React.FC = () => {
             ...(coords ?? {}),
         };
 
+        // Delivery zone fee is resolved server-side from this id.
+        if (guestInfo.localiteId) {
+            data.localite_id = guestInfo.localiteId;
+        }
+
         if (promoApplied) {
             // The API reads `promotion_code` (see OrderController@addGuestOrder)
             data.promotion_code = promoApplied.code;
@@ -216,6 +221,11 @@ const GuestCheckoutPage: React.FC = () => {
             cart_items: cartItems,
             ...(coords ?? {}),
         };
+
+        // Delivery zone fee is resolved server-side from this id.
+        if (guestInfo.localiteId) {
+            paymentData.localite_id = guestInfo.localiteId;
+        }
 
         if (promoApplied) {
             // The API reads `promotion_code` (see OrderController@addGuestOrderWithPayment)

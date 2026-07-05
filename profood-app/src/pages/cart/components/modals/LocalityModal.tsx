@@ -28,7 +28,7 @@ import './LocalityModal.css';
  */
 interface LocalityModalProps{
     localitiesInfo: LocalityInfo[];
-    onDismiss: (role?: 'cancel' | 'confirm', locality?: string) => void;
+    onDismiss: (role?: 'cancel' | 'confirm', locality?: string, localityId?: number) => void;
 }
 
 /**
@@ -59,7 +59,13 @@ const LocalityModal: React.FC<LocalityModalProps> = ({localitiesInfo, onDismiss}
     const [selectedLocality, setSelectedLocality] = useState<string | undefined>(undefined);
 
     /**
-     * 
+     * The id of the selected locality, sent alongside the wording so the order
+     * can resolve its delivery zone (commune).
+     */
+    const [selectedLocalityId, setSelectedLocalityId] = useState<number | undefined>(undefined);
+
+    /**
+     *
      */
     const [localitySelected, setLocalitySelected] = useState<boolean>(false);
 
@@ -113,6 +119,7 @@ const LocalityModal: React.FC<LocalityModalProps> = ({localitiesInfo, onDismiss}
         setLocalitySelected(false);
         setFilteredItems([]);
         setSelectedLocality(undefined);
+        setSelectedLocalityId(undefined);
     }, []);
 
     /**
@@ -121,6 +128,7 @@ const LocalityModal: React.FC<LocalityModalProps> = ({localitiesInfo, onDismiss}
      */
     const updateSelectedLocality = useCallback((selected_locality_info: LocalityInfo) => {
         setSelectedLocality(selected_locality_info.wording);
+        setSelectedLocalityId(selected_locality_info.id);
         setLocalitySelected(true);
         setFilteredItems([]);
     }, []);
@@ -219,7 +227,7 @@ const LocalityModal: React.FC<LocalityModalProps> = ({localitiesInfo, onDismiss}
                             expand="block"
                             id='btnConfirmLocality'
                             className='text-transform-none fw-semibold'
-                            onClick={() => onDismiss('confirm', selectedLocality)}
+                            onClick={() => onDismiss('confirm', selectedLocality, selectedLocalityId)}
                         >
                             <span style={{color: '#fff'}}>{t('Confirmer et continuer')}</span>
                         </IonButton>
@@ -240,7 +248,7 @@ const LocalityModal: React.FC<LocalityModalProps> = ({localitiesInfo, onDismiss}
                 </div>
             );
         }
-    }, [localitySelected, onDismiss, selectedLocality, showLocalityList, t]);
+    }, [localitySelected, onDismiss, selectedLocality, selectedLocalityId, showLocalityList, t]);
 
     return (
         <IonPage>

@@ -107,7 +107,9 @@ const OrderSummary: React.FC = () => {
         setShowSpinner(true);
         const orderStringId = SHA256_Encrypt(formatDate(new Date(), 'full', true, 'full'));
         const address = localStorage.getItem('selectedLocality');
+        const localiteId = localStorage.getItem('selectedLocaliteId');
         localStorage.removeItem('selectedLocality');
+        localStorage.removeItem('selectedLocaliteId');
         const coords = await captureDeliveryCoordinates();
         const data: any = {
             // command_id: 1,
@@ -117,6 +119,11 @@ const OrderSummary: React.FC = () => {
             order_id: orderStringId,
             ...(coords ?? {}),
         };
+        // The server resolves the delivery zone fee from this id; montant is
+        // recomputed server-side, so the client total is only cosmetic.
+        if (localiteId) {
+            data.localite_id = Number(localiteId);
+        }
         if (appliedPromo) {
             // Server re-validates the code and recomputes the discount from real
             // prices; this client montant is ignored server-side.
@@ -161,6 +168,7 @@ const OrderSummary: React.FC = () => {
         const token = localStorage.getItem('token');
         const orderStringId = SHA256_Encrypt(formatDate(new Date(), 'full', true, 'full'));
         const address = localStorage.getItem('selectedLocality');
+        const localiteId = localStorage.getItem('selectedLocaliteId');
         // localStorage.removeItem('selectedLocality');
         const coords = await captureDeliveryCoordinates();
         const requestTokenUrl = process.env.NODE_ENV === "production" ?
@@ -177,6 +185,11 @@ const OrderSummary: React.FC = () => {
             ...(coords ?? {}),
             //will be sent to paiement.php page
         };
+        // Delivery zone fee resolved server-side from this id; PayTech is issued
+        // for the server-computed montant, so the client total is only cosmetic.
+        if (localiteId) {
+            paymentPayload.localite_id = Number(localiteId);
+        }
         if (appliedPromo) {
             // Server re-validates and recomputes the discount authoritatively.
             // An invalid code makes add-order-with-payment return 422 BEFORE any
@@ -200,6 +213,7 @@ const OrderSummary: React.FC = () => {
             },
             didGetToken: function (pt_token: string, redirectUrl: string) {
                 localStorage.removeItem('selectedLocality');
+                localStorage.removeItem('selectedLocaliteId');
                 // The order (with its promo usage) is already persisted once the
                 // token is issued, so drop the applied code from local storage.
                 localStorage.removeItem('appliedPromoCode');
@@ -258,7 +272,8 @@ const OrderSummary: React.FC = () => {
      */
     const [presentLocalityModal, dismissLocalityModal] = useIonModal(LocalityModal, {
         localitiesInfo: localitiesInfo,
-        onDismiss: (role?: 'cancel' | 'confirm', locality?: string) => dismissLocalityModal(locality, role)
+        onDismiss: (role?: 'cancel' | 'confirm', locality?: string, localityId?: number) =>
+            dismissLocalityModal({ wording: locality, id: localityId }, role)
     });
 
     /**
@@ -311,7 +326,13 @@ const OrderSummary: React.FC = () => {
             onWillDismiss: (ev: CustomEvent<OverlayEventDetail>) => {
                 if (ev.detail.role === 'confirm') {
                     // setTimeout(() => openOrderFinalizationModal(), 200);
-                    localStorage.setItem('selectedLocality', ev.detail.data);
+                    localStorage.setItem('selectedLocality', ev.detail.data?.wording ?? '');
+                    // Persist the locality id so the order resolves its delivery zone.
+                    if (ev.detail.data?.id != null) {
+                        localStorage.setItem('selectedLocaliteId', String(ev.detail.data.id));
+                    } else {
+                        localStorage.removeItem('selectedLocaliteId');
+                    }
                     openOrderFinalizationModal();
                     // addOrder();
                 }

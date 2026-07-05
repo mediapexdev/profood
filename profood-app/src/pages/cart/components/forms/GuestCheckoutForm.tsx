@@ -101,6 +101,8 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
     const [phoneNumber, setPhoneNumber] = useState<string>('');
     const [email, setEmail]           = useState<string>('');
     const [address, setAddress]       = useState<string>('');
+    /** Id of the chosen locality — sent so the order resolves its delivery zone. */
+    const [selectedLocaliteId, setSelectedLocaliteId] = useState<number | undefined>(undefined);
 
     /** Whether the locality suggestion list is visible */
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
@@ -131,8 +133,9 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
     }, [address, localities]);
 
     /** Fills the field with the tapped suggestion and closes the list */
-    const selectLocality = useCallback((wording: string) => {
-        setAddress(wording);
+    const selectLocality = useCallback((locality: { id: number; wording: string }) => {
+        setAddress(locality.wording);
+        setSelectedLocaliteId(locality.id);
         setShowSuggestions(false);
         markTouched('address');
     }, [markTouched]);
@@ -206,6 +209,12 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
 
             if (!isValid) return;
 
+            // Resolve the locality id: the tapped suggestion, or an exact
+            // name match when the guest typed the full locality name.
+            const normalizedAddress = normalizeText(address.trim());
+            const resolvedLocaliteId = selectedLocaliteId
+                ?? localities.find(l => normalizeText(l.wording) === normalizedAddress)?.id;
+
             onSubmit({
                 firstName: firstName.trim(),
                 lastName: lastName.trim(),
@@ -213,9 +222,10 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                 phoneNumber: normalizedPhone,
                 email: email.trim(),
                 address: address.trim(),
+                localiteId: resolvedLocaliteId,
             });
         },
-        [isValid, onSubmit, firstName, lastName, normalizedPhone, email, address]
+        [isValid, onSubmit, firstName, lastName, normalizedPhone, email, address, selectedLocaliteId, localities]
     );
 
     // ── Render helpers ─────────────────────────────────────────────────────────
@@ -348,6 +358,8 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                     placeholder={t('Rechercher votre localité')}
                     onIonInput={(e) => {
                         setAddress(e.detail.value ?? '');
+                        // Typing invalidates a previously tapped suggestion.
+                        setSelectedLocaliteId(undefined);
                         setShowSuggestions(true);
                     }}
                     onIonFocus={() => setShowSuggestions(true)}
@@ -374,7 +386,7 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
                             button
                             detail={false}
                             key={locality.id}
-                            onClick={() => selectLocality(locality.wording)}
+                            onClick={() => selectLocality(locality)}
                         >
                             <IonIcon
                                 icon={locationOutline}
