@@ -30,6 +30,7 @@ import { OrderProps, OrderStatus } from '../../../types';
 import { useDataContext } from '../../../components/contexts/DataProvider';
 import { formatDate } from '../../../helpers/AssetHelpers';
 import OrderStatusesMenu from './OrderStatusesMenu';
+import LivreurFilterMenu, { LivreurFilter } from './LivreurFilterMenu';
 import useGoTo from '../../../components/hooks/useGoTo';
 
 import './OrdersListView.css';
@@ -43,6 +44,7 @@ const OrdersListView: React.FC = () => {
 
     const [searchedText, setSearchText] = useState<string>('');
     const [filterStatus, setFilterStatus] = useState<OrderStatus|null>(null);
+    const [filterLivreur, setFilterLivreur] = useState<LivreurFilter>(null);
     const [filteredOrders, setFilteredOrders] = useState<OrderProps[]>([]);
     const [fromSearch, setFromSearch] = useState<boolean>(false);
 
@@ -89,6 +91,16 @@ const OrdersListView: React.FC = () => {
         return filterStatus !== null && order.status.id === filterStatus.id;
     }, [filterStatus]);
 
+    const checkLivreur = useCallback((order: OrderProps) => {
+        if (filterLivreur === null) {
+            return true;
+        }
+        if (filterLivreur === 'unassigned') {
+            return !order.livreur;
+        }
+        return order.livreur?.id === filterLivreur.id;
+    }, [filterLivreur]);
+
     const checkSearchedText = useCallback((order: OrderProps) => {
         const user = order.customer?.user;
         const firstName = user?.first_name ?? order.guest_first_name ?? '';
@@ -104,14 +116,20 @@ const OrdersListView: React.FC = () => {
 
     useEffect(() => {
         let f_orders = filterStatus !== null ? orders.filter(checkStatus) : orders;
-        setFromSearch(filterStatus !== null);
+        let active = filterStatus !== null;
+
+        if(filterLivreur !== null){
+            f_orders = f_orders.filter(checkLivreur);
+            active = true;
+        }
 
         if(searchedText.length > 0){
             f_orders = f_orders.filter(checkSearchedText);
-            setFromSearch(true);
+            active = true;
         }
+        setFromSearch(active);
         setFilteredOrders(f_orders);
-    }, [orders, searchedText, filterStatus, checkStatus, checkSearchedText]);
+    }, [orders, searchedText, filterStatus, filterLivreur, checkStatus, checkLivreur, checkSearchedText]);
 
     // Clear bulk selection whenever the visible order list changes so
     // previously selected items that are no longer visible are not silently
@@ -241,6 +259,12 @@ const OrdersListView: React.FC = () => {
                                                 <OrderStatusesMenu
                                                     selectedStatus={filterStatus}
                                                     setSelectedStatus={setFilterStatus}
+                                                />
+                                            </Col>
+                                            <Col sm={6} md={4} xl={6}>
+                                                <LivreurFilterMenu
+                                                    selectedLivreur={filterLivreur}
+                                                    setSelectedLivreur={setFilterLivreur}
                                                 />
                                             </Col>
                                         </Row>
