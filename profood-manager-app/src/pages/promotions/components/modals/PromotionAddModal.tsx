@@ -85,6 +85,8 @@ const PromotionAddModal: React.FC<PromotionAddModalProps> = ({ show, setShow, to
     const [discountType, setDiscountType] = useState<DiscountTypeValue>('percentage');
     const [discountValue, setDiscountValue] = useState<number | undefined>(undefined);
     const [minOrderAmount, setMinOrderAmount] = useState<number | undefined>(undefined);
+    // Absolute cap (Fcfa) on the discount a percentage code can grant.
+    const [maxDiscount, setMaxDiscount] = useState<number | undefined>(undefined);
     const [maxUsage, setMaxUsage] = useState<number | undefined>(undefined);
     const [maxUsagePerUser, setMaxUsagePerUser] = useState<number | undefined>(undefined);
     const [startsAt, setStartsAt] = useState('');
@@ -131,6 +133,8 @@ const PromotionAddModal: React.FC<PromotionAddModalProps> = ({ show, setShow, to
             // Always send 0 for free_delivery so the backend column is never null
             discount_value:    discountType === 'free_delivery' ? 0 : discountValue,
             minimum_order_amount:  minOrderAmount ?? null,
+            // Only meaningful for percentage codes; null otherwise.
+            maximum_discount:      discountType === 'percentage' ? (maxDiscount ?? null) : null,
             usage_limit_total:     maxUsage ?? null,
             usage_limit_per_user:  maxUsagePerUser ?? null,
             starts_at:         startsAt || null,
@@ -329,6 +333,34 @@ const PromotionAddModal: React.FC<PromotionAddModalProps> = ({ show, setShow, to
                                 </Col>
                             )}
                         </Row>
+
+                        {/* Row 2b: Discount cap (percentage codes only) */}
+                        {discountType === 'percentage' && (
+                            <Row className='align-items-center'>
+                                <Col md={12}>
+                                    <FormGroup floating className='form-group mb-1'>
+                                        <Input
+                                            type='number'
+                                            name='maximum_discount'
+                                            id='promoMaxDiscountInput'
+                                            placeholder={t('Plafond de réduction')}
+                                            min={0}
+                                            value={maxDiscount ?? ''}
+                                            onInput={(e: React.FormEvent<HTMLInputElement>) =>
+                                                setMaxDiscount(
+                                                    e.currentTarget.value
+                                                        ? Number(e.currentTarget.value)
+                                                        : undefined
+                                                )
+                                            }
+                                        />
+                                        <Label for='promoMaxDiscountInput'>
+                                            {t('Plafond de réduction')} (Fcfa)
+                                        </Label>
+                                    </FormGroup>
+                                </Col>
+                            </Row>
+                        )}
 
                         {/* Row 3: Usage limits */}
                         <Row className='align-items-center'>

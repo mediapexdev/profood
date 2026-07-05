@@ -16,6 +16,8 @@ import { useTranslation } from "react-i18next";
 import useGoTo from "../../components/hooks/useGoTo";
 import CustomerDataViewPageContentHeading from "./components/CustomerDataViewPageContentHeading";
 import CustomerProfileDetailsOverview from "./components/CustomerProfileDetailsOverview";
+import CustomerLifetimeStats from "./components/CustomerLifetimeStats";
+import CustomerOrderHistory from "./components/CustomerOrderHistory";
 import { CustomerProps } from "../../types";
 
 import './CustomerDataViewPageContent.css';
@@ -73,7 +75,13 @@ const CustomerDataViewPageContent: React.FC<CustomerProps> = (customer: Customer
                     { customer && <CustomerDataViewPageContentHeading {...customer} /> }
                     </Col>
                     <Col xs={12}>
+                    { customer && <CustomerLifetimeStats {...customer} /> }
+                    </Col>
+                    <Col xs={12}>
                     { customer && <CustomerProfileDetailsOverview {...customer} /> }
+                    </Col>
+                    <Col xs={12}>
+                    { customer && <CustomerOrderHistory {...customer} /> }
                     </Col>
                 </Row>
             </Container>

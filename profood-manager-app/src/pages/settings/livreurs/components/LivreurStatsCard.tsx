@@ -32,6 +32,8 @@ interface LivreurStats {
     totalAmount: number;
     deliveriesGrouped: number;
     deliveriesIndividual: number;
+    totalDistanceKm: number | null;
+    averageDeliverySeconds: number | null;
 }
 
 const todayISO = (): string => {
@@ -40,6 +42,22 @@ const todayISO = (): string => {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
+};
+
+// Distance en km avec une décimale ; « — » lorsque la donnée est absente.
+const formatDistanceKm = (km: number | null | undefined): string => {
+    if (km === null || km === undefined || Number.isNaN(km) || km <= 0) return '—';
+    return `${km.toFixed(1)} km`;
+};
+
+// Durée lisible à partir de secondes : « Xh Ymin » ou « Y min ».
+// « — » lorsque la donnée est absente (aucune livraison terminée).
+const formatDeliveryDuration = (seconds: number | null | undefined): string => {
+    if (seconds === null || seconds === undefined || Number.isNaN(seconds) || seconds <= 0) return '—';
+    const totalMinutes = Math.round(seconds / 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return hours > 0 ? `${hours}h ${minutes}min` : `${minutes} min`;
 };
 
 const LivreurStatsCard: React.FC<LivreurStatsCardProps> = ({ livreurId }: LivreurStatsCardProps) => {
@@ -133,6 +151,16 @@ const LivreurStatsCard: React.FC<LivreurStatsCardProps> = ({ livreurId }: Livreu
                             label={t('Montant livré')}
                             value={`${formatNumber(stats?.totalAmount ?? 0)} Fcfa`}
                             color="success"
+                        />
+                        <Tile
+                            label={t('Distance parcourue')}
+                            value={formatDistanceKm(stats?.totalDistanceKm)}
+                            color="info"
+                        />
+                        <Tile
+                            label={t('Temps moyen de livraison')}
+                            value={formatDeliveryDuration(stats?.averageDeliverySeconds)}
+                            color="primary"
                         />
                     </Row>
                 )}
