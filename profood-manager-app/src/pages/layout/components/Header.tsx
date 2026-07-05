@@ -5,6 +5,7 @@ import { Button, Container } from "reactstrap";
 import { List } from 'react-bootstrap-icons';
 
 import UserMenu from "../../account/components/UserMenu";
+import NewOrderBell from "./NewOrderBell";
 import LanguageMenu from "../../../components/others/LanguageMenu";
 import FullscreenModeController from "../../../components/widgets/FullscreenModeController";
 import ThemeController from "./theme-mode/ThemeController";
@@ -61,6 +62,7 @@ const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
                         <h1 className="app-title fs-6 fw-semibold m-0 text-uppercase">Mecanisme de gestion des plaintes - MGP</h1>
                     </div> */}
                     <div className="d-flex align-items-center justify-content-start gap-3">
+                        <NewOrderBell />
                         <LanguageMenu />
                         <ThemeController />
                         <FullscreenModeController />
