@@ -15,7 +15,7 @@ import {
     Row
 } from 'reactstrap';
 
-import { ArrowClockwise, Grid3x3GapFill, ListUl } from 'react-bootstrap-icons';
+import { ArrowClockwise, Grid3x3GapFill, ListUl, PlusLg } from 'react-bootstrap-icons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -24,11 +24,13 @@ import { useTranslation } from 'react-i18next';
 
 import OrdersList from './OrdersList';
 import OrdersKanbanView from './OrdersKanbanView';
+import ExportOrdersButton from './ExportOrdersButton';
 import BulkStatusUpdateModal from './modals/BulkStatusUpdateModal';
 import { OrderProps, OrderStatus } from '../../../types';
 import { useDataContext } from '../../../components/contexts/DataProvider';
 import { formatDate } from '../../../helpers/AssetHelpers';
 import OrderStatusesMenu from './OrderStatusesMenu';
+import useGoTo from '../../../components/hooks/useGoTo';
 
 import './OrdersListView.css';
 
@@ -37,6 +39,7 @@ type ViewMode = 'table' | 'kanban';
 const OrdersListView: React.FC = () => {
     const { t } = useTranslation();
     const { orders, fetchOrders } = useDataContext();
+    const goTo = useGoTo();
 
     const [searchedText, setSearchText] = useState<string>('');
     const [filterStatus, setFilterStatus] = useState<OrderStatus|null>(null);
@@ -159,6 +162,18 @@ const OrdersListView: React.FC = () => {
                                         <Grid3x3GapFill size={14} />
                                     </Button>
                                 </ButtonGroup>
+                                <Button
+                                    tag='button'
+                                    type='button'
+                                    color="success"
+                                    size='md'
+                                    className="d-flex flex-center gap-2 rounded-1"
+                                    onClick={() => goTo('/commandes/nouvelle')}
+                                >
+                                    <PlusLg />
+                                    <span className="d-none d-md-inline">{t('Nouvelle commande')}</span>
+                                </Button>
+                                <ExportOrdersButton orders={filteredOrders} />
                                 <Button
                                     tag='button'
                                     type='button'

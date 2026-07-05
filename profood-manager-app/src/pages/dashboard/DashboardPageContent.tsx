@@ -56,6 +56,7 @@ const DashboardPageContent: React.FC = () => {
         statisticsCustomDateRange,
         fetchOrders,
         fetchOrdersStatisticsDetails,
+        fetchBestSellers,
         setStatisticsEndDate,
         setStatisticsStartDate,
         setStatisticsCustomDateRange
@@ -74,6 +75,7 @@ const DashboardPageContent: React.FC = () => {
         // the aggregated statistics (used by BoxTypesPercentageChart / OrdersStatisticsChart).
         fetchOrders(false);
         fetchOrdersStatisticsDetails(statisticsStartDate, statisticsEndDate, true);
+        fetchBestSellers(statisticsStartDate, statisticsEndDate);
     };
 
     /**
@@ -134,6 +136,7 @@ const DashboardPageContent: React.FC = () => {
         if(range !== 'custom_date_range'){
             onChange([start_date, end_date]);
             fetchOrdersStatisticsDetails(start_date, end_date, true);
+            fetchBestSellers(start_date, end_date);
             setIsOpen(false);
         }
     };

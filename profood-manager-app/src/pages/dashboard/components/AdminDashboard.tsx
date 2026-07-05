@@ -21,6 +21,7 @@ import RevenueChartView from './RevenueChartView';
 import BoxTypesPercentageChartViewInOrders from './BoxTypesPercentageChartViewInOrders';
 import RecentOrdersView from './RecentOrdersView';
 import DailyActivityView from './DailyActivityView';
+import BestSellersView from './BestSellersView';
 
 /**
  *
@@ -104,6 +105,11 @@ const AdminDashboard: React.FC<Props> = ({ datePickerSection }) => {
             </Col>
             <Col xs={12} lg={4}>
                 <BoxTypesPercentageChartViewInOrders />
+            </Col>
+
+            {/* Section 4b: Best sellers (period-scoped) */}
+            <Col xs={12}>
+                <BestSellersView />
             </Col>
 
             {/* Section 5: Recent Orders + Daily Activity */}
