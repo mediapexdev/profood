@@ -4,6 +4,7 @@ use App\Http\Controllers\BoxTypeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\LivreurController;
 use App\Http\Controllers\LocaliteController;
 use App\Http\Controllers\OrderController;
@@ -50,6 +51,9 @@ Route::get('get-slices-by-category/{id}', [SliceController::class, 'getSlicesByC
 
 Route::get('get-localites', [LocaliteController::class, 'getLocalites']);
 Route::get('get-localites-with-full-info', [LocaliteController::class, 'getLocalitesWithFullInfo']);
+
+// Public delivery fee quote for the storefront checkout.
+Route::post('quote-delivery-fee', [DeliveryController::class, 'quoteDeliveryFee']);
 
 // Public order-creation endpoints: tighter per-IP throttle than the global
 // api limiter because each request writes an order plus its cart snapshot.
@@ -293,6 +297,12 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     Route::get('get-order-statuses-details', [OrderController::class, 'getOrderStatusesDetails']);
     Route::get('get-orders-statistics-details', [OrderController::class, 'getOrdersStatisticsDetails']);
     Route::get('get-best-sellers', [OrderController::class, 'getBestSellers']);
+
+    // Delivery pricing configuration (staff)
+    Route::get('get-delivery-settings', [DeliveryController::class, 'getDeliverySettings']);
+    Route::post('update-delivery-settings', [DeliveryController::class, 'updateDeliverySettings']);
+    Route::get('get-delivery-zones', [DeliveryController::class, 'getDeliveryZones']);
+    Route::post('update-commune-fee', [DeliveryController::class, 'updateCommuneFee']);
 
     Route::post('approve-order/{id}', [OrderController::class, 'approveOrder']);
     Route::post('update-order-status', [OrderController::class, 'updateOrderStatus']);

@@ -40,6 +40,7 @@ class StoreOrderRequest extends FormRequest
         return [
             'customer_id'   => ['required', 'numeric', 'min:1'],
             'address'       => ['required', 'string', 'max:255'],
+            'localite_id'   => ['nullable', 'integer', 'exists:localites,id'],
             'order_id'      => ['required', 'string', 'max:255']
         ];
     }

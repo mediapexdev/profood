@@ -47,6 +47,7 @@ class StoreGuestOrderRequest extends FormRequest
             'guest_phone_number' => ['required', 'regex:#^(3[3]|7[5-80])[ ]?[0-9]{3}([ ]?[0-9]{2}){2}$#'],
             'guest_email'       => ['nullable', 'email', 'max:255'],
             'address'           => ['required', 'string', 'max:255'],
+            'localite_id'       => ['nullable', 'integer', 'exists:localites,id'],
             'cart_items'        => ['required', 'array', 'min:1', 'max:50'],
             'cart_items.*.type'              => ['required', 'in:box,slice'],
             // ",deleted_at,NULL" excludes soft-deleted products, which plain exists: accepts

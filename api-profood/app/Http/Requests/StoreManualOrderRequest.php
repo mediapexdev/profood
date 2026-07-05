@@ -46,6 +46,7 @@ class StoreManualOrderRequest extends FormRequest
             'guest_phone_number' => ['required_without:customer_id', 'nullable', 'regex:#^(3[3]|7[5-80])[ ]?[0-9]{3}([ ]?[0-9]{2}){2}$#'],
             'guest_email'        => ['nullable', 'email', 'max:255'],
             'address'            => ['required', 'string', 'max:255'],
+            'localite_id'        => ['nullable', 'integer', 'exists:localites,id'],
             'payment_method'     => ['nullable', 'string', 'max:255'],
             'mark_paid'          => ['sometimes', 'boolean'],
             'notify_customer'    => ['sometimes', 'boolean'],

@@ -24,7 +24,9 @@ class Commune extends Model
     /**
      * 
      */
-    protected $fillable = ['wording', 'arrondissement_id', 'departement_id'];
+    protected $fillable = ['wording', 'arrondissement_id', 'departement_id', 'delivery_fee'];
+
+    protected $casts = ['delivery_fee' => 'integer'];
 
     /**
      * Get the arrondissement associated with the commune or

@@ -21,6 +21,7 @@ use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Models\OrderPaymentStatus;
 use App\Models\OrderStatus;
+use App\Models\DeliverySettings;
 use App\Models\Promotion;
 use App\Models\PromotionUsage;
 use App\Models\Role;
@@ -132,6 +133,11 @@ class OrderController extends Controller
                 $montant += $cartSlice->slice->price * $cartSlice->quantity;
             }
 
+            // Server-authoritative delivery fee, resolved from the delivery zone
+            // (commune) and the subtotal. Never trust a client-supplied fee.
+            $localiteId = $request->filled('localite_id') ? (int) $request->localite_id : null;
+            $deliveryFee = DeliverySettings::resolveFee($localiteId, $montant);
+
             // Handle promotion code if provided
             $promotion = null;
             $discountAmount = 0;
@@ -146,13 +152,9 @@ class OrderController extends Controller
                 if ($promotion) {
                     // Check if promotion is valid
                     if ($promotion->isValid() && $promotion->canBeUsedBy($user)) {
-                        // Calculate discount (delivery fee would be passed separately if available)
-                        // The app has no delivery fee yet, and a client-supplied
-                        // value must NEVER be trusted: a free_delivery code returns
-                        // the delivery fee as the discount, so a crafted delivery_fee
-                        // would drive the order montant negative. Force 0 until a
-                        // server-side delivery fee exists.
-                        $deliveryFee = 0;
+                        // Use the server-resolved delivery fee above. A free_delivery
+                        // code returns that fee as the discount; since the fee is
+                        // server-derived (not client-supplied) the montant stays sound.
                         $discountAmount = $promotion->calculateDiscount($montant, $deliveryFee);
 
                         // Check minimum order amount
@@ -208,14 +210,16 @@ class OrderController extends Controller
             if(!isset($payment_status)){
                 return response()->json(['message' => "Une erreur est survenue ! Veuillez réessayer ou contacter {$contact}"], 500);
             }
-            // Apply discount to montant
-            $finalMontant = max(0, $montant - $discountAmount);
+            // Total = subtotal + delivery - discount, floored at 0.
+            $finalMontant = max(0, $montant + $deliveryFee - $discountAmount);
 
             $order = Order::create(array_merge([
                 'cart_id'                   => $cart->id,
                 'customer_id'               => $customer->id,
                 'address'                   => Str::of($request->address)->stripTags()->trim(),
                 'montant'                   => $finalMontant,
+                'delivery_fee'              => $deliveryFee,
+                'localite_id'               => $localiteId,
                 'order_status_id'           => $order_status->id,
                 'order_payment_status_id'   => $payment_status->id,
                 'promotion_id'              => $promotion ? $promotion->id : null,
@@ -376,9 +380,10 @@ class OrderController extends Controller
                 $montant += $cartSlice->slice->price * $cartSlice->quantity;
             }
 
-            // Apply existing discount if order had a promotion
+            // Preserve the discount and delivery fee already stored on the order.
             $existingDiscount = $order->discount_amount ?? 0;
-            $finalMontant = max(0, $montant - $existingDiscount);
+            $existingDeliveryFee = $order->delivery_fee ?? 0;
+            $finalMontant = max(0, $montant + $existingDeliveryFee - $existingDiscount);
 
             $code = $order->string_id;
             $order->montant = $finalMontant;
@@ -611,6 +616,10 @@ class OrderController extends Controller
             return response()->json(['message' => 'Le montant de la commande doit être supérieur à zéro'], 422);
         }
 
+        // Server-authoritative delivery fee (never trust the client).
+        $localiteId = $request->filled('localite_id') ? (int) $request->localite_id : null;
+        $deliveryFee = DeliverySettings::resolveFee($localiteId, $montant);
+
         // Handle promotion code if provided
         $promotion = null;
         $discountAmount = 0;
@@ -625,8 +634,7 @@ class OrderController extends Controller
             if ($promotion) {
                 // Check if promotion is valid (null user for guest orders)
                 if ($promotion->isValid() && $promotion->canBeUsedBy(null)) {
-                    // Calculate discount
-                    $deliveryFee = 0; // Never trust a client-sent delivery_fee: no delivery fee exists yet, and a free_delivery code returns it as the discount, which would drive montant negative.
+                    // free_delivery returns the server-resolved fee as the discount.
                     $discountAmount = $promotion->calculateDiscount($montant, $deliveryFee);
 
                     // Check minimum order amount
@@ -683,8 +691,8 @@ class OrderController extends Controller
             return response()->json(['message' => "Une erreur est survenue ! Veuillez réessayer ou contacter Profood"], 500);
         }
 
-        // Apply discount to montant
-        $finalMontant = max(0, $montant - $discountAmount);
+        // Total = subtotal + delivery - discount, floored at 0.
+        $finalMontant = max(0, $montant + $deliveryFee - $discountAmount);
 
         // Persist the order content so managers can see what was ordered
         $guest_cart = $this->createGuestCartSnapshot($cart_items);
@@ -699,6 +707,8 @@ class OrderController extends Controller
             'guest_email'               => $guest_email ? (string)$guest_email : null,
             'address'                   => (string)$address,
             'montant'                   => $finalMontant,
+            'delivery_fee'              => $deliveryFee,
+            'localite_id'               => $localiteId,
             'order_status_id'           => $order_status->id,
             'order_payment_status_id'   => $payment_status->id,
             'payment_method'            => 'À la livraison', // Guest orders default to cash on delivery
@@ -901,6 +911,10 @@ class OrderController extends Controller
             return response()->json(['message' => 'Le montant de la commande doit être supérieur à zéro'], 422);
         }
 
+        // Server-authoritative delivery fee (never trust the client).
+        $localiteId = $request->filled('localite_id') ? (int) $request->localite_id : null;
+        $deliveryFee = DeliverySettings::resolveFee($localiteId, $montant);
+
         // Handle promotion code if provided
         $promotion = null;
         $discountAmount = 0;
@@ -912,7 +926,7 @@ class OrderController extends Controller
 
             if ($promotion) {
                 if ($promotion->isValid() && $promotion->canBeUsedBy(null)) {
-                    $deliveryFee = 0; // Never trust a client-sent delivery_fee: no delivery fee exists yet, and a free_delivery code returns it as the discount, which would drive montant negative.
+                    // free_delivery returns the server-resolved fee as the discount.
                     $discountAmount = $promotion->calculateDiscount($montant, $deliveryFee);
 
                     if ($discountAmount == 0 && $montant < $promotion->minimum_order_amount) {
@@ -932,8 +946,8 @@ class OrderController extends Controller
             }
         }
 
-        // Apply discount to montant
-        $finalMontant = max(0, $montant - $discountAmount);
+        // Total = subtotal + delivery - discount, floored at 0.
+        $finalMontant = max(0, $montant + $deliveryFee - $discountAmount);
 
         // Get initial order status
         $order_status = OrderStatus::where('code', OrderStatus::AWAITING_PROCESSING)->first();
@@ -956,6 +970,8 @@ class OrderController extends Controller
             'guest_email'               => $guest_email ? (string)$guest_email : null,
             'address'                   => (string)$address,
             'montant'                   => $finalMontant,
+            'delivery_fee'              => $deliveryFee,
+            'localite_id'               => $localiteId,
             'order_status_id'           => $order_status->id,
             'order_payment_status_id'   => $payment_status->id,
             'cart_id'                   => $guest_cart->id,
@@ -1432,15 +1448,21 @@ class OrderController extends Controller
         $payment_method = $request->payment_method ? Str::of($request->payment_method)->stripTags()->trim() : 'À la livraison';
         $address = Str::of($request->address)->stripTags()->trim();
 
+        // Server-authoritative delivery fee for the (optional) delivery locality.
+        $localiteId = $request->filled('localite_id') ? (int) $request->localite_id : null;
+        $deliveryFee = DeliverySettings::resolveFee($localiteId, $montant);
+
         try {
             $order = DB::transaction(function () use (
-                $cart_items, $customer, $order_status, $payment_status, $payment_method, $address, $montant, $request
+                $cart_items, $customer, $order_status, $payment_status, $payment_method, $address, $montant, $deliveryFee, $localiteId, $request
             ) {
                 $cart = $this->createGuestCartSnapshot($cart_items);
 
                 $attributes = [
                     'address'                 => (string) $address,
-                    'montant'                 => $montant,
+                    'montant'                 => $montant + $deliveryFee,
+                    'delivery_fee'            => $deliveryFee,
+                    'localite_id'             => $localiteId,
                     'order_status_id'         => $order_status->id,
                     'order_payment_status_id' => $payment_status->id,
                     'payment_method'          => (string) $payment_method,

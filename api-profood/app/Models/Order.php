@@ -30,6 +30,8 @@ class Order extends Model
         'customer_id',
         'order_status_id',
         'montant',
+        'delivery_fee',
+        'localite_id',
         'order_payment_status_id',
         'payment_method',
         'address',
@@ -61,6 +63,14 @@ class Order extends Model
     public function customer()
     {
         return $this->hasOne(Customer::class, 'id', 'customer_id')->with('user');
+    }
+
+    /**
+     * The delivery locality (null for legacy / free-text orders).
+     */
+    public function localite()
+    {
+        return $this->belongsTo(Localite::class);
     }
 
     /**
