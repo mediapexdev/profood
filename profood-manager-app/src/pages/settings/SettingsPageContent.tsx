@@ -11,7 +11,8 @@ import {
 
 import {
     PeopleFill,
-    PersonFill
+    PersonFill,
+    TruckFront
 } from "react-bootstrap-icons";
 
 import { useTranslation } from "react-i18next";
@@ -67,6 +68,14 @@ const SettingsPageContent: React.FC = () => {
             url: '/parametres/utilisateurs',
             icon: <PeopleFill size={48} />,
             className: 'utilisateurs'
+        });
+    }
+    if(['admin', 'super admin', 'manager'].includes(userRole?.wording.toLowerCase() as string)){
+        mainMenuItems.push({
+            title: t('Livraison'),
+            url: '/parametres/livraison',
+            icon: <TruckFront size={48} />,
+            className: 'livraison'
         });
     }
 

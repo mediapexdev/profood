@@ -231,6 +231,14 @@ const OrderInvoicePageContent: React.FC<OrderProps> = (order: OrderProps) => {
                                                         {formatNumber(subtotal)} <small>Fcfa</small>
                                                     </span>
                                                 </div>
+                                                {Number(order.delivery_fee ?? 0) > 0 && (
+                                                    <div className="invoice-totals-row">
+                                                        <span className="invoice-totals-label">{t('Livraison')}</span>
+                                                        <span className="invoice-totals-value">
+                                                            {formatNumber(Number(order.delivery_fee))} <small>Fcfa</small>
+                                                        </span>
+                                                    </div>
+                                                )}
                                                 {discount > 0 && (
                                                     <div className="invoice-totals-row">
                                                         <span className="invoice-totals-label">

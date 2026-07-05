@@ -327,6 +327,8 @@ export interface OrderProps {
     guest_email: string | null;
     discount_amount: number | null;
     promotion_code: string | null;
+    delivery_fee: number;
+    localite_id: number | null;
     created_at: string;
     /** Assigned delivery person — null when unassigned. Eager-loaded by the API. */
     livreur: Livreur | null;

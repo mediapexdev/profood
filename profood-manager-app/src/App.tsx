@@ -25,6 +25,7 @@ import OrderInvoicePage from './pages/orders/OrderInvoicePage';
 import OrderReceiptPage from './pages/orders/OrderReceiptPage';
 import PublicReceiptPage from './pages/orders/PublicReceiptPage';
 import SettingsPage from './pages/settings/SettingsPage';
+import DeliverySettingsPage from './pages/settings/delivery/DeliverySettingsPage';
 import AccountPage from './pages/account/AccountPage';
 import UsersPage from './pages/settings/users/UsersPage';
 import NewUserPage from './pages/settings/users/NewUserPage';
@@ -195,6 +196,18 @@ function App() {
                         <RequireAuth redirectTo="/connexion">
                             <AccountPage />
                         </RequireAuth>
+                    }
+                />
+                <Route
+                    path="/parametres/livraison"
+                    element={
+                        (['admin', 'super admin', 'manager'].includes(userRole?.wording.toLowerCase() as string))
+                        ?
+                        <RequireAuth redirectTo="/connexion">
+                            <DeliverySettingsPage />
+                        </RequireAuth>
+                        :
+                        <NotFoundPage />
                     }
                 />
                 <Route

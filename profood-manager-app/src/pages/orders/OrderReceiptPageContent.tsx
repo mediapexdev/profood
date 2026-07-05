@@ -178,6 +178,17 @@ const OrderReceiptPageContent: React.FC<OrderProps> = (order: OrderProps) => {
                                 </>
                             )}
 
+                            {/* Delivery fee — shown only when charged. */}
+                            {Number(order.delivery_fee ?? 0) > 0 && (
+                                <>
+                                    <div className="receipt-subtotal-row">
+                                        <span>{t('Livraison')}</span>
+                                        <span>{formatNumber(Number(order.delivery_fee))} Fcfa</span>
+                                    </div>
+                                    <div className="receipt-separator"></div>
+                                </>
+                            )}
+
                             {/* Discount — shown only when a promo code reduced the total.
                                 order.montant is already net, so this line makes the
                                 subtotals reconcile with the total. */}
