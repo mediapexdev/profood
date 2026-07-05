@@ -193,7 +193,7 @@ const PasswordEditModal: React.FC<PasswordEditModalProps> = ({show, setShow, tog
             "new_password": newPassword,
             "new_password_confirmation": newPasswordConfirmation
         };
-        api.post('/update-user-password', data,
+        api.post('/change-password', data,
             {
                 headers: {
                     Authorization: `Bearer ${token}`

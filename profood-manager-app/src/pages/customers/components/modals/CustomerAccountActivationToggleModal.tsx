@@ -112,7 +112,7 @@ const CustomerAccountActivationToggleModal: React.FC<CustomerAccountActivationTo
             "admin_phone_number": adminPhoneNumber,
             "admin_password": password
         };
-        api.post('/toggle-customer-account-activation-by-admin', data,
+        api.post('/toggle-user-account-activation-by-admin', data,
             {
                 headers: {
                     Authorization : `Bearer ${token}`,

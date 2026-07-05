@@ -73,7 +73,7 @@ const StatisticsView: React.FC<Props> = ({ items, colSizes }) => {
         },
         {
             id: 'availableProducts',
-            title: t('Produits disponibles'),
+            title: t('Produits au catalogue'),
             number : slices.length,
             icon: <BagFill size={32} />,
             color: 'rgba(255,89,89,0.85)'

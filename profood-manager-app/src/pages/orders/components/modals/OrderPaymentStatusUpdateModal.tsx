@@ -96,7 +96,7 @@ const OrderPaymentStatusUpdateModal: React.FC<OrderPaymentStatusUpdateModalProps
     useEffect(() => {
 
         setTimeout(() => {
-            changeStatus(order.status);
+            changeStatus(order.payment_status);
 
             if(statusesSelectRef.current !== undefined && statusesSelectRef.current !== null){
                 statusesSelectRef.current.setValue(order.payment_status);

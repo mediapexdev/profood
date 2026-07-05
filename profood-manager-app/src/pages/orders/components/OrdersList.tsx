@@ -8,7 +8,7 @@ import {
 } from 'reactstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faPen } from '@fortawesome/free-solid-svg-icons';
 
 import { useTranslation } from 'react-i18next';
 
@@ -277,14 +277,13 @@ const OrdersList: React.FC<OrdersListProps> = ({
                                     <small className='ms-1'>Fcfa</small>
                                 </td>
                                 <td className='payment-status-cell'>
-                                    {/* <div className='d-flex flex-row align-items-center gap-2'> */}
+                                    <div className='d-flex flex-row align-items-center gap-2'>
                                         <Badge
                                             className={`order-payment-status ${getFgAndBgByOrderPaymentStatus(order.payment_status)} ${getPaymentStatusClassName(order.payment_status)} fw-medium`}
-                                            // color={`${getColorByOrderPaymentStatus(order.payment_status)}`}
                                         >
                                         {t(order.payment_status.wording)}
                                         </Badge>
-                                        {/* <Button
+                                        <Button
                                             tag='button'
                                             type='button'
                                             size='sm'
@@ -296,20 +295,19 @@ const OrdersList: React.FC<OrdersListProps> = ({
                                             }}
                                         >
                                             <FontAwesomeIcon icon={faPen} />
-                                        </Button> */}
-                                    {/* </div> */}
+                                        </Button>
+                                    </div>
                                 </td>
                                 {/* <td className='payment-method-cell'>{t(!order.payment_method ? 'Aucun' : order.payment_method)}</td> */}
                                 {/* <td className='address-cell'>{order.address}</td> */}
                                 <td className='status-cell'>
-                                    {/* <div className='d-flex flex-row align-items-center gap-2'> */}
+                                    <div className='d-flex flex-row align-items-center gap-2'>
                                         <Badge
                                             className={`order-status ${getFgAndBgByOrderStatus(order.status)} fw-medium`}
-                                            // color={getColorByOrderStatus(order.status)}
                                         >
                                         {t(order.status.wording)}
                                         </Badge>
-                                        {/* <Button
+                                        <Button
                                             tag='button'
                                             type='button'
                                             size='sm'
@@ -321,8 +319,8 @@ const OrdersList: React.FC<OrdersListProps> = ({
                                             }}
                                         >
                                             <FontAwesomeIcon icon={faPen} />
-                                        </Button> */}
-                                    {/* </div> */}
+                                        </Button>
+                                    </div>
                                 </td>
                                 <td className='livreur-cell'>
                                     {order.livreur ? (
@@ -353,32 +351,6 @@ const OrdersList: React.FC<OrdersListProps> = ({
                                             }}
                                         >
                                             <FontAwesomeIcon icon={faEye} />
-                                        </Button>
-                                        {/* <Button
-                                            tag='button'
-                                            type='button'
-                                            size='sm'
-                                            color='primary'
-                                            className='btn-edit btn-edit-order border-0'
-                                            onClick={() => {
-                                                setOrderToEdit(order);
-                                                setTimeout(() => setShowOrderEditModal(true), 0);
-                                            }}
-                                        >
-                                            <FontAwesomeIcon icon={faPen} />
-                                        </Button> */}
-                                        <Button
-                                            tag='button'
-                                            type='button'
-                                            size='sm'
-                                            color='none'
-                                            className='bg-hover-light-danger text-danger btn-delete btn-delete-order border-0'
-                                            onClick={() => {
-                                                setOrderToDelete(order);
-                                                setTimeout(() => setShowOrderDeleteModal(true), 0);
-                                            }}
-                                        >
-                                            <FontAwesomeIcon icon={faTrash} />
                                         </Button>
                                     </div>
                                 </td>

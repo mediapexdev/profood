@@ -28,15 +28,15 @@ import './RecentOrdersView.css';
 const RecentOrdersView: React.FC = () => {
     const { t } = useTranslation();
     const goTo = useGoTo();
-    const { orders } = useDataContext();
+    const { filteredOrders } = useDataContext();
 
     moment.locale(i18n.language);
 
     const recentOrders = useMemo(() => {
-        return [...orders]
+        return [...filteredOrders]
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, 8);
-    }, [orders]);
+    }, [filteredOrders]);
 
     return (
         <Card className='recent-orders-view border-0 h-100'>

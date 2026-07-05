@@ -37,13 +37,29 @@ const BoxTypesPercentageChartViewInOrders: React.FC = () => {
     /**
      * 
      */
+    /**
+     * Derive labels + series dynamically from box_types_count so every box type
+     * (including newly created ones) is rendered, not just 4 hardcoded names.
+     * Only box types that actually sold are shown (the backend seeds the 4 legacy
+     * names to 0 — those are filtered out to avoid noisy 0% slices).
+     */
+    const boxCount = Number(ordersStatisticsDetails?.all?.box_count ?? 0);
+    const boxTypesCount = ordersStatisticsDetails?.all?.box_types_count ?? {};
+    const boxTypeEntries = Object.entries(boxTypesCount).filter(([, count]) => Number(count) > 0);
+
+    const palette = [
+        'rgba(0,191,255,0.85)',
+        'rgba(85,110,230,0.85)',
+        'rgba(241,180,76,0.85)',
+        'rgba(52,195,143,0.85)',
+    ];
+
+    const labels = boxTypeEntries.map(([wording]) => wording);
+    const colors = boxTypeEntries.map((_, index) => palette[index % palette.length]);
     const data = {
-        series: [
-            Math.ceil((Number(ordersStatisticsDetails?.all?.box_types_count.Noflaye??0) * 100) / Number(ordersStatisticsDetails?.all?.box_count??0)),
-            Math.ceil((Number(ordersStatisticsDetails?.all?.box_types_count.Téranga??0) * 100) / Number(ordersStatisticsDetails?.all?.box_count??0)),
-            Math.ceil((Number(ordersStatisticsDetails?.all?.box_types_count.Woyofal??0) * 100) / Number(ordersStatisticsDetails?.all?.box_count??0)),
-            Math.ceil((Number(ordersStatisticsDetails?.all?.box_types_count.Xéweul??0) * 100) / Number(ordersStatisticsDetails?.all?.box_count??0)),
-        ]
+        series: boxTypeEntries.map(([, count]) =>
+            Math.ceil((Number(count ?? 0) * 100) / boxCount)
+        )
     };
 	return (
         <Card
@@ -62,7 +78,7 @@ const BoxTypesPercentageChartViewInOrders: React.FC = () => {
             </CardHeader>
             <CardBody>
             {
-                Number(ordersStatisticsDetails?.all?.box_count) < 1
+                (Number(ordersStatisticsDetails?.all?.box_count) || 0) < 1
                 ?
                 <div className='d-flex flex-center py-4'>
                     <CardText className='fs-8'>{t('Aucune donnée')}</CardText>
@@ -146,18 +162,8 @@ const BoxTypesPercentageChartViewInOrders: React.FC = () => {
                         //         stops: [0, 50, 53, 91]
                         //     },
                         // },
-                        labels: [
-                            'Noflaye',
-                            'Téranga',
-                            'Woyofal',
-                            'Xéweul'
-                        ],
-                        colors:[
-                            'rgba(0,191,255,0.85)',
-                            'rgba(85,110,230,0.85)',
-                            'rgba(241,180,76,0.85)',
-                            'rgba(52,195,143,0.85)',
-                        ],
+                        labels: labels,
+                        colors: colors,
                         responsive: [{
                             breakpoint: 576,
                             options: {
