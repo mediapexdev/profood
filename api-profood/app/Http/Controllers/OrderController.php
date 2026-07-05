@@ -145,7 +145,12 @@ class OrderController extends Controller
                     // Check if promotion is valid
                     if ($promotion->isValid() && $promotion->canBeUsedBy($user)) {
                         // Calculate discount (delivery fee would be passed separately if available)
-                        $deliveryFee = $request->input('delivery_fee', 0);
+                        // The app has no delivery fee yet, and a client-supplied
+                        // value must NEVER be trusted: a free_delivery code returns
+                        // the delivery fee as the discount, so a crafted delivery_fee
+                        // would drive the order montant negative. Force 0 until a
+                        // server-side delivery fee exists.
+                        $deliveryFee = 0;
                         $discountAmount = $promotion->calculateDiscount($montant, $deliveryFee);
 
                         // Check minimum order amount
@@ -202,7 +207,7 @@ class OrderController extends Controller
                 return response()->json(['message' => "Une erreur est survenue ! Veuillez réessayer ou contacter {$contact}"], 500);
             }
             // Apply discount to montant
-            $finalMontant = $montant - $discountAmount;
+            $finalMontant = max(0, $montant - $discountAmount);
 
             $order = Order::create(array_merge([
                 'cart_id'                   => $cart->id,
@@ -366,7 +371,7 @@ class OrderController extends Controller
 
             // Apply existing discount if order had a promotion
             $existingDiscount = $order->discount_amount ?? 0;
-            $finalMontant = $montant - $existingDiscount;
+            $finalMontant = max(0, $montant - $existingDiscount);
 
             $code = $order->string_id;
             $order->montant = $finalMontant;
@@ -545,7 +550,7 @@ class OrderController extends Controller
                 // Check if promotion is valid (null user for guest orders)
                 if ($promotion->isValid() && $promotion->canBeUsedBy(null)) {
                     // Calculate discount
-                    $deliveryFee = $request->input('delivery_fee', 0);
+                    $deliveryFee = 0; // Never trust a client-sent delivery_fee: no delivery fee exists yet, and a free_delivery code returns it as the discount, which would drive montant negative.
                     $discountAmount = $promotion->calculateDiscount($montant, $deliveryFee);
 
                     // Check minimum order amount
@@ -603,7 +608,7 @@ class OrderController extends Controller
         }
 
         // Apply discount to montant
-        $finalMontant = $montant - $discountAmount;
+        $finalMontant = max(0, $montant - $discountAmount);
 
         // Persist the order content so managers can see what was ordered
         $guest_cart = $this->createGuestCartSnapshot($cart_items);
@@ -828,7 +833,7 @@ class OrderController extends Controller
 
             if ($promotion) {
                 if ($promotion->isValid() && $promotion->canBeUsedBy(null)) {
-                    $deliveryFee = $request->input('delivery_fee', 0);
+                    $deliveryFee = 0; // Never trust a client-sent delivery_fee: no delivery fee exists yet, and a free_delivery code returns it as the discount, which would drive montant negative.
                     $discountAmount = $promotion->calculateDiscount($montant, $deliveryFee);
 
                     if ($discountAmount == 0 && $montant < $promotion->minimum_order_amount) {
@@ -849,7 +854,7 @@ class OrderController extends Controller
         }
 
         // Apply discount to montant
-        $finalMontant = $montant - $discountAmount;
+        $finalMontant = max(0, $montant - $discountAmount);
 
         // Get initial order status
         $order_status = OrderStatus::where('code', OrderStatus::AWAITING_PROCESSING)->first();
@@ -947,6 +952,12 @@ class OrderController extends Controller
      */
     public function approveOrder($order_id)
     {
+        // Only staff may approve orders.
+        $manager = User::with('role')->find(Auth::user()->getAuthIdentifier());
+        if(!isset($manager->role) || !in_array($manager->role->code, [Role::MANAGER, Role::ADMIN, Role::SUPER_ADMIN], true)){
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 403);
+        }
+
         $order = Order::find($order_id);
 
         if(!isset($order)){
@@ -1205,6 +1216,17 @@ class OrderController extends Controller
             return response()->json(['message' => 'Commande introuvable.'], 404);
         }
 
+        // This receipt exposes customer PII (name, phone, address) and the
+        // string_id is guessable, so it must NOT be readable by an enumerating
+        // caller. Restrict to staff or the order's own customer.
+        $authUser = Auth::user();
+        $isStaff = isset($authUser->role) && in_array($authUser->role->code, [Role::MANAGER, Role::ADMIN, Role::SUPER_ADMIN], true);
+        $isOwner = $order->customer && (int)$order->customer->user_id === (int)optional($authUser)->id;
+
+        if (!$isStaff && !$isOwner) {
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 403);
+        }
+
         return response()->json($order, 200);
     }
 
@@ -1360,17 +1382,38 @@ class OrderController extends Controller
             $orders = Order::where('created_at', '>=', $start_date)->with('status')->get();
         }
         else if(!isset($start_date) && isset($end_date)) {
-            $orders = Order::where(['created_at', '<=', $end_date])->with('status')->get();
+            $orders = Order::where('created_at', '<=', $end_date)->with('status')->get();
         }
         else {
             $orders = Order::whereBetween('created_at', [$start_date, $end_date])->with('status')->get();
         }
-        $box_types = BoxType::all();
+        // Pre-aggregate box/slice counts per cart in two queries instead of
+        // running (orders x box_types) COUNT queries inside the loop (N+1).
+        $cart_ids = $orders->pluck('cart_id')->filter()->unique()->values();
+
+        $box_rows_by_cart = Box::whereIn('cart_id', $cart_ids)
+            ->select('cart_id', 'box_type_id', DB::raw('count(*) as total'))
+            ->groupBy('cart_id', 'box_type_id')
+            ->get()
+            ->groupBy('cart_id');
+
+        $slice_count_by_cart = CartSlice::whereIn('cart_id', $cart_ids)
+            ->select('cart_id', DB::raw('count(*) as total'))
+            ->groupBy('cart_id')
+            ->pluck('total', 'cart_id');
+
+        // box_type_id -> wording, guarded below so an added / renamed / deleted
+        // box type can never break the aggregation (was hardcoded to 4 names).
+        $type_wording = BoxType::pluck('wording', 'id');
 
         foreach($orders as $order){
-            $box_count = Box::where('cart_id', $order->cart_id)->count();
-            $slices_count = CartSlice::where('cart_id', $order->cart_id)->count();
+            if(!isset($order->status) || !isset($keys_list[$order->status->code])){
+                continue;
+            }
             $key = $keys_list[$order->status->code];
+            $cartBoxRows = $box_rows_by_cart->get($order->cart_id, collect());
+            $box_count = (int)$cartBoxRows->sum('total');
+            $slices_count = (int)($slice_count_by_cart[$order->cart_id] ?? 0);
 
             $order_statistics_details['all']['number'] += 1;
             $order_statistics_details['all']['box_count'] += $box_count;
@@ -1380,13 +1423,14 @@ class OrderController extends Controller
             $order_statistics_details[$key]['box_count'] += $box_count;
             $order_statistics_details[$key]['slice_count'] += $slices_count;
 
-            foreach($box_types as $type){
-                $count = Box::where([
-                    'box_type_id'   => $type->id,
-                    'cart_id'       => $order->cart_id
-                ])->count();
-                $order_statistics_details['all']['box_types_count'][$type->wording] += $count;
-                $order_statistics_details[$key]['box_types_count'][$type->wording] += $count;
+            foreach($cartBoxRows as $row){
+                $wording = $type_wording[$row->box_type_id] ?? null;
+                if($wording === null){
+                    continue;
+                }
+                $count = (int)$row->total;
+                $order_statistics_details['all']['box_types_count'][$wording] = ($order_statistics_details['all']['box_types_count'][$wording] ?? 0) + $count;
+                $order_statistics_details[$key]['box_types_count'][$wording] = ($order_statistics_details[$key]['box_types_count'][$wording] ?? 0) + $count;
             }
         }
         return response()->json($order_statistics_details, 200);
@@ -1416,7 +1460,9 @@ class OrderController extends Controller
             return response()->json(['message' => $validator->errors()->first()], 422);
         }
         $manager_phone_number = Str::of($request->manager_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
-        $manager = User::where('phone_number', $manager_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // manager_phone_number (any token holder could name a real manager).
+        $manager = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($manager)) {
             return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 401);
@@ -1455,7 +1501,9 @@ class OrderController extends Controller
         // Validation and authorization are automatically handled by UpdateOrderStatusRequest
 
         $manager_phone_number = Str::of($request->manager_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
-        $manager = User::where('phone_number', $manager_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // manager_phone_number (any token holder could name a real manager).
+        $manager = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($manager)) {
             return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 401);
@@ -1534,7 +1582,10 @@ class OrderController extends Controller
                  *  A Twilio number "Profood" is used instead
                  */
                 // $twilio_number = env('TWILIO_PHONE_NUMBER');
-                $customer_phone_number = Str::of($order->customer->phoneNumber())->stripTags()->trim();
+                // Guest orders have no customer relation; notify the guest phone.
+                $customer_phone_number = $order->customer
+                    ? Str::of($order->customer->phoneNumber())->stripTags()->trim()
+                    : Str::of($order->guest_phone_number)->stripTags()->trim();
                 $client = new TwilioClient($account_sid, $auth_token);
                 $client->messages->create(
                     "+221{$customer_phone_number}", // Where to send a text message
@@ -1553,9 +1604,10 @@ class OrderController extends Controller
                     'action' => 'updateOrderStatus'
                 ]);
             }
-            catch(\Exception $exception) {
+            catch(\Throwable $exception) {
                 // Log SMS notification failure — non-blocking since the status
-                // update already succeeded above.
+                // update already succeeded above. Catch Throwable (not just
+                // Exception) so a null-customer TypeError can't 500 the request.
                 Log::error('Failed to send order status notification SMS', [
                     'order_id' => $order->id,
                     'order_ref' => $order->string_id,

@@ -65,8 +65,6 @@ Route::post('validate-promo-code', [PromotionController::class, 'validatePromoCo
 Route::get('active-promotions', [PromotionController::class, 'getActivePromotions']);
 Route::post('promotions-for-products', [PromotionController::class, 'getActivePromotionsForProducts']);
 
-Route::get('receipt/{string_id}', [OrderController::class, 'getPublicReceipt']);
-
 Route::post('signup', [UserController::class, 'signup']);
 Route::post('signin', [UserController::class, 'signin']);
 // Route::post('logout', [UserController::class, 'logout']);
@@ -114,6 +112,7 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     Route::post('delete-user-by-admin', [UserController::class, 'deleteUser']);
     Route::post('update-user-password-by-admin', [UserController::class, 'updateUserPassword']);
     Route::post('update-user-profile-details-by-admin', [UserController::class, 'updateUserProfileDetails']);
+    Route::post('toggle-user-account-activation-by-admin', [UserController::class, 'toggleUserAccountActivation']);
 
     Route::get('get-users', [UserController::class, 'getUsers']);
     Route::get('get-roles', [UserController::class, 'getRoles']);
@@ -296,7 +295,10 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     Route::post('approve-order/{id}', [OrderController::class, 'approveOrder']);
     Route::post('update-order-status', [OrderController::class, 'updateOrderStatus']);
     Route::post('update-order-payment-status', [OrderController::class, 'updateOrderPaymentStatus']);
-    
+
+    // Receipt exposes customer PII; authenticated + authorized only (see getPublicReceipt).
+    Route::get('receipt/{string_id}', [OrderController::class, 'getPublicReceipt']);
+
     Route::post('add-boxType', [BoxTypeController::class, 'addBoxType']);
     Route::post('update-boxType', [BoxTypeController::class, 'updateBoxType']);
     Route::post('delete-boxType', [BoxTypeController::class, 'deleteBoxType']);

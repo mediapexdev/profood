@@ -57,7 +57,9 @@ class UserController extends Controller
         // }
         $admin_phone_number = Str::of($request->admin_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
         // Eager load role relationship to avoid N+1 query when accessing role->code
-        $admin = User::with('role')->where('phone_number', $admin_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // admin_phone_number (any token holder could name a real admin).
+        $admin = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($admin)) {
             // Log unauthorized access attempt with phone number context
@@ -178,7 +180,9 @@ class UserController extends Controller
         // }
         $admin_phone_number = Str::of($request->admin_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
         // Eager load role relationship to avoid N+1 query when accessing role->code
-        $admin = User::with('role')->where('phone_number', $admin_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // admin_phone_number (any token holder could name a real admin).
+        $admin = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($admin)) {
             // return response()->json(['message' => 'Utilisateur inexistant !'], 404);
@@ -288,7 +292,9 @@ class UserController extends Controller
         // }
         $admin_phone_number = Str::of($request->admin_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
         // Eager load role relationship to avoid N+1 query when accessing role->code
-        $admin = User::with('role')->where('phone_number', $admin_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // admin_phone_number (any token holder could name a real admin).
+        $admin = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($admin)) {
             // return response()->json(['message' => 'Utilisateur inexistant'], 404);
@@ -399,7 +405,9 @@ class UserController extends Controller
         // }
         $admin_phone_number = Str::of($request->admin_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
         // Eager load role relationship to avoid N+1 query when accessing role->code
-        $admin = User::with('role')->where('phone_number', $admin_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // admin_phone_number (any token holder could name a real admin).
+        $admin = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($admin)) {
             // return response()->json(['message' => 'Utilisateur inexistant !'], 404);
@@ -521,7 +529,9 @@ class UserController extends Controller
         // }
         $admin_phone_number = Str::of($request->admin_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
         // Eager load role relationship to avoid N+1 query when accessing role->code
-        $admin = User::with('role')->where('phone_number', $admin_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // admin_phone_number (any token holder could name a real admin).
+        $admin = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($admin)) {
             // return response()->json(['message' => 'Utilisateur inexistant'], 404);
@@ -597,7 +607,9 @@ class UserController extends Controller
         // }
         $admin_phone_number = Str::of($request->admin_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
         // Eager load role relationship to avoid N+1 query when accessing role->code
-        $admin = User::with('role')->where('phone_number', $admin_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // admin_phone_number (any token holder could name a real admin).
+        $admin = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($admin)) {
             // return response()->json(['message' => 'Utilisateur inexistant !'], 404);
@@ -669,7 +681,9 @@ class UserController extends Controller
         }
         $admin_phone_number = Str::of($request->admin_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
         // Eager load role relationship to avoid N+1 query when accessing role->code
-        $admin = User::with('role')->where('phone_number', $admin_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // admin_phone_number (any token holder could name a real admin).
+        $admin = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($admin)) {
             // return response()->json(['message' => 'Utilisateur inexistant'], 404);
@@ -724,7 +738,9 @@ class UserController extends Controller
             return $response;
         }
         $admin_phone_number = Str::of($request->admin_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
-        $admin = User::where('phone_number', $admin_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // admin_phone_number (any token holder could name a real admin).
+        $admin = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($admin)) {
             // return response()->json(['message' => 'Utilisateur inexistant !'], 404);
@@ -787,7 +803,9 @@ class UserController extends Controller
             return $response;
         }
         $admin_phone_number = Str::of($request->admin_phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
-        $admin = User::where('phone_number', $admin_phone_number)->first();
+        // Authorize by the AUTHENTICATED caller, never the client-supplied
+        // admin_phone_number (any token holder could name a real admin).
+        $admin = User::with('role')->find(Auth::user()->getAuthIdentifier());
 
         if(!isset($admin)) {
             // return response()->json(['message' => 'Utilisateur inexistant'], 404);
@@ -873,6 +891,11 @@ class UserController extends Controller
 
         if(!isset($user)){
             return response()->json(['message' => "Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur"], 500);
+        }
+        // Only staff may list users — otherwise any authenticated caller
+        // (including a mobile-app customer) could enumerate staff phones/emails.
+        if(!isset($user->role) || !in_array($user->role->code, [Role::MANAGER, Role::ADMIN, Role::SUPER_ADMIN], true)){
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 403);
         }
         $super_admin_role = Role::where('code', Role::SUPER_ADMIN)->first();
 
@@ -1394,8 +1417,10 @@ class UserController extends Controller
                     // Default to 43200 minutes (30 days) if not set
                     $expirationMinutes = (int) env('API_TOKEN_EXPIRATION_MINUTES', 43200);
 
-                    if((int)$user->session_count > 0){
-                        // User has an existing session - reuse token but extend expiration
+                    if((int)$user->session_count > 0 && !empty($user->api_token)){
+                        // User has an existing, still-valid session - reuse token but extend expiration.
+                        // (If the token was cleared by expiry while session_count stayed > 0,
+                        // fall through to the else branch and mint a fresh one.)
                         $token = $user->api_token;
 
                         // Extend token expiration for existing sessions

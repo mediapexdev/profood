@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\BoxType;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\Promotion;
 use App\Models\Slice;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -168,6 +169,43 @@ class GuestOrderTest extends TestCase
         $payload['cart_items'][] = ['type' => 'box', 'box_type_id' => $boxType->id, 'quantity' => 16];
 
         $this->postJson('/api/guest-order', $payload)->assertStatus(422);
+    }
+
+    public function test_free_delivery_promo_with_crafted_delivery_fee_cannot_make_montant_negative()
+    {
+        Mail::fake();
+
+        $boxType = BoxType::first();
+        $slices = Slice::take(2)->get();
+        // Server-authoritative subtotal: box price + slice price * quantity.
+        $expectedSubtotal = $boxType->price + ($slices[0]->price * 3);
+
+        Promotion::create([
+            'code'                 => 'FREELIV',
+            'name'                 => 'Livraison gratuite',
+            'discount_type'        => Promotion::TYPE_FREE_DELIVERY,
+            'discount_value'       => 0,
+            'minimum_order_amount' => 0,
+            'is_active'            => true,
+            'first_order_only'     => false,
+            'usage_count'          => 0,
+        ]);
+
+        // A free_delivery code returns the delivery fee as the discount. A crafted
+        // delivery_fee must NOT be trusted, otherwise the order montant goes negative.
+        $payload = $this->guestOrderPayload([
+            'promotion_code' => 'FREELIV',
+            'delivery_fee'   => 999999999,
+        ]);
+
+        $response = $this->postJson('/api/guest-order', $payload);
+        $response->assertStatus(201);
+
+        $order = Order::where('string_id', $response->json('order.string_id'))->first();
+        $this->assertNotNull($order);
+        $this->assertGreaterThanOrEqual(0, (float) $order->montant, 'Order montant must never be negative');
+        // Delivery fee is not trusted from the client, so free delivery discounts 0.
+        $this->assertEquals($expectedSubtotal, (float) $order->montant);
     }
 
     public function test_guest_order_rejects_soft_deleted_composition_slices()
