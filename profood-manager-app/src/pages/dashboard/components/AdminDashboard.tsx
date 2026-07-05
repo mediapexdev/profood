@@ -3,6 +3,8 @@ import React, { useMemo } from 'react';
 import { Col } from 'reactstrap';
 
 import {
+    CartFill,
+    CashStack,
     CheckCircleFill,
     ExclamationTriangleFill,
     GearFill,
@@ -13,12 +15,14 @@ import { useTranslation } from 'react-i18next';
 
 import { useDataContext } from '../../../components/contexts/DataProvider';
 import { StatisticsElement } from './types';
+import { formatNumber } from '../../../helpers/AssetHelpers';
 import useGoTo from '../../../components/hooks/useGoTo';
 
 import TodaySnapshotView from './TodaySnapshotView';
 import StatisticsView from './StatisticsView';
 import RevenueChartView from './RevenueChartView';
 import BoxTypesPercentageChartViewInOrders from './BoxTypesPercentageChartViewInOrders';
+import OrdersStatisticsChartView from './OrdersStatisticsChartView';
 import RecentOrdersView from './RecentOrdersView';
 import DailyActivityView from './DailyActivityView';
 import BestSellersView from './BestSellersView';
@@ -37,9 +41,39 @@ interface Props {
 const AdminDashboard: React.FC<Props> = ({ datePickerSection }) => {
     const { t } = useTranslation();
     const goTo = useGoTo();
-    const { orders } = useDataContext();
+    const { orders, filteredOrders } = useDataContext();
 
     const navigateToOrders = () => goTo('/commandes');
+
+    // Period-scoped KPIs derived from the date-filtered orders. Cancelled
+    // orders (code 80) are excluded so they distort neither the average
+    // basket nor the count. Mirrors the revenue chart's cash-on-delivery rule
+    // (unpaid orders are kept — they are pending revenue).
+    const periodKPIs: StatisticsElement[] = useMemo(() => {
+        const relevant = filteredOrders.filter(o => o.status?.code !== 80);
+        const count = relevant.length;
+        const revenue = relevant.reduce((sum, o) => sum + Number(o.montant), 0);
+        const averageBasket = count > 0 ? Math.round(revenue / count) : 0;
+
+        return [
+            {
+                id: 'averageBasket',
+                title: t('Panier moyen'),
+                number: `${formatNumber(averageBasket)} Fcfa`,
+                icon: <CashStack size={32} />,
+                color: 'rgba(52,195,143,0.85)'
+            },
+            {
+                id: 'periodOrders',
+                title: t('Commandes sur la période'),
+                number: count,
+                icon: <CartFill size={32} />,
+                color: 'rgba(85,110,230,0.85)',
+                onClick: navigateToOrders
+            }
+        ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filteredOrders, t]);
 
     const pipelineKPIs: StatisticsElement[] = useMemo(() => {
         const pending = orders.filter(o => o.status.code === 8).length;
@@ -99,6 +133,11 @@ const AdminDashboard: React.FC<Props> = ({ datePickerSection }) => {
             {/* Section 3: Date picker */}
             {datePickerSection}
 
+            {/* Section 3b: Period KPIs (average basket, order count) */}
+            <Col xs={12}>
+                <StatisticsView items={periodKPIs} colSizes={{ xs: 6, lg: 3 }} />
+            </Col>
+
             {/* Section 4: Revenue Chart + Box Types */}
             <Col xs={12} lg={8}>
                 <RevenueChartView />
@@ -110,6 +149,11 @@ const AdminDashboard: React.FC<Props> = ({ datePickerSection }) => {
             {/* Section 4b: Best sellers (period-scoped) */}
             <Col xs={12}>
                 <BestSellersView />
+            </Col>
+
+            {/* Section 4c: Orders count by stage (period-scoped) */}
+            <Col xs={12}>
+                <OrdersStatisticsChartView />
             </Col>
 
             {/* Section 5: Recent Orders + Daily Activity */}
