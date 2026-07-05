@@ -45,8 +45,8 @@ const OrderInvoicePageContent: React.FC<OrderProps> = (order: OrderProps) => {
     /**
      * Calculate subtotals
      */
-    const boxesSubtotal = order.cart.boxes_data.reduce((sum, box) => sum + Number(box.type.price), 0);
-    const slicesSubtotal = order.cart.slices_data.reduce((sum, cs) => sum + (Number(cs.slice.price) * cs.quantity), 0);
+    const boxesSubtotal = order.cart.boxes_data.reduce((sum, box) => sum + Number(box.type?.price ?? 0), 0);
+    const slicesSubtotal = order.cart.slices_data.reduce((sum, cs) => sum + (Number(cs.slice?.price ?? 0) * cs.quantity), 0);
     const subtotal = boxesSubtotal + slicesSubtotal;
     const discount = order.discount_amount ?? 0;
 

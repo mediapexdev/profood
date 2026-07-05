@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { QRCodeSVG } from "qrcode.react";
-
 import { useTranslation } from "react-i18next";
 
 import { OrderProps } from "../../types";
@@ -12,8 +10,8 @@ import api from "../../api/api";
 import './PublicReceiptPage.css';
 
 /**
- * Public receipt page - accessible without authentication.
- * Fetches order data from the public API endpoint.
+ * Receipt page. The underlying endpoint exposes customer PII, so it is
+ * authenticated + staff/owner scoped; this page sends the stored staff token.
  */
 const PublicReceiptPage: React.FC = () => {
     const { t } = useTranslation();
@@ -26,7 +24,10 @@ const PublicReceiptPage: React.FC = () => {
     useEffect(() => {
         if (!orderId) return;
 
-        api.get(`/receipt/${orderId}`)
+        // The receipt endpoint is authenticated + authorized (it exposes
+        // customer PII); send the staff token.
+        const token = localStorage.getItem('token');
+        api.get(`/receipt/${orderId}`, { headers: { Authorization: `Bearer ${token}` } })
             .then((res) => {
                 if (res.status === 200) {
                     setOrder(res.data);
@@ -70,8 +71,8 @@ const PublicReceiptPage: React.FC = () => {
 
     const customerPhone = order.customer?.user?.phone_number ?? order.guest_phone_number ?? '';
 
-    const boxesSubtotal = order.cart.boxes_data.reduce((sum, box) => sum + Number(box.type.price), 0);
-    const slicesSubtotal = order.cart.slices_data.reduce((sum, cs) => sum + (Number(cs.slice.price) * cs.quantity), 0);
+    const boxesSubtotal = order.cart.boxes_data.reduce((sum, box) => sum + Number(box.type?.price ?? 0), 0);
+    const slicesSubtotal = order.cart.slices_data.reduce((sum, cs) => sum + (Number(cs.slice?.price ?? 0) * cs.quantity), 0);
 
     return (
         <div className="public-receipt-wrapper">
@@ -111,12 +112,12 @@ const PublicReceiptPage: React.FC = () => {
                         {order.cart.boxes_data.map((box) => (
                             <div key={box.id} className="receipt-box-item">
                                 <div className="receipt-box-header">
-                                    <span>{box.type.wording}</span>
-                                    <span>{formatNumber(box.type.price)} Fcfa</span>
+                                    <span>{box.type?.wording ?? t('Produit supprimé')}</span>
+                                    <span>{formatNumber(box.type?.price ?? 0)} Fcfa</span>
                                 </div>
                                 {box.box_slices.map((bs) => (
                                     <div key={bs.id} className="receipt-box-slice">
-                                        x{bs.quantity} {bs.slice.wording}
+                                        x{bs.quantity} {bs.slice?.wording ?? t('Produit supprimé')}
                                     </div>
                                 ))}
                             </div>
@@ -135,8 +136,8 @@ const PublicReceiptPage: React.FC = () => {
                         <div className="receipt-section-title">{t('Au détail')}</div>
                         {order.cart.slices_data.map((cs) => (
                             <div key={cs.id} className="receipt-slice-item">
-                                <span>x{cs.quantity} {cs.slice.wording}</span>
-                                <span>{formatNumber(cs.slice.price * cs.quantity)} Fcfa</span>
+                                <span>x{cs.quantity} {cs.slice?.wording ?? t('Produit supprimé')}</span>
+                                <span>{formatNumber((cs.slice?.price ?? 0) * cs.quantity)} Fcfa</span>
                             </div>
                         ))}
                         <div className="receipt-subtotal-row">
@@ -159,17 +160,6 @@ const PublicReceiptPage: React.FC = () => {
                 <div className="receipt-payment-info">
                     <div><strong>{t('Mode de paiement')}:</strong> {t(order.payment_method)}</div>
                     <div><strong>{t('Statut')}:</strong> {t(order.payment_status.wording)}</div>
-                </div>
-
-                <div className="receipt-separator"></div>
-
-                {/* QR Code */}
-                <div className="receipt-qrcode">
-                    <QRCodeSVG
-                        value={window.location.href}
-                        size={100}
-                        level="M"
-                    />
                 </div>
 
                 <div className="receipt-separator"></div>

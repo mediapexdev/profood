@@ -12,8 +12,6 @@ import { ArrowLeft } from "react-bootstrap-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 
-import { QRCodeSVG } from "qrcode.react";
-
 import { useTranslation } from "react-i18next";
 
 import { OrderProps } from "../../types";
@@ -49,17 +47,15 @@ const OrderReceiptPageContent: React.FC<OrderProps> = (order: OrderProps) => {
 
     const customerPhone = order.customer?.user?.phone_number ?? order.guest_phone_number ?? '';
 
-    const publicReceiptUrl = `${window.location.origin}/recu/${order.string_id}`;
-
     /**
      * Calculate boxes subtotal
      */
-    const boxesSubtotal = order.cart.boxes_data.reduce((sum, box) => sum + Number(box.type.price), 0);
+    const boxesSubtotal = order.cart.boxes_data.reduce((sum, box) => sum + Number(box.type?.price ?? 0), 0);
 
     /**
      * Calculate slices subtotal
      */
-    const slicesSubtotal = order.cart.slices_data.reduce((sum, cs) => sum + (Number(cs.slice.price) * cs.quantity), 0);
+    const slicesSubtotal = order.cart.slices_data.reduce((sum, cs) => sum + (Number(cs.slice?.price ?? 0) * cs.quantity), 0);
 
     /**
      *
@@ -146,12 +142,12 @@ const OrderReceiptPageContent: React.FC<OrderProps> = (order: OrderProps) => {
                                     {order.cart.boxes_data.map((box) => (
                                         <div key={box.id} className="receipt-box-item">
                                             <div className="receipt-box-header">
-                                                <span>{box.type.wording}</span>
-                                                <span>{formatNumber(box.type.price)} Fcfa</span>
+                                                <span>{box.type?.wording ?? t('Produit supprimé')}</span>
+                                                <span>{formatNumber(box.type?.price ?? 0)} Fcfa</span>
                                             </div>
                                             {box.box_slices.map((bs) => (
                                                 <div key={bs.id} className="receipt-box-slice">
-                                                    x{bs.quantity} {bs.slice.wording}
+                                                    x{bs.quantity} {bs.slice?.wording ?? t('Produit supprimé')}
                                                 </div>
                                             ))}
                                         </div>
@@ -170,8 +166,8 @@ const OrderReceiptPageContent: React.FC<OrderProps> = (order: OrderProps) => {
                                     <div className="receipt-section-title">{t('Au détail')}</div>
                                     {order.cart.slices_data.map((cs) => (
                                         <div key={cs.id} className="receipt-slice-item">
-                                            <span>x{cs.quantity} {cs.slice.wording}</span>
-                                            <span>{formatNumber(cs.slice.price * cs.quantity)} Fcfa</span>
+                                            <span>x{cs.quantity} {cs.slice?.wording ?? t('Produit supprimé')}</span>
+                                            <span>{formatNumber((cs.slice?.price ?? 0) * cs.quantity)} Fcfa</span>
                                         </div>
                                     ))}
                                     <div className="receipt-subtotal-row">
@@ -194,20 +190,6 @@ const OrderReceiptPageContent: React.FC<OrderProps> = (order: OrderProps) => {
                             <div className="receipt-payment-info">
                                 <div><strong>{t('Mode de paiement')}:</strong> {t(order.payment_method)}</div>
                                 <div><strong>{t('Statut')}:</strong> {t(order.payment_status.wording)}</div>
-                            </div>
-
-                            <div className="receipt-separator"></div>
-
-                            {/* QR Code */}
-                            <div className="receipt-qrcode">
-                                <QRCodeSVG
-                                    value={publicReceiptUrl}
-                                    size={100}
-                                    level="M"
-                                />
-                                <div className="receipt-qrcode-label">
-                                    {t('Scannez pour voir le reçu')}
-                                </div>
                             </div>
 
                             <div className="receipt-separator"></div>

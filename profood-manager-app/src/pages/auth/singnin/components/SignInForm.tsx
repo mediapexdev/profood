@@ -225,7 +225,13 @@ const SignInForm: React.FC = () => {
                         setShowSpinner(false);
                     }
                 }).catch((error) => {
-                    setAlertText(error.response.data.message ? t(error.response.data.message) : `${t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur")}.`);
+                    // Clear the spinner and surface the error even when the
+                    // /app-manager call fails with no HTTP response, otherwise
+                    // the user is stuck on an endless loading screen.
+                    setShowSpinner(false);
+                    setShowAlert(true);
+                    setAlertColor('danger');
+                    setAlertText(error.response?.data?.message ? t(error.response.data.message) : `${t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur")}.`);
                     console.dir(error);
                 });
             }
@@ -241,7 +247,7 @@ const SignInForm: React.FC = () => {
             setShowSpinner(false);
             setShowAlert(true);
             setAlertColor('danger');
-            setAlertText(error.response.data.message ? t(error.response.data.message) : `${t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur")}.`);
+            setAlertText(error.response?.data?.message ? t(error.response.data.message) : `${t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur")}.`);
             console.log(error);
         });
     };

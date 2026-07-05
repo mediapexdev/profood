@@ -48,7 +48,13 @@ const RevenueChartView: React.FC = () => {
         const start = statisticsStartDate ? moment(statisticsStartDate) : moment().subtract(29, 'days');
         const end = statisticsEndDate ? moment(statisticsEndDate) : moment();
 
+        const CANCELLED_STATUS_CODE = 80;
         const filteredOrders = orders.filter(order => {
+            // Cancelled orders are not revenue. (Unpaid orders are kept: this is
+            // a cash-on-delivery business, so they are pending revenue.)
+            if (order.status?.code === CANCELLED_STATUS_CODE) {
+                return false;
+            }
             const orderDate = moment(order.created_at);
             return orderDate.isSameOrAfter(start, 'day') && orderDate.isSameOrBefore(end, 'day');
         });

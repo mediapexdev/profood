@@ -148,7 +148,7 @@ const ProductsList: React.FC<ProductsListProps> = ({products, fromSearch = false
                                         color='info'
                                         className='bg-light-info2 text-gray-800 fw-medium'
                                     >
-                                        <span>{t(product.category.wording)}</span>
+                                        <span>{product.category ? t(product.category.wording) : t('Sans catégorie')}</span>
                                     </Badge>
                                 </td>
                                 <td className='price-cell'>

@@ -101,8 +101,14 @@ const UserMenu: React.FC = () => {
                 }, 2400);
             })
             .catch((error) => {
-                showToast(`${t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur")}.`, 'error');
-                // showToast(error.message, 'error');
+                // Even if /signout fails (e.g. the token already expired), clear
+                // the local session and leave — otherwise the user is stuck
+                // "logged in" with no way to sign out.
+                localStorage.removeItem(localStorage.getItem('token') as string);
+                localStorage.removeItem('token');
+                toggleDropdown();
+                goToSignIn();
+                setShowSpinner(false);
                 console.log(error);
             });
         }

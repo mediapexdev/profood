@@ -30,7 +30,7 @@ const OrderBoxDetails: React.FC<OrderProps> = (order : OrderProps) => {
 
         if(order !== undefined){
             order.cart.boxes_data.map((e) => {
-                return amount += Number(e.type.price);
+                return amount += Number(e.type?.price ?? 0);
             })
         }
         return formatNumber(amount);
@@ -70,8 +70,8 @@ const OrderBoxDetails: React.FC<OrderProps> = (order : OrderProps) => {
                         return (
                             <tr key={index}>
                                 <td className='content-color font-sm id-cell'>0{index + 1}</td>
-                                <td className='content-color font-sm box-name-cell'>{box_data.type.wording}</td>
-                                <td className='content-color font-sm box-quantity-cell'>{box_data.type.capacity}</td>
+                                <td className='content-color font-sm box-name-cell'>{box_data.type?.wording ?? t('Produit supprimé')}</td>
+                                <td className='content-color font-sm box-quantity-cell'>{box_data.type?.capacity ?? '—'}</td>
                                 <td className='content-color font-sm box-products-cell'>
                                     <div className='d-flex flex-column'>
                                     {
@@ -90,7 +90,7 @@ const OrderBoxDetails: React.FC<OrderProps> = (order : OrderProps) => {
                                                     </div> */}
                                                     <div>
                                                         <small className='me-1'>{`x${box_slice.quantity}`}</small>
-                                                        <span>{`${t(box_slice.slice.wording)}`}</span>
+                                                        <span>{box_slice.slice ? `${t(box_slice.slice.wording)}` : t('Produit supprimé')}</span>
                                                         {/* <span>{`${t(box_slice.slice.wording)} (x${box_slice.quantity})`}</span> */}
                                                     </div>
                                                 </div>
@@ -100,7 +100,7 @@ const OrderBoxDetails: React.FC<OrderProps> = (order : OrderProps) => {
                                     </div>
                                 </td>
                                 <td className='content-color font-sm box-price-cell'>
-                                    <span>{formatNumber(box_data.type.price)}</span>
+                                    <span>{formatNumber(box_data.type?.price ?? 0)}</span>
                                     <small className='ms-1'>Fcfa</small>
                                 </td>
                             </tr>

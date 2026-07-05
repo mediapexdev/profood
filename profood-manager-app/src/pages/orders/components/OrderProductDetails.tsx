@@ -30,7 +30,7 @@ const OrderProductDetails: React.FC<OrderProps> = (order : OrderProps) => {
 
         if(order !== undefined){
             order.cart.slices_data.map((e) => {
-                return amount += Number(e.slice.price * e.quantity);
+                return amount += Number((e.slice?.price ?? 0) * e.quantity);
             })
         }
         return formatNumber(amount);
@@ -80,17 +80,17 @@ const OrderProductDetails: React.FC<OrderProps> = (order : OrderProps) => {
                                             />
                                         </div> */}
                                         <div>
-                                            <span>{t(slices_data.slice.wording)}</span>
+                                            <span>{slices_data.slice ? t(slices_data.slice.wording) : t('Produit supprimé')}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td className='content-color font-sm product-price-cell'>
-                                    <span>{formatNumber(slices_data.slice.price)}</span>
+                                    <span>{formatNumber(slices_data.slice?.price ?? 0)}</span>
                                     <small className='ms-1'>Fcfa</small>
                                 </td>
                                 <td className='content-color font-sm product-quantity-cell'>{slices_data.quantity}</td>
                                 <td className='content-color font-sm product-amount-cell'>
-                                    <span>{formatNumber(slices_data.slice.price * slices_data.quantity)}</span>
+                                    <span>{formatNumber((slices_data.slice?.price ?? 0) * slices_data.quantity)}</span>
                                     <small className='ms-1'>Fcfa</small>
                                 </td>
                             </tr>
