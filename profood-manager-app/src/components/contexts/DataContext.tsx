@@ -1,6 +1,7 @@
 import { createContext } from "react";
 
 import {
+    BestSellersReport,
     BoxTypeProps,
     CategoryProps,
     CustomDateRange,
@@ -25,8 +26,10 @@ export interface DataContextType {
     customers: CustomerProps[];
     livreurs: Livreur[];
     orders: OrderProps[];
+    filteredOrders: OrderProps[];
     orderPaymentStatuses: OrderPaymentStatus[];
     ordersStatisticsDetails?: OrdersStatisticsDetails;
+    bestSellers?: BestSellersReport;
     orderStatuses: OrderStatus[];
     promotions: PromotionProps[];
     slices: SliceProps[];
@@ -43,6 +46,7 @@ export interface DataContextType {
     fetchOrders: (showSpinner?: boolean, spinnerTime?: number) => void;
     fetchOrderPaymentStatuses: (showSpinner?: boolean, spinnerTime?: number) => void;
     fetchOrdersStatisticsDetails: (startDate: Date|null, endDate: Date|null, showSpinner?: boolean, spinnerTime?: number) => void;
+    fetchBestSellers: (startDate: Date|null, endDate: Date|null, showSpinner?: boolean, spinnerTime?: number) => void;
     fetchOrderStatuses: (showSpinner?: boolean, spinnerTime?: number) => void;
     fetchPromotions: (showSpinner?: boolean, spinnerTime?: number) => void;
     fetchSlices: (showSpinner?: boolean, spinnerTime?: number) => void;
@@ -55,6 +59,7 @@ export interface DataContextType {
     setOrders: (orders: OrderProps[]) => void;
     setOrderPaymentStatuses: (statuses: OrderPaymentStatus[]) => void;
     setOrdersStatisticsDetails: (statisticsDetails?: OrdersStatisticsDetails) => void;
+    setBestSellers: (report?: BestSellersReport) => void;
     setOrderStatuses: (statuses: OrderStatus[]) => void;
     setPromotions: (promotions: PromotionProps[]) => void;
     setSlices: (slices: SliceProps[]) => void;
@@ -74,8 +79,10 @@ const DataContext = createContext<DataContextType>({
     customers: [],
     livreurs: [],
     orders: [],
+    filteredOrders: [],
     orderPaymentStatuses: [],
     ordersStatisticsDetails: undefined,
+    bestSellers: undefined,
     orderStatuses: [],
     promotions: [],
     slices: [],
@@ -92,6 +99,7 @@ const DataContext = createContext<DataContextType>({
     fetchOrders: () => {/* */},
     fetchOrderPaymentStatuses: () => {/* */},
     fetchOrdersStatisticsDetails: () => {/* */},
+    fetchBestSellers: () => {/* */},
     fetchOrderStatuses: () => {/* */},
     fetchPromotions: () => {/* */},
     fetchSlices:() => {/* */},
@@ -104,6 +112,7 @@ const DataContext = createContext<DataContextType>({
     setOrders: () => {/* */},
     setOrderPaymentStatuses: () => {/* */},
     setOrdersStatisticsDetails : () => {/* */},
+    setBestSellers: () => {/* */},
     setOrderStatuses: () => {/* */},
     setPromotions: () => {/* */},
     setSlices: () => {/* */},

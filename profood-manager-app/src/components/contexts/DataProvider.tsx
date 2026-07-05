@@ -1,6 +1,8 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { useTranslation } from "react-i18next";
+
+import moment from "moment";
 
 import api from "../../api/api";
 import DataContext, { DataContextType } from "./DataContext";
@@ -13,6 +15,7 @@ import {
     OrderPaymentStatus,
     OrderProps,
     OrderStatus,
+    BestSellersReport,
     OrdersStatisticsDetails,
     PromotionProps,
     SliceProps,
@@ -52,6 +55,7 @@ const DataProvider = ({ children }: Props) => {
     const [orders, setOrders] = useState<OrderProps[]>([]);
     const [orderPaymentStatuses, setOrderPaymentStatuses] = useState<OrderPaymentStatus[]>([]);
     const [ordersStatisticsDetails, setOrdersStatisticsDetails] = useState<OrdersStatisticsDetails|undefined>(undefined);
+    const [bestSellers, setBestSellers] = useState<BestSellersReport|undefined>(undefined);
     const [orderStatuses, setOrderStatuses] = useState<OrderStatus[]>([]);
     const [promotions, setPromotions] = useState<PromotionProps[]>([]);
     const [slices, setSlices] = useState<SliceProps[]>([]);
@@ -333,9 +337,61 @@ const DataProvider = ({ children }: Props) => {
     }, [setShowSpinner, showToast, t]);
 
     /**
-     * 
-     * @param showSpinner 
-     * @param spinnerTime 
+     * Fetch the best-sellers report for a date range (read-only).
+     */
+    const fetchBestSellers = useCallback((startDate: Date|null = null,
+        endDate: Date|null = null, showSpinner: boolean = false, spinnerTime: number = 300) => {
+
+        let start_date = null;
+        let end_date = null;
+
+        if(startDate !== null){
+            const startYear = startDate.getFullYear();
+            const startMonth = startDate.getMonth() < 9 ? `0${startDate.getMonth() + 1}` : startDate.getMonth() + 1;
+            const startDay = startDate.getDate() < 10 ? `0${startDate.getDate()}` : startDate.getDate();
+            start_date = `${startYear}-${startMonth}-${startDay}`
+        }
+        if(endDate !== null){
+            const endYear = endDate.getFullYear();
+            const endMonth = endDate.getMonth() < 9 ? `0${endDate.getMonth() + 1}` : endDate.getMonth() + 1;
+            const endDay = endDate.getDate() < 10 ? `0${endDate.getDate()}` : endDate.getDate();
+            end_date = `${endYear}-${endMonth}-${endDay}`
+        }
+        const token = localStorage.getItem('token');
+
+        if(token !== null){
+            if(showSpinner){
+                setShowSpinner(true);
+            }
+            api.get('/get-best-sellers', {
+                headers:{
+                  Authorization:`Bearer ${token}`,
+                },
+                params: {
+                    start_date: start_date,
+                    end_date: end_date,
+                    limit: 10
+                }
+            }).then((res) => {
+                setBestSellers(res.data);
+                setTimeout(() => {
+                    if(showSpinner){
+                        setShowSpinner(false);
+                    }
+                }, spinnerTime);
+            }).catch((error) => {
+                if(showSpinner){
+                    setShowSpinner(false);
+                }
+                console.log(error);
+            });
+        }
+    }, [setShowSpinner]);
+
+    /**
+     *
+     * @param showSpinner
+     * @param spinnerTime
      */
     const fetchOrderStatuses = useCallback((showSpinner: boolean = true, spinnerTime: number = 300) => {
 
@@ -524,6 +580,53 @@ const DataProvider = ({ children }: Props) => {
     }, [fetchData]);
 
     /**
+     * Orders restricted to the selected statistics date range. Period-sensitive
+     * dashboard widgets consume this instead of the raw all-time `orders` list so
+     * they honour the dashboard date picker. Live/today widgets keep using `orders`.
+     */
+    const filteredOrders = useMemo(() => {
+        const start = statisticsStartDate ? moment(statisticsStartDate).startOf('day') : null;
+        const end = statisticsEndDate ? moment(statisticsEndDate).endOf('day') : null;
+
+        if (start === null && end === null) {
+            return orders;
+        }
+
+        return orders.filter((order) => {
+            const orderDate = moment(order.created_at);
+            if (start !== null && orderDate.isBefore(start)) {
+                return false;
+            }
+            if (end !== null && orderDate.isAfter(end)) {
+                return false;
+            }
+            return true;
+        });
+    }, [orders, statisticsStartDate, statisticsEndDate]);
+
+    /**
+     * Poll for new orders in the background so the header alert badge stays live
+     * without a manual refresh. Skipped when the tab is hidden, when logged out,
+     * or while on the orders view (where a wholesale refresh could clobber an
+     * in-flight Kanban drag / optimistic status change).
+     */
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+                return;
+            }
+            if (!localStorage.getItem('token')) {
+                return;
+            }
+            if (window.location.pathname.startsWith('/commandes')) {
+                return;
+            }
+            fetchOrders(false);
+        }, 60000);
+        return () => clearInterval(interval);
+    }, [fetchOrders]);
+
+    /**
      * Define the context value
      */
     const contextValue : DataContextType = {
@@ -532,8 +635,10 @@ const DataProvider = ({ children }: Props) => {
         customers,
         livreurs,
         orders,
+        filteredOrders,
         orderPaymentStatuses,
         ordersStatisticsDetails,
+        bestSellers,
         orderStatuses,
         promotions,
         slices,
@@ -550,6 +655,7 @@ const DataProvider = ({ children }: Props) => {
         fetchOrders,
         fetchOrderPaymentStatuses,
         fetchOrdersStatisticsDetails,
+        fetchBestSellers,
         fetchOrderStatuses,
         fetchPromotions,
         fetchSlices,
@@ -562,6 +668,7 @@ const DataProvider = ({ children }: Props) => {
         setOrders,
         setOrderPaymentStatuses,
         setOrdersStatisticsDetails,
+        setBestSellers,
         setOrderStatuses,
         setPromotions,
         setSlices,

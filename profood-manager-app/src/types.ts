@@ -228,11 +228,8 @@ export interface OrderStatisticsDetails {
     number: number;
     box_count: number;
     slice_count: number;
-    box_types_count:  {
-        'Noflaye': 0,
-        'Téranga': 0,
-        'Woyofal': 0,
-        'Xéweul': 0,
+    box_types_count: {
+        [wording: string]: number;
     }
 }
 
@@ -246,6 +243,32 @@ export interface OrdersStatisticsDetails {
     inTheProcessOfDelivery?: OrderStatisticsDetails;
     delivered?: OrderStatisticsDetails;
     cancelled?: OrderStatisticsDetails;
+}
+
+/**
+ * Best-sellers report (GET /get-best-sellers). Read-only aggregation of sold
+ * units over a date range.
+ */
+export interface BestSellerBoxType {
+    box_type_id: number;
+    wording: string;
+    units: number;
+    revenue: number;
+}
+
+export interface BestSellerSlice {
+    slice_id: number;
+    wording: string;
+    standalone_units: number;
+    in_box_units: number;
+    units: number;
+    revenue: number;
+}
+
+export interface BestSellersReport {
+    range: { start_date: string | null; end_date: string | null };
+    box_types: BestSellerBoxType[];
+    slices: BestSellerSlice[];
 }
 
 /**
