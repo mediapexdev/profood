@@ -231,12 +231,16 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
     // ── Render helpers ─────────────────────────────────────────────────────────
 
     /**
-     * Returns the IonItem colour prop: 'danger' when the field is touched and
-     * invalid, 'success' when touched and valid, undefined otherwise.
+     * Ionic 8 validation classes for a standalone IonInput: red highlight when
+     * the field is touched and invalid, green when touched and valid. (Ionic 8
+     * dropped the legacy `<IonLabel position="floating">` slot, so each field is
+     * a standalone filled input carrying its own label — same pattern as the
+     * sign-up form.)
      */
-    const itemColor = (field: string, error: string | null) => {
-        if (!touched[field]) return undefined;
-        return error ? 'danger' : 'success';
+    const inputClass = (field: string, error: string | null) => {
+        const base = 'guest-input content-color';
+        if (!touched[field]) return base;
+        return `${base} ion-touched ${error ? 'ion-invalid' : 'ion-valid'}`;
     };
 
     /**
@@ -259,67 +263,58 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
             </p>
 
             {/* ── First name ─────────────────────────────────────────────── */}
-            <IonItem
-                lines="full"
-                color={itemColor('firstName', firstNameError)}
+            <IonInput
+                className={inputClass('firstName', firstNameError)}
+                fill="solid"
+                type="text"
+                label={`${t('Prénom')} *`}
+                labelPlacement="floating"
+                value={firstName}
+                autocomplete="given-name"
+                inputmode="text"
+                maxlength={255}
                 style={{ marginBottom: '0.5rem' }}
-            >
-                <IonInput
-                    type="text"
-                    label={`${t('Prénom')} *`}
-                    labelPlacement="floating"
-                    value={firstName}
-                    autocomplete="given-name"
-                    inputmode="text"
-                    maxlength={255}
-                    onIonInput={(e) => setFirstName(e.detail.value ?? '')}
-                    onIonBlur={() => markTouched('firstName')}
-                    aria-label={t('Prénom')}
-                />
-            </IonItem>
+                onIonInput={(e) => setFirstName(e.detail.value ?? '')}
+                onIonBlur={() => markTouched('firstName')}
+                aria-label={t('Prénom')}
+            />
             {fieldError('firstName', firstNameError)}
 
             {/* ── Last name ──────────────────────────────────────────────── */}
-            <IonItem
-                lines="full"
-                color={itemColor('lastName', lastNameError)}
+            <IonInput
+                className={inputClass('lastName', lastNameError)}
+                fill="solid"
+                type="text"
+                label={`${t('Nom')} *`}
+                labelPlacement="floating"
+                value={lastName}
+                autocomplete="family-name"
+                inputmode="text"
+                maxlength={255}
                 style={{ marginBottom: '0.5rem' }}
-            >
-                <IonInput
-                    type="text"
-                    label={`${t('Nom')} *`}
-                    labelPlacement="floating"
-                    value={lastName}
-                    autocomplete="family-name"
-                    inputmode="text"
-                    maxlength={255}
-                    onIonInput={(e) => setLastName(e.detail.value ?? '')}
-                    onIonBlur={() => markTouched('lastName')}
-                    aria-label={t('Nom')}
-                />
-            </IonItem>
+                onIonInput={(e) => setLastName(e.detail.value ?? '')}
+                onIonBlur={() => markTouched('lastName')}
+                aria-label={t('Nom')}
+            />
             {fieldError('lastName', lastNameError)}
 
             {/* ── Phone number ───────────────────────────────────────────── */}
-            <IonItem
-                lines="full"
-                color={itemColor('phoneNumber', phoneError)}
+            <IonInput
+                className={inputClass('phoneNumber', phoneError)}
+                fill="solid"
+                type="tel"
+                label={`${t('Numéro de téléphone')} *`}
+                labelPlacement="floating"
+                value={phoneNumber}
+                autocomplete="tel-national"
+                inputmode="tel"
+                maxlength={15}
+                placeholder="77 123 45 67"
                 style={{ marginBottom: '0.5rem' }}
-            >
-                <IonInput
-                    type="tel"
-                    label={`${t('Numéro de téléphone')} *`}
-                    labelPlacement="floating"
-                    value={phoneNumber}
-                    autocomplete="tel-national"
-                    inputmode="tel"
-                    maxlength={15}
-                    placeholder="77 123 45 67"
-                    onIonInput={(e) => setPhoneNumber(e.detail.value ?? '')}
-                    onIonBlur={() => markTouched('phoneNumber')}
-                    aria-label={t('Numéro de téléphone')}
-                />
-            </IonItem>
+                onIonInput={(e) => setPhoneNumber(e.detail.value ?? '')}
+                onIonBlur={() => markTouched('phoneNumber')}
+                aria-label={t('Numéro de téléphone')}
+            />
             {fieldError('phoneNumber', phoneError)}
             {!touched.phoneNumber && (
                 <IonNote className="guest-field-note font-xs content-color">
@@ -328,54 +323,48 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({ onSubmit, onCance
             )}
 
             {/* ── Email (optional) ───────────────────────────────────────── */}
-            <IonItem
-                lines="full"
-                color={itemColor('email', emailError)}
+            <IonInput
+                className={inputClass('email', emailError)}
+                fill="solid"
+                type="email"
+                label={t('Adresse e-mail (optionnel)')}
+                labelPlacement="floating"
+                value={email}
+                autocomplete="email"
+                inputmode="email"
+                maxlength={255}
                 style={{ marginBottom: '0.5rem' }}
-            >
-                <IonInput
-                    type="email"
-                    label={t('Adresse e-mail (optionnel)')}
-                    labelPlacement="floating"
-                    value={email}
-                    autocomplete="email"
-                    inputmode="email"
-                    maxlength={255}
-                    onIonInput={(e) => setEmail(e.detail.value ?? '')}
-                    onIonBlur={() => markTouched('email')}
-                    aria-label={t('Adresse e-mail (optionnel)')}
-                />
-            </IonItem>
+                onIonInput={(e) => setEmail(e.detail.value ?? '')}
+                onIonBlur={() => markTouched('email')}
+                aria-label={t('Adresse e-mail (optionnel)')}
+            />
             {fieldError('email', emailError)}
 
             {/* ── Delivery destination (locality autocomplete) ───────────── */}
-            <IonItem
-                lines="full"
-                color={itemColor('address', addressError)}
+            <IonInput
+                className={inputClass('address', addressError)}
+                fill="solid"
+                type="text"
+                label={`${t('Adresse de livraison')} *`}
+                labelPlacement="floating"
+                value={address}
+                maxlength={255}
+                placeholder={t('Rechercher votre localité')}
                 style={{ marginBottom: '0.5rem' }}
-            >
-                <IonInput
-                    type="text"
-                    label={`${t('Adresse de livraison')} *`}
-                    labelPlacement="floating"
-                    value={address}
-                    maxlength={255}
-                    placeholder={t('Rechercher votre localité')}
-                    onIonInput={(e) => {
-                        setAddress(e.detail.value ?? '');
-                        // Typing invalidates a previously tapped suggestion.
-                        setSelectedLocaliteId(undefined);
-                        setShowSuggestions(true);
-                    }}
-                    onIonFocus={() => setShowSuggestions(true)}
-                    onIonBlur={() => {
-                        markTouched('address');
-                        // Delay so a tap on a suggestion lands before the list closes
-                        setTimeout(() => setShowSuggestions(false), 250);
-                    }}
-                    aria-label={t('Adresse de livraison')}
-                />
-            </IonItem>
+                onIonInput={(e) => {
+                    setAddress(e.detail.value ?? '');
+                    // Typing invalidates a previously tapped suggestion.
+                    setSelectedLocaliteId(undefined);
+                    setShowSuggestions(true);
+                }}
+                onIonFocus={() => setShowSuggestions(true)}
+                onIonBlur={() => {
+                    markTouched('address');
+                    // Delay so a tap on a suggestion lands before the list closes
+                    setTimeout(() => setShowSuggestions(false), 250);
+                }}
+                aria-label={t('Adresse de livraison')}
+            />
             {fieldError('address', addressError)}
             {!touched.address && localities.length > 0 && (
                 <IonNote className="guest-field-note font-xs content-color">
