@@ -1,9 +1,9 @@
 type Tone = 'cat' | 'fresh' | 'pop' | 'out'
 
 const TONES: Record<Tone, string> = {
-  cat: 'bg-ink text-bg',
-  fresh: 'bg-froid-tint text-[#1c5f5c] dark:text-[#bfe3e2] border border-froid',
-  pop: 'bg-braise text-white',
+  cat: 'bg-ink text-surface',
+  fresh: 'bg-halal/12 text-halal border border-halal/40',
+  pop: 'bg-terre text-white',
   out: 'bg-transparent text-alerte border border-alerte',
 }
 

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
@@ -6,6 +7,7 @@ import { SLICES, PRICE_PER_CUT } from '../lib/catalog'
 import { DIAGRAMS, getCutInfo } from '../lib/anatomy'
 import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
+import { useCart } from '../contexts/CartContext'
 
 const CAPACITY = 8
 
@@ -18,6 +20,8 @@ const BEEF = DIAGRAMS.boeuf
 
 export function ComposerPage() {
   const [picks, setPicks] = useState<number[]>([])
+  const { addBox } = useCart()
+  const navigate = useNavigate()
 
   const toggle = (id: number) => {
     haptic('light')
@@ -39,6 +43,14 @@ export function ComposerPage() {
   }, [picks])
 
   const total = picks.length * PRICE_PER_CUT
+
+  const addToCart = () => {
+    if (!picks.length) return
+    haptic('medium')
+    addBox(`Box composée · ${picks.length} découpes`, total, picks, BEEF.src)
+    setPicks([])
+    navigate('/panier')
+  }
 
   return (
     <>
@@ -93,7 +105,9 @@ export function ComposerPage() {
               <span className="text-[11px] font-bold text-terre-dark">soit {picks.length ? fmtFcfa(PRICE_PER_CUT) : '—'} la découpe</span>
             </div>
           </div>
-          <Button full className="mt-4" onClick={() => haptic('medium')}>Ajouter la box au panier</Button>
+          <Button full disabled={!picks.length} className="mt-4" onClick={addToCart}>
+            {picks.length ? 'Ajouter la box au panier' : 'Choisissez vos découpes'}
+          </Button>
           <p className="text-[12px] text-taupe mt-3">Le prix se met à jour à chaque choix — jamais recalculé côté client au moment de payer.</p>
         </div>
       </Page>

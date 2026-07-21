@@ -8,7 +8,7 @@ import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
 
 export function PanierPage() {
-  const { lines, total, setQty } = useCart()
+  const { lines, total, count, setLineQty, clear } = useCart()
   const navigate = useNavigate()
 
   if (!lines.length) {
@@ -32,17 +32,25 @@ export function PanierPage() {
       <AppBar title="Mon panier" />
       <Page>
         <div className="mx-auto max-w-2xl px-4 md:px-6 pt-3 flex flex-col gap-3">
-          {lines.map(({ slice, qty }) => (
-            <div key={slice.id} className="flex items-center gap-3 bg-surface border border-sable rounded-card p-3">
-              <img src={slice.image} alt={slice.name} className="w-16 h-16 shrink-0 rounded-lg object-cover bg-creme" />
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] text-taupe">{count} article{count > 1 ? 's' : ''}</span>
+            <button onClick={() => { haptic('light'); clear() }} className="text-[13px] font-bold text-taupe active:text-alerte inline-flex items-center gap-1">
+              <Icon name="delete" size={16} /> Vider
+            </button>
+          </div>
+
+          {lines.map((l) => (
+            <div key={l.id} className="flex items-center gap-3 bg-surface border border-sable rounded-card p-3">
+              <img src={l.image} alt={l.name} className="w-16 h-16 shrink-0 rounded-lg object-cover bg-creme" />
               <div className="flex-1 min-w-0">
-                <p className="font-title font-bold text-[15px] truncate">{slice.name}</p>
-                <p className="text-[12px] text-taupe tabular-nums">{fmtFcfa(slice.price)}</p>
+                <p className="font-title font-bold text-[15px] truncate">{l.name}</p>
+                {l.kind === 'box' && <p className="text-[11px] font-bold text-terre-deep">Box composée · {l.cutIds?.length ?? 0} découpes</p>}
+                <p className="text-[12px] text-taupe tabular-nums">{fmtFcfa(l.unitPrice)}</p>
               </div>
               <div className="inline-flex items-center border-[1.5px] border-sable rounded-full overflow-hidden">
-                <button className="w-9 h-9 grid place-items-center active:bg-creme-dark" aria-label="Retirer" onClick={() => { haptic('light'); setQty(slice.id, qty - 1) }}><Icon name="remove" size={18} /></button>
-                <span className="min-w-9 text-center font-bold tabular-nums">{qty}</span>
-                <button className="w-9 h-9 grid place-items-center active:bg-creme-dark" aria-label="Ajouter" onClick={() => { haptic('light'); setQty(slice.id, qty + 1) }}><Icon name="add" size={18} /></button>
+                <button className="w-9 h-9 grid place-items-center active:bg-creme-dark" aria-label="Retirer" onClick={() => { haptic('light'); setLineQty(l.id, l.qty - 1) }}><Icon name="remove" size={18} /></button>
+                <span className="min-w-9 text-center font-bold tabular-nums">{l.qty}</span>
+                <button className="w-9 h-9 grid place-items-center active:bg-creme-dark" aria-label="Ajouter" onClick={() => { haptic('light'); setLineQty(l.id, l.qty + 1) }}><Icon name="add" size={18} /></button>
               </div>
             </div>
           ))}
@@ -53,7 +61,7 @@ export function PanierPage() {
               <span className="font-title font-extrabold text-xl tabular-nums">{fmtFcfa(total)}</span>
             </div>
             <p className="text-[12px] text-taupe mt-1">Frais de livraison calculés à l'étape suivante, selon votre zone.</p>
-            <Button full className="mt-4" onClick={() => haptic('medium')}>Commander</Button>
+            <Button full className="mt-4" onClick={() => navigate('/checkout')}>Commander</Button>
           </div>
         </div>
       </Page>
