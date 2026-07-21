@@ -3,25 +3,29 @@ import { useNavigate } from 'react-router-dom'
 import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
-import { SLICES, PRICE_PER_CUT } from '../lib/catalog'
+import { PRICE_PER_CUT } from '../lib/catalog'
 import { DIAGRAMS, getCutInfo } from '../lib/anatomy'
 import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
 import { useCart } from '../contexts/CartContext'
+import { useCatalog } from '../contexts/CatalogContext'
 
 const CAPACITY = 8
-
-/** Découpes de bœuf disponibles en box et localisables sur la planche. */
-const CANDIDATES = SLICES.filter(
-  (s) => s.categoryId === 1 && s.availableInBox && (getCutInfo(s.name)?.zones.length ?? 0) > 0,
-).slice(0, 12)
-
 const BEEF = DIAGRAMS.boeuf
 
 export function ComposerPage() {
   const [picks, setPicks] = useState<number[]>([])
   const { addBox } = useCart()
+  const { slices: SLICES } = useCatalog()
   const navigate = useNavigate()
+
+  /** Découpes de bœuf disponibles en box et localisables sur la planche. */
+  const CANDIDATES = useMemo(
+    () => SLICES.filter(
+      (s) => s.categoryId === 1 && s.availableInBox && (getCutInfo(s.name)?.zones.length ?? 0) > 0,
+    ).slice(0, 12),
+    [SLICES],
+  )
 
   const toggle = (id: number) => {
     haptic('light')
@@ -40,7 +44,7 @@ export function ComposerPage() {
       if (s) getCutInfo(s.name)?.zones.forEach((z) => set.add(z))
     }
     return set
-  }, [picks])
+  }, [picks, SLICES])
 
   const total = picks.length * PRICE_PER_CUT
 

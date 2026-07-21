@@ -4,13 +4,14 @@ import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
 import { ProductCard } from '../components/ProductCard'
-import { SLICES } from '../lib/catalog'
 import { useFavorites } from '../contexts/FavoritesContext'
+import { useCatalog } from '../contexts/CatalogContext'
 
 export function FavorisPage() {
   const navigate = useNavigate()
   const { ids } = useFavorites()
-  const favs = ids.map((id) => SLICES.find((s) => s.id === id)).filter((s): s is NonNullable<typeof s> => !!s)
+  const { slices } = useCatalog()
+  const favs = ids.map((id) => slices.find((s) => s.id === id)).filter((s): s is NonNullable<typeof s> => !!s)
 
   return (
     <>

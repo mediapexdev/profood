@@ -26,6 +26,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import { BottomNav } from './components/shell/BottomNav'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { AuthProvider } from './contexts/AuthContext'
+import { CatalogProvider } from './contexts/CatalogContext'
 import { CartProvider } from './contexts/CartContext'
 import { FavoritesProvider } from './contexts/FavoritesContext'
 import { BoutiquePage } from './pages/BoutiquePage'
@@ -56,6 +57,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <CatalogProvider>
         <FavoritesProvider>
           <CartProvider>
             <BrowserRouter>
@@ -81,6 +83,7 @@ export default function App() {
             </BrowserRouter>
           </CartProvider>
         </FavoritesProvider>
+        </CatalogProvider>
       </AuthProvider>
     </ThemeProvider>
   )

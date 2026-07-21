@@ -4,7 +4,8 @@ import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
 import { CutDiagram } from '../components/CutDiagram'
 import { Icon } from '../components/ui/Icon'
-import { SLICES, categoryLabel } from '../lib/catalog'
+import { categoryLabel } from '../lib/catalog'
+import { useCatalog } from '../contexts/CatalogContext'
 import { fmtFcfa } from '../lib/format'
 import { useCart } from '../contexts/CartContext'
 import { useFavorites } from '../contexts/FavoritesContext'
@@ -12,7 +13,8 @@ import { haptic } from '../lib/haptics'
 
 export function ProduitPage() {
   const { id } = useParams()
-  const slice = SLICES.find((s) => String(s.id) === id)
+  const { slices } = useCatalog()
+  const slice = slices.find((s) => String(s.id) === id)
   const { add } = useCart()
   const { has, toggle } = useFavorites()
 

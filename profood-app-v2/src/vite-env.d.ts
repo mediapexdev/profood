@@ -6,6 +6,11 @@ interface ImportMetaEnv {
    * Doit valoir le PROFOOD_APP_KEY du serveur. Secret prod — cf. .env.example.
    */
   readonly VITE_APP_KEY?: string
+  /**
+   * Bascule le catalogue sur l'API Laravel ('true') au lieu des données
+   * locales (défaut). Bascule progressive — cf. src/contexts/CatalogContext.
+   */
+  readonly VITE_USE_API_CATALOG?: string
 }
 
 interface ImportMeta {

@@ -15,6 +15,9 @@ export interface Slice {
   weight: number
   availableInBox: boolean
   image: string
+  /** Champs « live » (présents quand le catalogue vient de l'API). */
+  promotionalPrice?: number | null
+  stockQuantity?: number | null
 }
 
 export interface Box {

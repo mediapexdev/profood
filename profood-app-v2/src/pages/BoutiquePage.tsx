@@ -3,8 +3,9 @@ import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { ProductCard } from '../components/ProductCard'
 import { Icon } from '../components/ui/Icon'
-import { CATEGORIES, SLICES, slicesByCategory, categoryLabel } from '../lib/catalog'
+import { categoryLabel } from '../lib/catalog'
 import type { Slice } from '../lib/catalog'
+import { useCatalog } from '../contexts/CatalogContext'
 
 type Sort = 'pertinence' | 'prix-asc' | 'prix-desc'
 
@@ -18,6 +19,7 @@ const SORTS: { key: Sort; label: string }[] = [
 const norm = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 
 export function BoutiquePage() {
+  const { slices: SLICES, categories: CATEGORIES, slicesByCategory } = useCatalog()
   const [catId, setCatId] = useState<number>(CATEGORIES[0]?.id ?? 1)
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<Sort>('pertinence')
@@ -32,7 +34,7 @@ export function BoutiquePage() {
     if (sort === 'prix-asc') return [...base].sort((a, b) => a.price - b.price)
     if (sort === 'prix-desc') return [...base].sort((a, b) => b.price - a.price)
     return base
-  }, [catId, query, sort, searching])
+  }, [catId, query, sort, searching, SLICES, slicesByCategory])
 
   return (
     <>
