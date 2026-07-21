@@ -3,15 +3,18 @@ import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
 import { CutDiagram } from '../components/CutDiagram'
+import { Icon } from '../components/ui/Icon'
 import { SLICES, categoryLabel } from '../lib/catalog'
 import { fmtFcfa } from '../lib/format'
 import { useCart } from '../contexts/CartContext'
+import { useFavorites } from '../contexts/FavoritesContext'
 import { haptic } from '../lib/haptics'
 
 export function ProduitPage() {
   const { id } = useParams()
   const slice = SLICES.find((s) => String(s.id) === id)
   const { add } = useCart()
+  const { has, toggle } = useFavorites()
 
   if (!slice) {
     return (
@@ -33,7 +36,17 @@ export function ProduitPage() {
 
           <div className="px-4 pt-4 md:pt-0">
             <p className="text-[11px] font-bold tracking-[.16em] uppercase text-taupe">{categoryLabel(slice.category)} · {slice.weight} kg</p>
-            <h2 className="text-2xl md:text-3xl mt-1">{slice.name}</h2>
+            <div className="flex items-start justify-between gap-3 mt-1">
+              <h2 className="text-2xl md:text-3xl">{slice.name}</h2>
+              <button
+                onClick={() => { haptic('light'); toggle(slice.id) }}
+                aria-label={has(slice.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                aria-pressed={has(slice.id)}
+                className={`shrink-0 grid h-10 w-10 place-items-center rounded-full border-[1.5px] border-sable active:scale-90 transition ${has(slice.id) ? 'text-terre' : 'text-taupe'}`}
+              >
+                <Icon name="favorite" size={22} fill={has(slice.id)} />
+              </button>
+            </div>
             <p className="font-title text-2xl font-extrabold text-terre tabular-nums mt-3">{fmtFcfa(slice.price)}</p>
 
             <div className="mt-5 bg-creme-dark rounded-card p-4">

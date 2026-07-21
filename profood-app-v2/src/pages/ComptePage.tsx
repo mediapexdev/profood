@@ -3,12 +3,14 @@ import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Icon } from '../components/ui/Icon'
 import { listOrders } from '../lib/orders'
+import { useFavorites } from '../contexts/FavoritesContext'
 import { haptic } from '../lib/haptics'
 
 export function ComptePage() {
   const navigate = useNavigate()
   const orders = listOrders()
   const lastOrder = orders[0]
+  const { count: favCount } = useFavorites()
 
   const rows: { icon: string; label: string; hint?: string; onClick?: () => void; disabled?: boolean }[] = [
     { icon: 'receipt_long', label: 'Mes commandes', hint: orders.length ? String(orders.length) : undefined, onClick: () => navigate('/commandes') },
@@ -18,8 +20,8 @@ export function ComptePage() {
       onClick: lastOrder ? () => navigate(`/suivi/${lastOrder.token}`) : undefined,
       disabled: !lastOrder,
     },
+    { icon: 'favorite', label: 'Mes découpes favorites', hint: favCount ? String(favCount) : undefined, onClick: () => navigate('/favoris') },
     { icon: 'location_on', label: 'Mes adresses', disabled: true },
-    { icon: 'favorite', label: 'Mes découpes favorites', disabled: true },
     { icon: 'help', label: 'Aide & contact', disabled: true },
   ]
 

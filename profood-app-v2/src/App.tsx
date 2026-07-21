@@ -12,6 +12,7 @@
  *   /confirmation/:token   → ConfirmationPage
  *   /suivi/:token          → SuiviPage (chronologie 4 états)
  *   /commandes             → CommandesPage (historique local)
+ *   /favoris               → FavorisPage (découpes favorites)
  *   *                      → redirection vers /
  *
  * La nav (AppBar en haut, BottomNav en bas sur mobile) persiste entre les
@@ -21,6 +22,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import { BottomNav } from './components/shell/BottomNav'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { CartProvider } from './contexts/CartContext'
+import { FavoritesProvider } from './contexts/FavoritesContext'
 import { BoutiquePage } from './pages/BoutiquePage'
 import { ComposerPage } from './pages/ComposerPage'
 import { PanierPage } from './pages/PanierPage'
@@ -30,6 +32,7 @@ import { CheckoutPage } from './pages/CheckoutPage'
 import { ConfirmationPage } from './pages/ConfirmationPage'
 import { SuiviPage } from './pages/SuiviPage'
 import { CommandesPage } from './pages/CommandesPage'
+import { FavorisPage } from './pages/FavorisPage'
 
 function AppLayout() {
   return (
@@ -43,24 +46,27 @@ function AppLayout() {
 export default function App() {
   return (
     <ThemeProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<AppLayout />}>
-              <Route path="/" element={<BoutiquePage />} />
-              <Route path="/composer" element={<ComposerPage />} />
-              <Route path="/panier" element={<PanierPage />} />
-              <Route path="/compte" element={<ComptePage />} />
-            </Route>
-            <Route path="/produit/:id" element={<ProduitPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/confirmation/:token" element={<ConfirmationPage />} />
-            <Route path="/suivi/:token" element={<SuiviPage />} />
-            <Route path="/commandes" element={<CommandesPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </CartProvider>
+      <FavoritesProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<BoutiquePage />} />
+                <Route path="/composer" element={<ComposerPage />} />
+                <Route path="/panier" element={<PanierPage />} />
+                <Route path="/compte" element={<ComptePage />} />
+              </Route>
+              <Route path="/produit/:id" element={<ProduitPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/confirmation/:token" element={<ConfirmationPage />} />
+              <Route path="/suivi/:token" element={<SuiviPage />} />
+              <Route path="/commandes" element={<CommandesPage />} />
+              <Route path="/favoris" element={<FavorisPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
+      </FavoritesProvider>
     </ThemeProvider>
   )
 }

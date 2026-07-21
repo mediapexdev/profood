@@ -3,7 +3,9 @@ import type { Slice } from '../lib/catalog'
 import { categoryLabel } from '../lib/catalog'
 import { fmtFcfa } from '../lib/format'
 import { CutDiagram } from './CutDiagram'
+import { Icon } from './ui/Icon'
 import { useCart } from '../contexts/CartContext'
+import { useFavorites } from '../contexts/FavoritesContext'
 import { haptic } from '../lib/haptics'
 
 /**
@@ -14,7 +16,9 @@ import { haptic } from '../lib/haptics'
 export function ProductCard({ slice }: { slice: Slice }) {
   const navigate = useNavigate()
   const { qtyOf, add, setQty } = useCart()
+  const { has, toggle } = useFavorites()
   const qty = qtyOf(slice.id)
+  const fav = has(slice.id)
 
   return (
     <article
@@ -28,6 +32,17 @@ export function ProductCard({ slice }: { slice: Slice }) {
         <img src={slice.image} alt={slice.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <span className="absolute left-2 top-2 rounded-full bg-terre px-2.5 py-0.5 font-title text-[10px] font-bold uppercase tracking-wide text-white">
           {categoryLabel(slice.category)}
+        </span>
+        <span
+          role="button"
+          tabIndex={0}
+          aria-label={fav ? `Retirer ${slice.name} des favoris` : `Ajouter ${slice.name} aux favoris`}
+          aria-pressed={fav}
+          onClick={(e) => { e.stopPropagation(); haptic('light'); toggle(slice.id) }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); haptic('light'); toggle(slice.id) } }}
+          className={`absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-surface/90 backdrop-blur transition active:scale-90 ${fav ? 'text-terre' : 'text-taupe'}`}
+        >
+          <Icon name="favorite" size={18} fill={fav} />
         </span>
         {/* Schéma de découpe révélé au survol (desktop) */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden translate-y-2 border-t border-sable bg-surface/95 px-2.5 py-2 opacity-0 backdrop-blur transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 md:block">
@@ -43,7 +58,7 @@ export function ProductCard({ slice }: { slice: Slice }) {
           {qty === 0 ? (
             <button
               onClick={() => { haptic('medium'); add(slice) }}
-              className="rounded-full bg-encre px-4 py-2 font-title text-xs font-bold text-white transition hover:bg-terre active:scale-95"
+              className="rounded-full bg-encre dark:bg-terre px-4 py-2 font-title text-xs font-bold text-white transition hover:bg-terre dark:hover:bg-terre-dark active:scale-95"
             >
               Ajouter
             </button>
