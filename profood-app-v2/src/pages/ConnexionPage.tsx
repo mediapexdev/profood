@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
@@ -12,6 +12,8 @@ const inputCls =
 
 export function ConnexionPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const flash = location.state as { justRegistered?: boolean; passwordReset?: boolean } | null
   const { login } = useAuth()
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
@@ -43,6 +45,12 @@ export function ConnexionPage() {
         <div className="mx-auto max-w-md px-5 md:px-6 pt-6 flex flex-col">
           <h2 className="font-title text-2xl">Bon retour 👋</h2>
           <p className="text-taupe text-[14px] mt-1">Connectez-vous pour retrouver vos commandes et adresses.</p>
+
+          {(flash?.justRegistered || flash?.passwordReset) && (
+            <p className="mt-3 rounded-xl bg-halal/12 text-halal text-[13px] font-semibold px-3.5 py-2.5">
+              {flash.justRegistered ? 'Compte créé ! Connectez-vous pour continuer.' : 'Mot de passe modifié ! Connectez-vous.'}
+            </p>
+          )}
 
           <div className="mt-6 flex flex-col gap-3.5">
             <label className="block">

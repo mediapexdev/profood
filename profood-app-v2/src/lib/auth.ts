@@ -1,133 +1,195 @@
 /**
- * Authentification client — implémentation LOCALE (comptes en localStorage,
- * mot de passe salé + haché via Web Crypto). Sert de socle testable sans
- * backend et SANS créer de vrais utilisateurs ni consommer de SMS.
+ * Authentification client — branchée sur l'API Laravel, portée fidèlement de
+ * l'app Ionic (profood-app/src/pages/auth/**). Mêmes endpoints, mêmes charges
+ * utiles, même stockage du token.
  *
- * ┌─ SEAM API LARAVEL (à brancher plus tard) ──────────────────────────────┐
- * │ Contrat réel (cf. api-profood + profood-app) :                          │
- * │  • POST /signin   { phone_number, password, app_key }                    │
- * │      → 200 { token, user:{ phone_number, ... } }  (Bearer token Sanctum) │
- * │      ⚠ exige app_key = env PROFOOD_APP_KEY (secret prod, rôle CUSTOMER). │
- * │  • POST /signup   { phone_number, password, code, ... }                  │
- * │      code = OTP SMS → flux 2 étapes : POST demande de code, puis signup. │
- * │  • POST /password-reset { phone_number, code, password }                 │
- * │  • Téléphone SN : /(^3[3]|^7[5-80])[ ]?\d{3}([ ]?\d{2}){2}$/             │
- * │ Pour brancher : remplacer register/login/logout ci-dessous par des      │
- * │ appels axios, stocker le token, et poser l'entête Authorization.        │
- * └─────────────────────────────────────────────────────────────────────────┘
+ * Prérequis d'exécution (identiques à l'app Ionic) :
+ *   • L'API doit être joignable (prod https://api.profood-app.com, ou
+ *     http://localhost:8000 en dev — cf. api/client.ts).
+ *   • VITE_APP_KEY doit valoir le PROFOOD_APP_KEY du serveur (secret prod).
+ *     Sans lui, l'API rejette signin/signup (rôle CUSTOMER). Voir .env.example.
+ *
+ * Flux (identiques à l'Ionic) :
+ *   login    : POST /signin {phone_number,password,app_key} → {token}
+ *              puis GET /customer (Bearer) → infos utilisateur.
+ *   signup   : 1) POST /check-user-data-requesting-registration  (envoi SMS)
+ *              2) POST /check-verification-code {for:'REGISTRATION',code}
+ *              3) POST /signup {...,code,password,password_confirmation}
+ *   reset    : 1) POST /user-phonenumber-exists                  (envoi SMS)
+ *              2) POST /check-verification-code {for:'PASSWORD_RESET',code}
+ *              3) POST /password-reset {...,code,password,password_confirmation}
  */
+import api, { TOKEN_KEY } from '../api/client'
 import { saveContact } from './profile'
 
-export interface Account {
-  id: string
-  name: string
-  phone: string
-  email?: string
-  passwordHash: string
-  salt: string
-  createdAt: number
-}
+const APP_KEY = import.meta.env.VITE_APP_KEY as string | undefined
 
 export interface AuthUser {
-  id: string
+  id: number | null
+  userId: number | null
+  firstName: string
+  lastName: string
   name: string
   phone: string
   email?: string
+  avatar?: string | null
+  role?: unknown
 }
 
-const ACCOUNTS_KEY = 'profood.accounts.v1'
-const SESSION_KEY = 'profood.session.v1'
+export type CodePurpose = 'REGISTRATION' | 'PASSWORD_RESET'
 
-/** Normalise un numéro pour comparaison (retire espaces et indicatif +221). */
-export function normalizePhone(v: string): string {
-  return v.replace(/[^\d]/g, '').replace(/^221/, '')
+/** Erreur porteuse du message serveur (déjà en français côté API). */
+export class AuthError extends Error {}
+
+function fail(error: unknown, fallback: string): never {
+  const e = error as { response?: { data?: { message?: string } } }
+  throw new AuthError(e?.response?.data?.message || fallback)
 }
 
-function readAccounts(): Account[] {
-  try {
-    const raw = localStorage.getItem(ACCOUNTS_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
-function writeAccounts(list: Account[]): void {
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(list))
+function fullName(first: string, last: string): string {
+  return `${first ?? ''} ${last ?? ''}`.trim()
 }
 
-function randId(): string {
-  const c = globalThis.crypto
-  if (c?.randomUUID) return c.randomUUID().slice(0, 12)
-  return Math.floor(Math.random() * 1e12).toString(36)
-}
-
-/** SHA-256(salt + mot de passe) en hex. Placeholder local en attendant le serveur. */
-async function hash(password: string, salt: string): Promise<string> {
-  const data = new TextEncoder().encode(salt + password)
-  const digest = await globalThis.crypto.subtle.digest('SHA-256', data)
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
-}
-
-function toUser(a: Account): AuthUser {
-  return { id: a.id, name: a.name, phone: a.phone, email: a.email }
+function persist(token: string, user: AuthUser): void {
+  localStorage.setItem(TOKEN_KEY, token)
+  localStorage.setItem(token, JSON.stringify(user)) // infos indexées par le token (comme l'Ionic)
+  saveContact({ name: user.name, phone: user.phone, email: user.email })
 }
 
 export function currentUser(): AuthUser | null {
   try {
-    const raw = localStorage.getItem(SESSION_KEY)
-    if (!raw) return null
-    const id = JSON.parse(raw) as string
-    const acc = readAccounts().find((a) => a.id === id)
-    return acc ? toUser(acc) : null
+    const token = localStorage.getItem(TOKEN_KEY)
+    if (!token) return null
+    const raw = localStorage.getItem(token)
+    return raw ? (JSON.parse(raw) as AuthUser) : null
   } catch {
     return null
   }
 }
 
-export class AuthError extends Error {}
+export function currentToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY)
+}
 
-export async function register(input: {
-  name: string
-  phone: string
+export async function login(phone: string, password: string): Promise<AuthUser> {
+  let token: string
+  try {
+    const res = await api.post('/signin', { phone_number: phone, password, app_key: APP_KEY })
+    token = res.data.token
+  } catch (e) {
+    fail(e, 'Numéro ou mot de passe incorrect.')
+  }
+  try {
+    const res = await api.get('/customer', { headers: { Authorization: `Bearer ${token}` } })
+    const u = res.data.user
+    const user: AuthUser = {
+      id: res.data.id ?? null,
+      userId: u.id ?? null,
+      firstName: u.first_name ?? '',
+      lastName: u.last_name ?? '',
+      name: fullName(u.first_name, u.last_name),
+      phone: u.phone_number ?? phone,
+      email: u.email ?? undefined,
+      avatar: u.avatar ?? null,
+      role: u.role,
+    }
+    persist(token, user)
+    return user
+  } catch (e) {
+    fail(e, 'Impossible de récupérer votre profil. Réessayez.')
+  }
+}
+
+export async function logout(): Promise<void> {
+  const token = currentToken()
+  try {
+    if (token) await api.post('/signout', { app_key: APP_KEY }, { headers: { Authorization: `Bearer ${token}` } })
+  } catch {
+    /* déconnexion best-effort : on purge le local même si l'appel échoue */
+  }
+  if (token) localStorage.removeItem(token)
+  localStorage.removeItem(TOKEN_KEY)
+}
+
+// ── Inscription (3 étapes) ────────────────────────────────────────────────
+export async function requestSignupCode(input: {
+  firstName: string
+  lastName: string
   email?: string
+  phone: string
+}): Promise<void> {
+  try {
+    await api.post('/check-user-data-requesting-registration', {
+      first_name: input.firstName,
+      last_name: input.lastName,
+      email: input.email ?? '',
+      phone_number: input.phone,
+      avatar_input_action: 'none',
+      app_key: APP_KEY,
+    })
+  } catch (e) {
+    fail(e, 'Impossible d’envoyer le code. Réessayez.')
+  }
+}
+
+export async function verifyCode(phone: string, code: string, purpose: CodePurpose): Promise<void> {
+  try {
+    await api.post('/check-verification-code', { app_key: APP_KEY, phone_number: phone, for: purpose, code })
+  } catch (e) {
+    fail(e, 'Code invalide !')
+  }
+}
+
+export async function completeSignup(input: {
+  firstName: string
+  lastName: string
+  email?: string
+  phone: string
+  code: string
   password: string
-}): Promise<AuthUser> {
-  const phone = normalizePhone(input.phone)
-  const accounts = readAccounts()
-  if (accounts.some((a) => normalizePhone(a.phone) === phone)) {
-    throw new AuthError('Un compte existe déjà avec ce numéro.')
+  passwordConfirmation: string
+}): Promise<void> {
+  try {
+    await api.post('/signup', {
+      first_name: input.firstName,
+      last_name: input.lastName,
+      phone_number: input.phone,
+      email: input.email ?? '',
+      code: input.code,
+      password: input.password,
+      password_confirmation: input.passwordConfirmation,
+      avatar_input_action: 'none',
+      app_key: APP_KEY,
+    })
+  } catch (e) {
+    fail(e, 'Inscription impossible. Réessayez.')
   }
-  const salt = randId()
-  const acc: Account = {
-    id: randId(),
-    name: input.name.trim(),
-    phone: input.phone.trim(),
-    email: input.email?.trim() || undefined,
-    passwordHash: await hash(input.password, salt),
-    salt,
-    createdAt: Date.now(),
-  }
-  writeAccounts([...accounts, acc])
-  localStorage.setItem(SESSION_KEY, JSON.stringify(acc.id))
-  // Alimente le profil (pré-remplissage checkout) avec les coordonnées.
-  saveContact({ name: acc.name, phone: acc.phone, email: acc.email })
-  return toUser(acc)
 }
 
-export async function login(phoneInput: string, password: string): Promise<AuthUser> {
-  const phone = normalizePhone(phoneInput)
-  const acc = readAccounts().find((a) => normalizePhone(a.phone) === phone)
-  if (!acc || (await hash(password, acc.salt)) !== acc.passwordHash) {
-    throw new AuthError('Numéro ou mot de passe incorrect.')
+// ── Réinitialisation du mot de passe (3 étapes) ───────────────────────────
+export async function requestResetCode(phone: string): Promise<void> {
+  try {
+    await api.post('/user-phonenumber-exists', { phone_number: phone, app_key: APP_KEY })
+  } catch (e) {
+    fail(e, 'Impossible d’envoyer le code. Réessayez.')
   }
-  localStorage.setItem(SESSION_KEY, JSON.stringify(acc.id))
-  saveContact({ name: acc.name, phone: acc.phone, email: acc.email })
-  return toUser(acc)
 }
 
-export function logout(): void {
-  localStorage.removeItem(SESSION_KEY)
+export async function resetPassword(input: {
+  phone: string
+  code: string
+  password: string
+  passwordConfirmation: string
+}): Promise<void> {
+  try {
+    await api.post('/password-reset', {
+      app_key: APP_KEY,
+      phone_number: input.phone,
+      code: input.code,
+      password: input.password,
+      password_confirmation: input.passwordConfirmation,
+    })
+  } catch (e) {
+    fail(e, 'Réinitialisation impossible. Réessayez.')
+  }
 }
