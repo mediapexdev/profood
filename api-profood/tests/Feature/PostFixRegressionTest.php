@@ -8,8 +8,10 @@ use App\Models\OrderPaymentStatus;
 use App\Models\OrderStatus;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\VerificationCodesLog;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -86,10 +88,21 @@ class PostFixRegressionTest extends TestCase
 
     public function test_signup_accepts_names_with_apostrophe_and_hyphen()
     {
+        // L'inscription exige désormais le code de vérification serveur.
+        VerificationCodesLog::create([
+            'phone_number' => '770000021',
+            'for' => 'REGISTRATION',
+            'sent' => 1,
+            'code_hash' => Hash::make('A1B2C3'),
+            'expires_at' => Carbon::now()->addMinutes(10),
+            'attempts' => 0,
+        ]);
+
         $this->postJson('/api/signup', [
             'first_name' => "N'Diaye",
             'last_name' => 'Anne-Marie',
             'phone_number' => '770000021',
+            'code' => 'A1B2C3',
             'password' => 'Test1234!',
             'password_confirmation' => 'Test1234!',
             'avatar_input_action' => 'none',

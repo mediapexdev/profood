@@ -79,6 +79,11 @@ Route::post('signin', [UserController::class, 'signin']);
 Route::post('check-user-data-requesting-registration', [UserController::class, 'checkUserDataRequestingRegistration']);
 Route::post('password-reset', [UserController::class, 'resetPassword']);
 Route::post('user-phonenumber-exists', [UserController::class, 'userPhoneNumberExists']);
+// Vérification serveur d'un code OTP (sans consommation), limitée par IP en
+// complément du compteur de tentatives stocké en base.
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('check-verification-code', [UserController::class, 'checkVerificationCode']);
+});
 
 /**
  * Test/Debug routes - Only accessible in local and testing environments

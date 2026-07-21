@@ -181,7 +181,8 @@ const PasswordResetForm: React.FC = () => {
                 showToast(res.data.message ? t(res.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
             }
             else {
-                sessionStorage.setItem('passwordwordResetVerificationCode', res.data.code);
+                // Le code de vérification ne quitte jamais le serveur : il est
+                // envoyé par SMS et vérifié côté serveur.
                 showToast(t("Un code de confirmation vous a été envoyé"));
                 // console.log(res.data.message)
                 setTimeout(() => {
@@ -225,18 +226,23 @@ const PasswordResetForm: React.FC = () => {
      */
     const otpSubmit = (_code: string) => {
 
-        const verficationCcode = sessionStorage.getItem('passwordwordResetVerificationCode');
-
-        if(verficationCcode !== _code){
-            showToast(`${t('Code invalide')} !`)
+        // C'est le serveur, et lui seul, qui décide si le code est valide.
+        const data = {
+            "app_key": process.env.REACT_APP_KEY,
+            "phone_number": phoneNumber,
+            "for": "PASSWORD_RESET",
+            "code": _code
+        };
+        api.post("/check-verification-code", data).then(() => {
+            showToast(`${t('Numéro vérifié avec succès')} !`);
+            setTimeout(() => {
+                setShowPasswordForm(true);
+                setShowSpinner(false);
+            }, 1200);
+        }).catch((error) => {
+            showToast(error.response?.data?.message ? t(error.response.data.message) : `${t('Code invalide')} !`);
             setShowSpinner(false);
-        }
-        showToast(`${t('Numéro vérifié avec succès')} !`)            
-        setTimeout(() => {
-            sessionStorage.removeItem('passwordwordResetVerificationCode');
-            setShowPasswordForm(true);
-            setShowSpinner(false);
-        }, 1200);
+        });
 
         // window.confirmationResult.confirm(_code).then((confirmationResult) => {
         //     showToast(`${t('Numéro vérifié avec succès')} !`)            
@@ -303,6 +309,9 @@ const PasswordResetForm: React.FC = () => {
         const data = {
             "app_key": process.env.REACT_APP_KEY,
             "phone_number": phoneNumber,
+            // Le code saisi est transmis au serveur : c'est lui qui autorise
+            // (ou refuse) le changement de mot de passe.
+            "code": verificationCode,
             "password": password,
             "password_confirmation": passwordConfirmation
         };

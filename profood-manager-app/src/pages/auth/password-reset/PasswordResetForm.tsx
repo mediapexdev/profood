@@ -13,9 +13,6 @@ import {
 } from 'reactstrap';
 import { Eye, EyeSlash, InfoCircleFill } from 'react-bootstrap-icons';
 
-import { firebaseAuth } from "../../../firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "@firebase/auth";
-
 import { useTranslation } from 'react-i18next';
 
 import api from '../../../api/api';
@@ -138,32 +135,8 @@ const PasswordResetForm: React.FC = () => {
     const passwordFormGroupWrapper = useRef<HTMLDivElement|null>(null);
     const passwordConfirmationFormGroupWrapper = useRef<HTMLDivElement|null>(null);
 
-    /**
-     * 
-     */
-    const generateRecaptacha = () => {
-
-        if(typeof window.recaptchaVerifier !== 'object' ||
-                !(window.recaptchaVerifier instanceof RecaptchaVerifier)){
-            window.recaptchaVerifier = new RecaptchaVerifier(
-                firebaseAuth,
-                "recaptchaContainer",
-                {
-                    size: "invisible",
-                    callback: function (response: string) {
-                        console.log("Captcha Resolved");
-                    },
-                    'expired-callback': () => {
-                        console.log("Response expired. Ask user to solve reCAPTCHA again.");
-                    },
-                    defaultCountry: "SN",
-                },
-            );
-        }
-        // else{
-        //     window.recaptchaVerifier.render();
-        // }
-    };
+    // Le reCAPTCHA invisible et l'OTP Firebase ont été retirés : la
+    // vérification du code se fait désormais côté serveur.
 
     /**
      * 
@@ -200,28 +173,12 @@ const PasswordResetForm: React.FC = () => {
                 setAlertText(res.data.message ? t(res.data.message) : `${t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur")}.`);
             }
             else {
-                generateRecaptacha();
-                // let phone_number = e.target.phone.value;
-                // const appVerifier = window.recaptchaVerifier;
-                const submittedPhone = `+221${phoneNumber.replaceAll(' ', '')}`;
-
-                signInWithPhoneNumber(firebaseAuth, submittedPhone, window.recaptchaVerifier).then((confirmationResult) => {
-                    // SMS sent. Prompt user to type the code from the message, then sign the
-                    // user in with confirmationResult.confirm(code).
-                    showToast(t('Un code de confirmation vous a été envoyé'), 'info', {autoClose: 2000});
-                    setShowOtp(true);
-                    setShowSpinner(false);
-                    window.confirmationResult = confirmationResult;
-                    // ...
-                }).catch((error) => {
-                    // Error; SMS not sent
-                    // ...
-                    setShowSpinner(false);
-                    // showToast(t('Veuilez entrer un format de numéro correct'));
-                    setShowAlert(true);
-                    setAlertColor('danger');
-                    setAlertText(error.message ? t(error.message) : `${t("Une erreur est survenue ! Veuillez réessayer ou contacter l'administrateur")}.`);
-                });
+                // Le code de vérification est désormais émis et vérifié par le
+                // serveur : l'OTP Firebase, contrôlé côté navigateur, ne
+                // prouvait rien au serveur qui changeait le mot de passe.
+                showToast(t('Un code de confirmation vous a été envoyé'), 'info', {autoClose: 2000});
+                setShowOtp(true);
+                setShowSpinner(false);
             }
         }).catch((error) => {
             setShowSpinner(false);
@@ -238,21 +195,25 @@ const PasswordResetForm: React.FC = () => {
      */
     const otpSubmit = (_code: string) => {
 
-        window.confirmationResult.confirm(_code).then((confirmationResult) => {
+        // C'est le serveur, et lui seul, qui décide si le code est valide.
+        const data = {
+            "app_key": process.env.REACT_APP_KEY,
+            "phone_number": phoneNumber,
+            "for": "PASSWORD_RESET",
+            "code": _code
+        };
+        api.post("/check-verification-code", data).then(() => {
             setIsValidVerificationCode(true);
             showToast(t('Numéro vérifié avec succès'), 'success', {autoClose: 2000});
             setTimeout(() => {
                 setShowPasswordForm(true);
                 setShowSpinner(false);
             }, 600);
-            // window.open("/", "_self");
         }).catch((error: any) => {
-            // User couldn't sign in (bad verification code?)
-            showToast(`${t('Code invalide')} !`, 'warning', {autoClose: 2000});
+            showToast(error.response?.data?.message ? t(error.response.data.message) : `${t('Code invalide')} !`, 'warning', {autoClose: 2000});
             setIsValidVerificationCode(false);
             setIsTouchedForVerificationCode(true);
             setShowSpinner(false);
-            console.dir(error);
         });
     };
 
@@ -308,6 +269,9 @@ const PasswordResetForm: React.FC = () => {
         // setShowSpinner(true);
         const data = {
             "phone_number": phoneNumber,
+            // Le code saisi est transmis au serveur : c'est lui qui autorise
+            // (ou refuse) le changement de mot de passe.
+            "code": verificationCode,
             "password": password,
             "password_confirmation": passwordConfirmation,
             "app_key": process.env.REACT_APP_KEY

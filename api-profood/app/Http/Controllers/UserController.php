@@ -128,7 +128,7 @@ class UserController extends Controller
             'first_name'    => Str::of($request->first_name)->stripTags()->trim(),
             'last_name'     => Str::of($request->last_name)->stripTags()->trim(),
             'phone_number'  => Str::of($request->phone_number)->stripTags()->trim()->replaceMatches('/\s+/', ''),
-            'email'         => Str::of($request->email)->stripTags()->trim(),
+            'email'         => $this->normalizeEmail($request->email),
             'password'      => Hash::make(Str::of($request->password)->stripTags()->trim()),
             'role_id'       => (int)$role->id,
             'active'        => true,
@@ -229,7 +229,7 @@ class UserController extends Controller
             'first_name'    => Str::of($request->first_name)->stripTags()->trim(),
             'last_name'     => Str::of($request->last_name)->stripTags()->trim(),
             'phone_number'  => Str::of($request->phone_number)->stripTags()->trim()->replaceMatches('/\s+/', ''),
-            'email'         => Str::of($request->email)->stripTags()->trim(),
+            'email'         => $this->normalizeEmail($request->email),
             'password'      => Hash::make(Str::of($request->password)->stripTags()->trim()),
             'role_id'       => $user_role->id,
             'active'        => true,
@@ -333,14 +333,14 @@ class UserController extends Controller
         if(!isset($user)) {
             return response()->json(['message' => 'Client inexistant'], 404);
         }
-        $email = Str::of($request->email)->stripTags()->trim();
+        $email = $this->normalizeEmail($request->email);
         $phone_number = Str::of($request->phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
 
         if(0 != \strcmp($phone_number, $user->phone_number) &&
                 user::Where('phone_number', $phone_number)->exists()){
             return response()->json(['message' => "Le numéro de téléphone a déjà été prise"], 422);
         }
-        if(0 != \strcmp($email, $user->email) && user::Where('email', $email)->exists()){
+        if($email !== $user->email && isset($email) && user::Where('email', $email)->exists()){
             return response()->json(['message' => "L'adresse e-mail a déjà été prise"], 422);
         }
         $changes_made = false;
@@ -359,7 +359,7 @@ class UserController extends Controller
             $user->phone_number = $phone_number;
             $changes_made = true;
         }
-        if(0 != \strcmp($email, $user->email)){
+        if($email !== $user->email){
             $user->email = $email;
             $changes_made = true;
         }
@@ -449,14 +449,14 @@ class UserController extends Controller
             ($user_role->code == Role::ADMIN && $admin->role->code != Role::SUPER_ADMIN)){
             return response()->json(['message' => 'Demande rejetée !'], 403);
         }
-        $email = Str::of($request->email)->stripTags()->trim();
+        $email = $this->normalizeEmail($request->email);
         $phone_number = Str::of($request->phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
 
         if(0 != \strcmp($phone_number, $user->phone_number) &&
                 user::Where('phone_number', $phone_number)->exists()){
             return response()->json(['message' => "Le numéro de téléphone a déjà été prise"], 422);
         }
-        if(0 != \strcmp($email, $user->email) && user::Where('email', $email)->exists()){
+        if($email !== $user->email && isset($email) && user::Where('email', $email)->exists()){
             return response()->json(['message' => "L'adresse e-mail a déjà été prise"], 422);
         }
         $changes_made = false;
@@ -483,7 +483,7 @@ class UserController extends Controller
             $user->phone_number = $phone_number;
             $changes_made = true;
         }
-        if(0 != \strcmp($email, $user->email)){
+        if($email !== $user->email){
             $user->email = $email;
             $changes_made = true;
         }
@@ -1023,41 +1023,28 @@ class UserController extends Controller
             if(isset($response)){
                 return $response;
             }
-            if(0 == \strcmp($app_key, $profood_app_manager_key)){
-                return response()->json(['message' => 'success'], 200);
+            // L'application manager ne recevait aucun code du serveur : elle
+            // s'appuyait sur un OTP Firebase vérifié côté navigateur, que le
+            // serveur ne pouvait pas contrôler. Elle passe désormais par le
+            // même code serveur que les autres applications.
+
+            // In development/local mode, use a fixed OTP code to avoid Twilio costs
+            if (App::environment('local')) {
+                $code = '123456'; // Fixed OTP for development
+                Log::info('Dev mode: Using fixed OTP code for password reset', [
+                    'phone_number' => $request->phone_number
+                ]);
+                // Le code n'est renvoyé au client QUE en environnement local.
+                $this->issueVerificationCode('PASSWORD_RESET', $request->phone_number, $code);
+
+                return response()->json(['message' => 'success', 'code' => $code], 200);
             }
+
             try{
-                $v = VerificationCodesLog::where([
-                    'for'           => 'PASSWORD_RESET',
-                    'phone_number'  => $request->phone_number
-                ])->first();
+                $throttled = $this->throttleVerificationCode('PASSWORD_RESET', $request->phone_number, 'userPhoneNumberExists');
 
-                if(!isset($v)){
-                    $v = VerificationCodesLog::create([
-                        'phone_number'  => Str::of($request->phone_number)->stripTags()->trim()->replaceMatches('/\s+/', ''),
-                        'for'           => 'PASSWORD_RESET',
-                        'sent'          => 1
-                    ]);
-                }
-                else{
-                    $last_update = Carbon::createFromFormat('Y-m-d H:i:s', $v->updated_at);
-
-                    if($last_update->diffInMinutes(Carbon::now(), false) >= 30){
-                        $v->sent = 0;
-                    }
-                    $s = (int)$v->sent;
-
-                    if($s == 3){
-                        // Log rate limit exceeded
-                        Log::warning('SMS verification rate limit exceeded for password reset', [
-                            'phone_number' => $request->phone_number,
-                            'sent_count' => $s,
-                            'action' => 'userPhoneNumberExists'
-                        ]);
-                        return response()->json(['message' => "Vous venez de faire plus de 3 demandes, merci de réessayer plus tard ou de contacter le service client", 'error' => 429], 429);
-                    }
-                    $v->sent = ($s + 1);
-                    $v->save();
+                if(isset($throttled)){
+                    return $throttled;
                 }
                 /**
                  * Account SID and Auth Token from twilio.com/console
@@ -1080,14 +1067,16 @@ class UserController extends Controller
                     )
                 );
 
+                // Le code n'est connu que du serveur et du destinataire du SMS.
+                $this->issueVerificationCode('PASSWORD_RESET', $request->phone_number, $code);
+
                 // Log successful SMS verification code sent
                 Log::info('SMS verification code sent for password reset', [
                     'phone_number' => $request->phone_number,
-                    'sent_count' => $v->sent,
                     'action' => 'userPhoneNumberExists'
                 ]);
 
-                return response()->json(['message' => 'success', 'code' => $code], 200);
+                return response()->json(['message' => 'success'], 200);
             }
             catch (\Exception $e) {
                 // Log Twilio SMS failure
@@ -1163,6 +1152,10 @@ class UserController extends Controller
      */
     public function checkRegistrationRequestData(Request $request)
     {
+        // The e-mail is optional : a blank field must be treated as absent,
+        // otherwise 'nullable' does not apply and the regex rule rejects ''.
+        $request['email'] = $this->normalizeEmail($request->email);
+
         $validator = Validator::make($request->all(), [
             // Allow letters, spaces, apostrophes (straight and typographic) and
             // hyphens so common Senegalese/French names (N'Diaye, M'Baye,
@@ -1228,38 +1221,19 @@ class UserController extends Controller
             if (App::environment('local')) {
                 $code = '123456'; // Fixed OTP for development
                 Log::info('Dev mode: Using fixed OTP code', [
-                    'phone_number' => $request->phone_number,
-                    'code' => $code
+                    'phone_number' => $request->phone_number
                 ]);
+                // Le code n'est renvoyé au client QUE en environnement local.
+                $this->issueVerificationCode('REGISTRATION', $request->phone_number, $code);
+
                 return response()->json(['message' => 'success', 'code' => $code], 200);
             }
 
             try{
-                $v = VerificationCodesLog::where([
-                    'for'           => 'REGISTRATION',
-                    'phone_number'  => $request->phone_number
-                ])->first();
+                $throttled = $this->throttleVerificationCode('REGISTRATION', $request->phone_number, 'checkUserDataRequestingRegistration');
 
-                if(!isset($v)){
-                    $v = VerificationCodesLog::create([
-                        'phone_number'  => Str::of($request->phone_number)->stripTags()->trim()->replaceMatches('/\s+/', ''),
-                        'for'           => 'REGISTRATION',
-                        'sent'          => 1
-                    ]);
-                }
-                else{
-                    $last_update = Carbon::createFromFormat('Y-m-d H:i:s', $v->updated_at);
-
-                    if($last_update->diffInMinutes(Carbon::now(), false) >= 30){
-                        $v->sent = 0;
-                    }
-                    $s = (int)$v->sent;
-
-                    if($s == 3){
-                        return response()->json(['message' => "Vous venez de faire plus de 3 demandes, merci de réessayer plus tard ou de contacter le service client", 'error' => 429], 429);
-                    }
-                    $v->sent = ($s + 1);
-                    $v->save();
+                if(isset($throttled)){
+                    return $throttled;
                 }
                 /**
                  * Account SID and Auth Token from twilio.com/console
@@ -1281,13 +1255,286 @@ class UserController extends Controller
                         'body' => "{$code} est votre code de vérification Profood"
                     )
                 );
-                return response()->json(['message' => 'success', 'code' => $code], 200);
+                // Le code n'est connu que du serveur et du destinataire du SMS.
+                $this->issueVerificationCode('REGISTRATION', $request->phone_number, $code);
+
+                return response()->json(['message' => 'success'], 200);
             }
             catch (\Exception $e) {
                 return response()->json(['message' => $e->getMessage()], 500);
             }
         }
         return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 401);
+    }
+
+    /**
+     * Vérifie un code de vérification sans le consommer.
+     *
+     * Sert uniquement à donner un retour immédiat à l'utilisateur entre
+     * l'étape « saisie du code » et l'étape suivante du formulaire. La
+     * décision qui compte reste celle prise au moment de l'action finale
+     * (signup / password-reset), où le code est revérifié puis consommé.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkVerificationCode(Request $request)
+    {
+        $app_key = Str::of($request['app_key'])->stripTags()->trim();
+        $profood_app_key = env('PROFOOD_APP_KEY');
+        $profood_app_manager_key = env('PROFOOD_APP_MANAGER_KEY');
+        $profood_app_livreur_key = env('PROFOOD_APP_LIVREUR_KEY');
+
+        $authorized = (!empty($profood_app_key) && 0 == \strcmp($app_key, $profood_app_key)) ||
+            (!empty($profood_app_manager_key) && 0 == \strcmp($app_key, $profood_app_manager_key)) ||
+            (!empty($profood_app_livreur_key) && 0 == \strcmp($app_key, $profood_app_livreur_key));
+
+        if(!$authorized){
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 401);
+        }
+        $validator = Validator::make($request->all(), [
+            'phone_number'  => ['required', 'regex:#(^3[3]|^7[5-80])[ ]?[0-9]{3}([ ]?[0-9]{2}){2}$#'],
+            'for'           => ['required', 'in:REGISTRATION,PASSWORD_RESET'],
+            'code'          => ['required', 'string']
+        ]);
+        if($validator->fails()) {
+            return response()->json(['message' => self::VERIFICATION_CODE_ERROR_MESSAGE], 422);
+        }
+        // Vérification sans consommation : le code doit encore servir à
+        // l'appel final.
+        if(!$this->verifyVerificationCode($request->for, $request->phone_number, $request->code, false)){
+            return response()->json(['message' => self::VERIFICATION_CODE_ERROR_MESSAGE], 422);
+        }
+        return response()->json(['message' => 'success'], 200);
+    }
+
+    /**
+     * Normalize an incoming e-mail address.
+     *
+     * The e-mail is optional everywhere : forms send an empty string when the
+     * field is left blank, and an empty string is NOT interchangeable with
+     * null here (the users.email column is unique, so two blank e-mails stored
+     * as '' would collide, and `where('email', '')` would wrongly report the
+     * address as already taken).
+     *
+     * @param  mixed  $value
+     *
+     * @return string|null
+     */
+    protected function normalizeEmail($value): ?string
+    {
+        if(!isset($value)){
+            return null;
+        }
+        $email = (string) Str::of($value)->stripTags()->trim();
+
+        return $email === '' ? null : $email;
+    }
+
+    /**
+     * Number of verification SMS allowed per phone number and per window.
+     */
+    protected const VERIFICATION_CODE_MAX_SENT = 3;
+
+    /**
+     * Length of the throttling window, in minutes.
+     */
+    protected const VERIFICATION_CODE_WINDOW_MINUTES = 30;
+
+    /**
+     * Throttle the sending of a verification SMS.
+     *
+     * Returns a 429 response when the quota is exhausted, null otherwise.
+     *
+     * @param  string  $for            REGISTRATION | PASSWORD_RESET
+     * @param  string  $phone_number
+     * @param  string  $action         Context used for logging
+     *
+     * @return \Illuminate\Http\JsonResponse|null
+     */
+    protected function throttleVerificationCode(string $for, string $phone_number, string $action)
+    {
+        $phone_number = (string) Str::of($phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
+
+        $v = VerificationCodesLog::where([
+            'for'           => $for,
+            'phone_number'  => $phone_number
+        ])->first();
+
+        if(!isset($v)){
+            VerificationCodesLog::create([
+                'phone_number'  => $phone_number,
+                'for'           => $for,
+                'sent'          => 1
+            ]);
+            return null;
+        }
+        $last_update = Carbon::parse($v->updated_at);
+        $elapsed = $last_update->diffInMinutes(Carbon::now(), false);
+
+        // The window has expired : the quota starts over.
+        if($elapsed >= self::VERIFICATION_CODE_WINDOW_MINUTES){
+            $v->sent = 0;
+        }
+        $s = (int)$v->sent;
+
+        if($s >= self::VERIFICATION_CODE_MAX_SENT){
+            $remaining = max(1, self::VERIFICATION_CODE_WINDOW_MINUTES - (int)$elapsed);
+
+            Log::warning('SMS verification rate limit exceeded', [
+                'phone_number'      => $phone_number,
+                'for'               => $for,
+                'sent_count'        => $s,
+                'remaining_minutes' => $remaining,
+                'action'            => $action
+            ]);
+            return response()->json([
+                'message' => "Vous avez atteint la limite de " . self::VERIFICATION_CODE_MAX_SENT . " demandes. Merci de réessayer dans {$remaining} minute" . ($remaining > 1 ? 's' : '') . " ou de contacter le service client",
+                'error'   => 429
+            ], 429);
+        }
+        $v->sent = ($s + 1);
+        $v->save();
+
+        return null;
+    }
+
+    /**
+     * Clear the verification SMS quota of a phone number.
+     *
+     * Called once the flow it protects has succeeded, so that a legitimate
+     * user is never locked out by their own past (successful) attempts.
+     *
+     * @param  string  $for
+     * @param  string  $phone_number
+     *
+     * @return void
+     */
+    protected function clearVerificationCodeThrottle(string $for, string $phone_number): void
+    {
+        $phone_number = (string) Str::of($phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
+
+        VerificationCodesLog::where([
+            'for'           => $for,
+            'phone_number'  => $phone_number
+        ])->delete();
+    }
+
+    /**
+     * Durée de validité d'un code de vérification, en minutes.
+     */
+    protected const VERIFICATION_CODE_TTL_MINUTES = 10;
+
+    /**
+     * Nombre de saisies erronées tolérées pour un même code.
+     */
+    protected const VERIFICATION_CODE_MAX_ATTEMPTS = 5;
+
+    /**
+     * Message renvoyé à chaque échec de vérification.
+     *
+     * Volontairement neutre : il ne dit jamais si c'est le numéro ou le code
+     * qui est en cause, ni si le code est expiré, consommé ou simplement faux.
+     */
+    protected const VERIFICATION_CODE_ERROR_MESSAGE = 'Code de vérification invalide ou expiré';
+
+    /**
+     * Enregistre le code de vérification qui vient d'être envoyé.
+     *
+     * Le code est stocké **haché** : le serveur est le seul à pouvoir dire
+     * si une saisie est correcte, et une fuite de la base ne révèle rien.
+     *
+     * @param  string  $for            REGISTRATION | PASSWORD_RESET
+     * @param  string  $phone_number
+     * @param  string  $code
+     *
+     * @return void
+     */
+    protected function issueVerificationCode(string $for, string $phone_number, string $code): void
+    {
+        $phone_number = (string) Str::of($phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
+
+        $log = VerificationCodesLog::where([
+            'for'           => $for,
+            'phone_number'  => $phone_number
+        ])->first();
+
+        if(!isset($log)){
+            $log = new VerificationCodesLog([
+                'phone_number'  => $phone_number,
+                'for'           => $for,
+                'sent'          => 1
+            ]);
+        }
+        $log->code_hash   = Hash::make($code);
+        $log->expires_at  = Carbon::now()->addMinutes(self::VERIFICATION_CODE_TTL_MINUTES);
+        $log->attempts    = 0;
+        $log->consumed_at = null;
+        $log->save();
+    }
+
+    /**
+     * Vérifie côté serveur un code de vérification saisi par l'utilisateur.
+     *
+     * Le code doit exister, ne pas être expiré, ne pas avoir déjà été
+     * consommé, et n'avoir pas épuisé son quota de tentatives. Chaque échec
+     * incrémente le compteur de tentatives.
+     *
+     * @param  string  $for
+     * @param  string  $phone_number
+     * @param  mixed   $code
+     * @param  bool    $consume   Marque le code comme consommé en cas de succès
+     *
+     * @return bool
+     */
+    protected function verifyVerificationCode(string $for, string $phone_number, $code, bool $consume = true): bool
+    {
+        $phone_number = (string) Str::of($phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
+        $code = (string) Str::of((string) $code)->stripTags()->trim()->replaceMatches('/\s+/', '');
+
+        if($code === ''){
+            return false;
+        }
+        $log = VerificationCodesLog::where([
+            'for'           => $for,
+            'phone_number'  => $phone_number
+        ])->first();
+
+        if(!isset($log) || empty($log->code_hash)){
+            return false;
+        }
+        if(isset($log->consumed_at)){
+            return false;
+        }
+        if(!isset($log->expires_at) || Carbon::parse($log->expires_at)->isPast()){
+            return false;
+        }
+        if((int) $log->attempts >= self::VERIFICATION_CODE_MAX_ATTEMPTS){
+            return false;
+        }
+        if(!Hash::check($code, $log->code_hash)){
+            // Les tentatives ne doivent pas rafraîchir updated_at : cette
+            // colonne pilote la fenêtre du throttle d'envoi de SMS.
+            $log->attempts = ((int) $log->attempts) + 1;
+            $log->timestamps = false;
+            $log->save();
+            $log->timestamps = true;
+
+            Log::warning('Invalid verification code submitted', [
+                'phone_number' => $phone_number,
+                'for'          => $for,
+                'attempts'     => $log->attempts
+            ]);
+            return false;
+        }
+        if($consume){
+            $log->consumed_at = Carbon::now();
+            $log->timestamps = false;
+            $log->save();
+            $log->timestamps = true;
+        }
+        return true;
     }
 
     /**
@@ -1330,6 +1577,14 @@ class UserController extends Controller
         // Validation is automatically handled by SignupRequest
         // No need for manual validation anymore
 
+        $signup_phone_number = (string) Str::of($request->phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
+
+        // Vérification serveur du code envoyé par SMS lors de l'étape
+        // check-user-data-requesting-registration : sans elle, n'importe qui
+        // peut créer un compte sur un numéro qui ne lui appartient pas.
+        if(!$this->verifyVerificationCode('REGISTRATION', $signup_phone_number, $request->code)){
+            return response()->json(['message' => self::VERIFICATION_CODE_ERROR_MESSAGE], 422);
+        }
         $user_role = Role::where('code', Role::CUSTOMER)->first();
 
         if(!isset($user_role)){
@@ -1352,6 +1607,9 @@ class UserController extends Controller
         Customer::create([
             'user_id' => $user->id,
         ]);
+
+        // The registration succeeded : the SMS quota must not penalise the user afterwards.
+        $this->clearVerificationCodeThrottle('REGISTRATION', $user->phone_number);
 
         // Log successful user signup
         Log::info('New customer account created via signup', [
@@ -1560,8 +1818,17 @@ class UserController extends Controller
             if($validator->fails()) {
                 return response()->json(['message' => $validator->errors()->first()], 422);
             }
+            // Vérification serveur du code reçu par SMS. Sans elle, connaître
+            // un numéro de téléphone suffisait à reprendre n'importe quel
+            // compte : le code n'était comparé que côté client.
+            if(!$this->verifyVerificationCode('PASSWORD_RESET', $phone_number, $request->code)){
+                return response()->json(['message' => self::VERIFICATION_CODE_ERROR_MESSAGE], 422);
+            }
             $user->password = Hash::make(Str::of($request->password)->stripTags()->trim());
             $user->save();
+
+            // The reset succeeded : the SMS quota must not penalise the user afterwards.
+            $this->clearVerificationCodeThrottle('PASSWORD_RESET', $phone_number);
 
             return response()->json(['message' => 'Mot de passe mis à jour'], 200);
         }
@@ -1627,7 +1894,7 @@ class UserController extends Controller
             return $response;
         }
 
-        $email = Str::of($request->email)->stripTags()->trim();
+        $email = $this->normalizeEmail($request->email);
         $phone_number = Str::of($request->phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
 
         // Eager load role relationship to avoid N+1 query when accessing role->code
@@ -1638,7 +1905,7 @@ class UserController extends Controller
         }
 
         // Check if email is already taken by another user
-        if(0 != \strcmp($email, $user->email) && User::Where('email', $email)->exists()){
+        if($email !== $user->email && isset($email) && User::Where('email', $email)->exists()){
             return response()->json(['message' => "L'adresse e-mail a déjà été prise"], 422);
         }
 
@@ -1654,7 +1921,7 @@ class UserController extends Controller
             $user->last_name = $last_name;
             $changes_made = true;
         }
-        if(0 != \strcmp($email, $user->email)){
+        if($email !== $user->email){
             $user->email = $email;
             $changes_made = true;
         }

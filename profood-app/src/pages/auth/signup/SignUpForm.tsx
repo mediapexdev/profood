@@ -71,7 +71,7 @@ const SignUpForm: React.FC = () => {
     const [isValidPhoneNumber, setIsValidPhoneNumber] = useState<boolean>(false);
 
     const [isTouchedForEmail, setIsTouchedForEmail] = useState<boolean>(false);
-    const [isValidEmail, setIsValidEmail] = useState<boolean>(false);
+    const [isValidEmail, setIsValidEmail] = useState<boolean>(true);
 
     const [isTouchedForPassword, setIsTouchedForPassword] = useState<boolean>(false);
     const [isValidPassword, setIsValidPassword] = useState<boolean>(false);
@@ -155,7 +155,9 @@ const SignUpForm: React.FC = () => {
      */
     const changeEmail = (_email: string) => {
         setEmail(_email);
-        setIsValidEmail(_email.length > 0 && _email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) !== null);
+        // L'e-mail est facultatif : un champ vide est valide, mais une
+        // saisie non vide doit rester un e-mail correct.
+        setIsValidEmail(_email.length === 0 || _email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) !== null);
     };
 
     /**
@@ -256,7 +258,8 @@ const SignUpForm: React.FC = () => {
                 showToast(res.data.message ? t(res.data.message) : `${t('Une erreur est survenue ! Veuillez réessayer ou contacter Profood')}.`);
             }
             else {
-                sessionStorage.setItem('signUpVerificationCode', res.data.code);
+                // Le code de vérification ne quitte jamais le serveur : il est
+                // envoyé par SMS et vérifié côté serveur.
                 showToast(t("Un code de confirmation vous a été envoyé"));
                 setShowOtp(true);
                 setShowSpinner(false);
@@ -296,19 +299,23 @@ const SignUpForm: React.FC = () => {
      */
     const otpSubmit = (_code: string) => {
 
-        const verficationCcode = sessionStorage.getItem('signUpVerificationCode');
-
-        if(verficationCcode !== _code){
-            showToast(`${t('Code invalide')} !`)
+        // C'est le serveur, et lui seul, qui décide si le code est valide.
+        const data = {
+            "app_key": process.env.REACT_APP_KEY,
+            "phone_number": phoneNumber,
+            "for": "REGISTRATION",
+            "code": _code
+        };
+        api.post("/check-verification-code", data).then(() => {
+            showToast(`${t('Numéro vérifié avec succès')} !`);
+            setTimeout(() => {
+                setShowPasswordForm(true);
+                setShowSpinner(false);
+            }, 1200);
+        }).catch((error) => {
+            showToast(error.response?.data?.message ? t(error.response.data.message) : `${t('Code invalide')} !`);
             setShowSpinner(false);
-            return;
-        }
-        showToast(`${t('Numéro vérifié avec succès')} !`)
-        setTimeout(() => {
-            sessionStorage.removeItem('signUpVerificationCode');
-            setShowPasswordForm(true);
-            setShowSpinner(false);
-        }, 1200);
+        });
 
         // window.confirmationResult.confirm(_code).then((confirmationResult) => {
         //     showToast(`${t('Numéro vérifié avec succès')} !`);
@@ -377,6 +384,9 @@ const SignUpForm: React.FC = () => {
             "last_name": lastName,
             "phone_number": phoneNumber,
             "email": email,
+            // Le code saisi est transmis au serveur : c'est lui qui valide
+            // que le numéro appartient bien à la personne qui s'inscrit.
+            "code": verificationCode,
             "password": password,
             "password_confirmation": passwordConfirmation,
             "avatar_input_action": "none",
@@ -467,14 +477,14 @@ const SignUpForm: React.FC = () => {
                     <div className="position-relative input-group mb-0">
                         <IonInput
                             type='email'
-                            label={t('Adresse e-mail')}
+                            label={t('Adresse e-mail (optionnel)')}
                             labelPlacement="floating"
-                            aria-label={t('Adresse e-mail')}
+                            aria-label={t('Adresse e-mail (optionnel)')}
                             autocomplete='email'
                             fill="solid"
                             className={`form-element content-color ${isValidEmail && 'ion-valid'} ${!isValidEmail && 'ion-invalid'} ${isTouchedForEmail && 'ion-touched'}`}
                             // helperText={t('Enter a valid email address')}
-                            errorText={t(!email.length ? 'Veuillez renseigner votre adresse e-mail' : 'Adresse e-mail invalide')}
+                            errorText={t('Adresse e-mail invalide')}
                             value={email}
                             onIonBlur={() => setIsTouchedForEmail(true)}
                             onIonInput={(event) => changeEmail(event.target.value as string)}
