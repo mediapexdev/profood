@@ -97,7 +97,7 @@ const UserProfileDetailsEditingFormView: React.FC<UserProfileDetailsEditingFormV
     const [isTouchedForRole, setIsTouchedForRole] = useState<boolean>(false);
     const [isValidPhoneNumber, setIsValidPhoneNumber] = useState<boolean>(false);
     const [isTouchedForPhoneNumber, setIsTouchedForPhoneNumber] = useState<boolean>(false);
-    const [isValidEmail, setIsValidEmail] = useState<boolean>(false);
+    const [isValidEmail, setIsValidEmail] = useState<boolean>(true);
     const [isTouchedForEmail, setIsTouchedForEmail] = useState<boolean>(false);
 
     /**
@@ -121,7 +121,7 @@ const UserProfileDetailsEditingFormView: React.FC<UserProfileDetailsEditingFormV
             changeLastName(user.last_name);
             changeRole(user.role);
             changePhoneNumber(user.phone_number);
-            changeEmail(user.email);
+            changeEmail(user.email ?? '');
             setPreview(user.avatar);
 
             // if(role !== undefined && role !== null){
@@ -210,7 +210,9 @@ const UserProfileDetailsEditingFormView: React.FC<UserProfileDetailsEditingFormV
      */
     const changeEmail = (_email: string) => {
         setEmail(_email);
-        setIsValidEmail(_email.length > 0 &&
+        // L'e-mail est facultatif : un champ vide est valide, mais une
+        // saisie non vide doit rester un e-mail correct.
+        setIsValidEmail(_email.length === 0 ||
             _email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) !== null);
     };
 
@@ -550,9 +552,9 @@ const UserProfileDetailsEditingFormView: React.FC<UserProfileDetailsEditingFormV
                                         invalid={!isValidEmail && isTouchedForEmail}
                                         valid={false}
                                     />
-                                    <Label for='emailInput'>{t('Adresse e-mail')}</Label>
+                                    <Label for='emailInput'>{t('Adresse e-mail (optionnel)')}</Label>
                                 </FormGroup>
-                                <FormFeedback invalid='true'>{t(!email.length ? 'Veuillez renseigner ce champ' : 'Adresse e-mail invalide')} !</FormFeedback>
+                                <FormFeedback invalid='true'>{t('Adresse e-mail invalide')} !</FormFeedback>
                             </div>
                         </Col>
                     </Row>

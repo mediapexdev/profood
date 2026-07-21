@@ -38,6 +38,20 @@ class UpdateCustomerProfileRequest extends FormRequest
     }
 
     /**
+     * Normalize the optional e-mail : a blank field must reach the validator
+     * as null, otherwise 'nullable' does not apply and the regex rule rejects
+     * the empty string.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('email') && trim((string) $this->email) === '') {
+            $this->merge(['email' => null]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * Rules enforce:
@@ -57,7 +71,7 @@ class UpdateCustomerProfileRequest extends FormRequest
             'first_name'            => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
             'last_name'             => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
             'phone_number'          => ['required', 'regex:#(^3[3]|^7[5-80])[ ]?[0-9]{3}([ ]?[0-9]{2}){2}$#'],
-            'email'                 => ['required', 'regex:#^[^\s@]+@[^\s@]+\.[^\s@]+$#'],
+            'email'                 => ['nullable', 'regex:#^[^\s@]+@[^\s@]+\.[^\s@]+$#'],
             'avatar'                => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:1024', 'dimensions:min_width=200,min_height=200'],
             'avatar_input_action'   => ['required', 'regex:#(none|change|remove){1}#']
         ];
@@ -85,7 +99,6 @@ class UpdateCustomerProfileRequest extends FormRequest
             'last_name.max'                 => 'Le nom ne doit pas dépasser 255 caractères',
             'phone_number.required'         => 'Le numéro de téléphone est obligatoire',
             'phone_number.regex'            => 'Le numéro de téléphone n\'est pas valide',
-            'email.required'                => "L'adresse e-mail est obligatoire",
             'email.regex'                   => "L'adresse e-mail n'est pas valide",
             'avatar.image'                  => 'Le fichier doit être une image',
             'avatar.mimes'                  => 'L\'image doit être au format jpeg, jpg, png ou webp',

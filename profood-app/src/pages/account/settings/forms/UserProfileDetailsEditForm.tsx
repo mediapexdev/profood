@@ -58,7 +58,7 @@ const UserProfileDetailsEditForm: React.FC = () => {
     const [isValidFirstName, setIsValidFirstName] = useState<boolean>(true);
     const [isTouchedForLastName, setIsTouchedForLastName] = useState<boolean>(false);
     const [isValidLastName, setIsValidLastName] = useState<boolean>(true);
-    const [isValidEmail, setIsValidEmail] = useState<boolean>(false);
+    const [isValidEmail, setIsValidEmail] = useState<boolean>(true);
     const [isTouchedForEmail, setIsTouchedForEmail] = useState<boolean>(false);
 
     /**
@@ -85,7 +85,9 @@ const UserProfileDetailsEditForm: React.FC = () => {
      */
     const changeEmail = (_email: string) => {
         setUEmail(_email);
-        setIsValidEmail(_email.length > 0 && _email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) !== null);
+        // L'e-mail est facultatif : un champ vide est valide, mais une
+        // saisie non vide doit rester un e-mail correct.
+        setIsValidEmail(_email.length === 0 || _email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) !== null);
     };
 
     /**
@@ -115,7 +117,7 @@ const UserProfileDetailsEditForm: React.FC = () => {
     useEffect(() => {
         setUFirstName(firstName);
         setULastName(lastName);
-        setUEmail(email);
+        setUEmail(email ?? "");
         // setUAvatar(avatar);
         setPreview(avatar);
     }, []);
@@ -462,12 +464,12 @@ const UserProfileDetailsEditForm: React.FC = () => {
                             <div className="position-relative input-group mb-0">
                                 <IonInput
                                     type='email'
-                                    label={t("Adresse e-mail")}
+                                    label={t("Adresse e-mail (optionnel)")}
                                     labelPlacement="floating"
-                                    aria-label={t("Adresse e-mail")}
+                                    aria-label={t("Adresse e-mail (optionnel)")}
                                     fill="solid"
                                     // helperText={t('Veuillez renseigner ce champ')}
-                                    errorText={t(!email.length ? "Veuillez renseigner l'adresse e-mail" : 'Adresse e-mail invalide')}
+                                    errorText={t('Adresse e-mail invalide')}
                                     className={`form-element content-color ${isValidEmail && 'ion-valid'} ${!isValidLastName && 'ion-invalid'} ${isTouchedForEmail && 'ion-touched'}`}
                                     value={uemail}
                                     onIonBlur={() => setIsTouchedForEmail(true)}

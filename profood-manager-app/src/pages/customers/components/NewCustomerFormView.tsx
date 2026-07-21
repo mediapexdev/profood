@@ -79,7 +79,7 @@ const NewCustomerFormView: React.FC = () => {
     const [isTouchedForLastName, setIsTouchedForLastName] = useState<boolean>(false);
     const [isValidPhoneNumber, setIsValidPhoneNumber] = useState<boolean>(false);
     const [isTouchedForPhoneNumber, setIsTouchedForPhoneNumber] = useState<boolean>(false);
-    const [isValidEmail, setIsValidEmail] = useState<boolean>(false);
+    const [isValidEmail, setIsValidEmail] = useState<boolean>(true);
     const [isTouchedForEmail, setIsTouchedForEmail] = useState<boolean>(false);
     const [isValidPassword, setIsValidPassword] = useState<boolean>(false);
     const [isTouchedForPassword, setIsTouchedForPassword] = useState<boolean>(false);
@@ -179,7 +179,9 @@ const NewCustomerFormView: React.FC = () => {
      */
     const changeEmail = (_email: string) => {
         setEmail(_email);
-        setIsValidEmail(_email.length > 0 && _email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) !== null);
+        // L'e-mail est facultatif : un champ vide est valide, mais une
+        // saisie non vide doit rester un e-mail correct.
+        setIsValidEmail(_email.length === 0 || _email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) !== null);
     };
 
     /**
@@ -508,9 +510,9 @@ const NewCustomerFormView: React.FC = () => {
                                         invalid={!isValidEmail && isTouchedForEmail}
                                         valid={false}
                                     />
-                                    <Label for='emailInput'>{t('Adresse e-mail')}</Label>
+                                    <Label for='emailInput'>{t('Adresse e-mail (optionnel)')}</Label>
                                 </FormGroup>
-                                <FormFeedback invalid='true'>{t(!email.length ? 'Veuillez renseigner ce champ' : 'Adresse e-mail invalide')} !</FormFeedback>
+                                <FormFeedback invalid='true'>{t('Adresse e-mail invalide')} !</FormFeedback>
                             </div>
                         </Col>
                         <Col xl={6}>

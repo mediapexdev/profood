@@ -40,6 +40,12 @@ class SignupRequest extends FormRequest
                 'phone_number' => preg_replace('/\s+/', '', (string) $this->phone_number),
             ]);
         }
+        // The e-mail is optional : a blank field must reach the validator as
+        // null, otherwise 'nullable' does not apply and the regex rule rejects
+        // the empty string.
+        if ($this->has('email') && trim((string) $this->email) === '') {
+            $this->merge(['email' => null]);
+        }
     }
 
     /**

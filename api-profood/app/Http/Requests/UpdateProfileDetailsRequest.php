@@ -26,6 +26,20 @@ class UpdateProfileDetailsRequest extends FormRequest
     }
 
     /**
+     * Normalize the optional e-mail : a blank field must reach the validator
+     * as null, otherwise 'nullable' does not apply and the regex rule rejects
+     * the empty string.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('email') && trim((string) $this->email) === '') {
+            $this->merge(['email' => null]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * Rules enforce:
@@ -41,7 +55,7 @@ class UpdateProfileDetailsRequest extends FormRequest
         return [
             'first_name'            => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
             'last_name'             => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
-            'email'                 => ['required', 'regex:#^[^\s@]+@[^\s@]+\.[^\s@]+$#'],
+            'email'                 => ['nullable', 'regex:#^[^\s@]+@[^\s@]+\.[^\s@]+$#'],
             'avatar'                => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:1024', 'dimensions:min_width=200,min_height=200'],
             'avatar_input_action'   => ['required', 'regex:#(none|change|remove){1}#']
         ];
@@ -61,7 +75,6 @@ class UpdateProfileDetailsRequest extends FormRequest
             'last_name.required'            => 'Le nom est obligatoire',
             'last_name.regex'               => 'Le nom ne doit contenir que des lettres',
             'last_name.max'                 => 'Le nom ne doit pas dépasser 255 caractères',
-            'email.required'                => "L'adresse e-mail est obligatoire",
             'email.regex'                   => "L'adresse e-mail n'est pas valide",
             'avatar.image'                  => 'Le fichier doit être une image',
             'avatar.mimes'                  => 'L\'image doit être au format jpeg, jpg, png ou webp',
