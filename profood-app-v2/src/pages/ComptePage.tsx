@@ -3,6 +3,7 @@ import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Icon } from '../components/ui/Icon'
 import { listOrders } from '../lib/orders'
+import { getProfile } from '../lib/profile'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { haptic } from '../lib/haptics'
 
@@ -11,6 +12,7 @@ export function ComptePage() {
   const orders = listOrders()
   const lastOrder = orders[0]
   const { count: favCount } = useFavorites()
+  const profile = getProfile()
 
   const rows: { icon: string; label: string; hint?: string; onClick?: () => void; disabled?: boolean }[] = [
     { icon: 'receipt_long', label: 'Mes commandes', hint: orders.length ? String(orders.length) : undefined, onClick: () => navigate('/commandes') },
@@ -21,7 +23,7 @@ export function ComptePage() {
       disabled: !lastOrder,
     },
     { icon: 'favorite', label: 'Mes découpes favorites', hint: favCount ? String(favCount) : undefined, onClick: () => navigate('/favoris') },
-    { icon: 'location_on', label: 'Mes adresses', disabled: true },
+    { icon: 'location_on', label: 'Mes adresses', hint: profile.addresses.length ? String(profile.addresses.length) : undefined, onClick: () => navigate('/adresses') },
     { icon: 'help', label: 'Aide & contact', disabled: true },
   ]
 
@@ -34,9 +36,11 @@ export function ComptePage() {
             <div className="w-12 h-12 rounded-full bg-terre/15 grid place-items-center text-terre">
               <Icon name="person" size={28} fill />
             </div>
-            <div>
-              <p className="font-title font-extrabold">Invité</p>
-              <p className="text-[13px] text-taupe">Connectez-vous pour retrouver vos commandes</p>
+            <div className="min-w-0">
+              <p className="font-title font-extrabold truncate">{profile.name || 'Invité'}</p>
+              <p className="text-[13px] text-taupe truncate">
+                {profile.phone ? profile.phone : 'Connectez-vous pour retrouver vos commandes'}
+              </p>
             </div>
           </div>
 

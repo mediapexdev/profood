@@ -6,6 +6,8 @@ import { Button } from '../components/ui/Button'
 import { useCart } from '../contexts/CartContext'
 import { DELIVERY_ZONES, zoneById, deliveryFee } from '../lib/delivery'
 import { createOrder } from '../lib/orders'
+import { getProfile, defaultAddress, rememberFromOrder } from '../lib/profile'
+import type { SavedAddress } from '../lib/profile'
 import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
 
@@ -36,14 +38,32 @@ export function CheckoutPage() {
   const { lines, total: subtotal, clear } = useCart()
   const navigate = useNavigate()
 
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
-  const [zoneId, setZoneId] = useState('')
-  const [address, setAddress] = useState('')
+  // Pré-remplissage depuis le profil invité (dernières coordonnées + adresse).
+  const [profile] = useState(getProfile)
+  const initialAddr = defaultAddress(profile)
+  const savedAddresses = profile.addresses
+
+  const [name, setName] = useState(profile.name)
+  const [phone, setPhone] = useState(profile.phone)
+  const [email, setEmail] = useState(profile.email ?? '')
+  const [zoneId, setZoneId] = useState(initialAddr?.zoneId ?? '')
+  const [address, setAddress] = useState(initialAddr?.address ?? '')
   const [note, setNote] = useState('')
+  const [pickedAddrId, setPickedAddrId] = useState<string | undefined>(initialAddr?.id)
   const [touched, setTouched] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+
+  const pickAddress = (a: SavedAddress) => {
+    haptic('light')
+    setPickedAddrId(a.id)
+    setAddress(a.address)
+    setZoneId(a.zoneId)
+  }
+  const useNewAddress = () => {
+    setPickedAddrId(undefined)
+    setAddress('')
+    setZoneId('')
+  }
 
   const zone = zoneById(zoneId)
   const fee = useMemo(() => deliveryFee(zone, subtotal), [zone, subtotal])
@@ -92,6 +112,7 @@ export function CheckoutPage() {
       subtotal,
       deliveryFee: fee,
     })
+    rememberFromOrder(order.customer)
     clear()
     navigate(`/confirmation/${order.token}`, { replace: true })
   }
@@ -118,8 +139,36 @@ export function CheckoutPage() {
           {/* Livraison */}
           <section className="bg-surface border border-sable rounded-card p-4 flex flex-col gap-3.5">
             <h2 className="font-title font-extrabold text-lg">Livraison</h2>
+
+            {/* Adresses enregistrées (si profil connu) */}
+            {savedAddresses.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <span className="text-[13px] font-bold text-taupe">Mes adresses</span>
+                <div className="flex flex-wrap gap-2">
+                  {savedAddresses.map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => pickAddress(a)}
+                      className={`text-left rounded-xl border-[1.5px] px-3 py-2 max-w-full transition-colors ${pickedAddrId === a.id ? 'border-terre bg-terre/10' : 'border-sable bg-surface'}`}
+                    >
+                      <span className="block text-[13px] font-bold text-ink truncate">{a.commune}</span>
+                      <span className="block text-[12px] text-taupe truncate max-w-[220px]">{a.address}</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={useNewAddress}
+                    className={`rounded-xl border-[1.5px] border-dashed px-3 py-2 text-[13px] font-bold transition-colors ${pickedAddrId === undefined ? 'border-terre text-terre' : 'border-sable text-taupe'}`}
+                  >
+                    + Nouvelle adresse
+                  </button>
+                </div>
+              </div>
+            )}
+
             <Field label="Zone (commune)" error={touched ? errors.zone : ''}>
-              <select className={inputCls} value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
+              <select className={inputCls} value={zoneId} onChange={(e) => { setZoneId(e.target.value); if (savedAddresses.length) setPickedAddrId(undefined) }}>
                 <option value="">— Choisir une commune —</option>
                 {DELIVERY_ZONES.map((z) => (
                   <option key={z.id} value={z.id}>{z.commune} · {fmtFcfa(z.fee)}</option>
@@ -134,7 +183,7 @@ export function CheckoutPage() {
               </p>
             )}
             <Field label="Adresse précise" error={touched ? errors.address : ''}>
-              <input className={inputCls} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Rue, immeuble, point de repère" autoComplete="street-address" />
+              <input className={inputCls} value={address} onChange={(e) => { setAddress(e.target.value); if (savedAddresses.length) setPickedAddrId(undefined) }} placeholder="Rue, immeuble, point de repère" autoComplete="street-address" />
             </Field>
             <Field label="Note pour le livreur (facultatif)">
               <textarea className={`${inputCls} min-h-[64px] resize-none`} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Étage, code, horaire…" />

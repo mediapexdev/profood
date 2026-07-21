@@ -13,6 +13,7 @@
  *   /suivi/:token          → SuiviPage (chronologie 4 états)
  *   /commandes             → CommandesPage (historique local)
  *   /favoris               → FavorisPage (découpes favorites)
+ *   /adresses              → AdressesPage (adresses enregistrées)
  *   *                      → redirection vers /
  *
  * La nav (AppBar en haut, BottomNav en bas sur mobile) persiste entre les
@@ -33,6 +34,7 @@ import { ConfirmationPage } from './pages/ConfirmationPage'
 import { SuiviPage } from './pages/SuiviPage'
 import { CommandesPage } from './pages/CommandesPage'
 import { FavorisPage } from './pages/FavorisPage'
+import { AdressesPage } from './pages/AdressesPage'
 
 function AppLayout() {
   return (
@@ -62,6 +64,7 @@ export default function App() {
               <Route path="/suivi/:token" element={<SuiviPage />} />
               <Route path="/commandes" element={<CommandesPage />} />
               <Route path="/favoris" element={<FavorisPage />} />
+              <Route path="/adresses" element={<AdressesPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
