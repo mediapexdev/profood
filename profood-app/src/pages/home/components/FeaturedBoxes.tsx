@@ -64,10 +64,10 @@ const FeaturedBoxes: React.FC<FeaturedBoxesProps> = ({ boxes }) => {
     const displayedBoxes = boxes.slice(0, 6);
 
     return (
-        <section className="featured-boxes-section home-section" aria-label={t('Acheter un Box')}>
+        <section className="featured-boxes-section home-section" aria-label={t('Nos Box')}>
             {/* Section header with "see all" link */}
             <div className="featured-boxes-header">
-                <h2 className="featured-boxes-heading">{t('Acheter un Box')}</h2>
+                <h2 className="featured-boxes-heading">{t('Nos Box')}</h2>
                 <IonButton
                     fill="clear"
                     size="small"
@@ -82,7 +82,7 @@ const FeaturedBoxes: React.FC<FeaturedBoxesProps> = ({ boxes }) => {
 
             {/* Box concept explainer — one-liner */}
             <p className="featured-boxes-explainer">
-                {t("Qu'est-ce qu'un Box ?")} —&nbsp;
+                {t("Qu'est-ce qu'un Box ?")}&nbsp;
                 <span className="featured-boxes-explainer-detail">
                     {t('Un Box est un panier de viande à prix fixe que vous composez vous-même. Choisissez parmi nos découpes de bœuf, mouton et volaille jusqu\'à remplir votre Box !')}
                 </span>
