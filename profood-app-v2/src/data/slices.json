@@ -1,0 +1,612 @@
+[
+  {
+    "id": 1,
+    "name": "Agneau entier local",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 6500,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/agneau-entier-local.png"
+  },
+  {
+    "id": 2,
+    "name": "Aile de poulet",
+    "categoryId": 3,
+    "category": "Volaille",
+    "price": 2500,
+    "weight": 5.0,
+    "availableInBox": true,
+    "image": "/images/slices/aile-de-poulet.png"
+  },
+  {
+    "id": 3,
+    "name": "Basse côte sans os",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 5430,
+    "weight": 2.5,
+    "availableInBox": true,
+    "image": "/images/slices/basse-cote-sans-os.png"
+  },
+  {
+    "id": 4,
+    "name": "Bavette",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 5810,
+    "weight": 2.5,
+    "availableInBox": true,
+    "image": "/images/slices/bavette.png"
+  },
+  {
+    "id": 5,
+    "name": "Blanc de poulet",
+    "categoryId": 3,
+    "category": "Volaille",
+    "price": 5000,
+    "weight": 2.5,
+    "availableInBox": true,
+    "image": "/images/slices/blanc-de-poulet.png"
+  },
+  {
+    "id": 6,
+    "name": "Blanquette de veau",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6790,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/blanquette-de-veau.png"
+  },
+  {
+    "id": 7,
+    "name": "Boulette de viande",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 5060,
+    "weight": 2.5,
+    "availableInBox": true,
+    "image": "/images/slices/boulette-de-viande.png"
+  },
+  {
+    "id": 8,
+    "name": "Bourguignon",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6250,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/bourguignon.png"
+  },
+  {
+    "id": 9,
+    "name": "Brochette de faux filet",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 8000,
+    "weight": 1.5,
+    "availableInBox": false,
+    "image": "/images/slices/brochette-de-faux-filet.png"
+  },
+  {
+    "id": 10,
+    "name": "Brochette de filet de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 9000,
+    "weight": 1.5,
+    "availableInBox": true,
+    "image": "/images/slices/brochette-de-filet-de-boeuf.png"
+  },
+  {
+    "id": 12,
+    "name": "Coeur de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 7000,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/coeur-de-boeuf.png"
+  },
+  {
+    "id": 11,
+    "name": "Coeur de boeuf tranché",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 7510,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/coeur-de-boeuf-tranche.png"
+  },
+  {
+    "id": 13,
+    "name": "Collier sans os",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4230,
+    "weight": 3.3,
+    "availableInBox": true,
+    "image": "/images/slices/collier-sans-os.png"
+  },
+  {
+    "id": 15,
+    "name": "Côte de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 5520,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/cote-de-boeuf.png"
+  },
+  {
+    "id": 16,
+    "name": "Côte de filet d'agneau",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 5990,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/cote-de-filet-d-agneau.png"
+  },
+  {
+    "id": 14,
+    "name": "Cotelettes d'agneau",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 5510,
+    "weight": 2.5,
+    "availableInBox": true,
+    "image": "/images/slices/cotelettes-d-agneau.png"
+  },
+  {
+    "id": 17,
+    "name": "Cuisse de boeuf découpé",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4600,
+    "weight": 3.5,
+    "availableInBox": true,
+    "image": "/images/slices/cuisse-de-boeuf-decoupe.png"
+  },
+  {
+    "id": 18,
+    "name": "Cuisse de poulet",
+    "categoryId": 3,
+    "category": "Volaille",
+    "price": 2800,
+    "weight": 4.5,
+    "availableInBox": true,
+    "image": "/images/slices/cuisse-de-poulet.png"
+  },
+  {
+    "id": 19,
+    "name": "Émincé de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6300,
+    "weight": 2.2,
+    "availableInBox": true,
+    "image": "/images/slices/emince-de-boeuf.png"
+  },
+  {
+    "id": 20,
+    "name": "Entrecôte de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6550,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/entrecote-de-boeuf.png"
+  },
+  {
+    "id": 22,
+    "name": "Épaule d'agneau",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 6500,
+    "weight": 2.5,
+    "availableInBox": true,
+    "image": "/images/slices/epaule-d-agneau.png"
+  },
+  {
+    "id": 21,
+    "name": "Épaule d'agneau desossé",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 7500,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/epaule-d-agneau-desosse.png"
+  },
+  {
+    "id": 23,
+    "name": "Escaloppe de veau",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6490,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/escaloppe-de-veau.png"
+  },
+  {
+    "id": 24,
+    "name": "Faux filet",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 7000,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/faux-filet.png"
+  },
+  {
+    "id": 25,
+    "name": "Filet de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 8500,
+    "weight": 1.5,
+    "availableInBox": true,
+    "image": "/images/slices/filet-de-boeuf.png"
+  },
+  {
+    "id": 26,
+    "name": "Foie de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4000,
+    "weight": 3.5,
+    "availableInBox": true,
+    "image": "/images/slices/foie-de-boeuf.png"
+  },
+  {
+    "id": 27,
+    "name": "Foie de mouton",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 4000,
+    "weight": 3.5,
+    "availableInBox": true,
+    "image": "/images/slices/foie-de-mouton.png"
+  },
+  {
+    "id": 28,
+    "name": "Gigot d'agneau desossé",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 8990,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/gigot-d-agneau-desosse.png"
+  },
+  {
+    "id": 29,
+    "name": "Gigot de mouton desossé",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 7000,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/gigot-de-mouton-desosse.png"
+  },
+  {
+    "id": 30,
+    "name": "Gigot de mouton tranché",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 6500,
+    "weight": 2.5,
+    "availableInBox": true,
+    "image": "/images/slices/gigot-de-mouton-tranche.png"
+  },
+  {
+    "id": 31,
+    "name": "Gite de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6370,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/gite-de-boeuf.png"
+  },
+  {
+    "id": 32,
+    "name": "Haut de cuisse de poulet",
+    "categoryId": 3,
+    "category": "Volaille",
+    "price": 2700,
+    "weight": 4.5,
+    "availableInBox": true,
+    "image": "/images/slices/haut-de-cuisse-de-poulet.png"
+  },
+  {
+    "id": 33,
+    "name": "Jarret avec os",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4600,
+    "weight": 3.0,
+    "availableInBox": true,
+    "image": "/images/slices/jarret-avec-os.png"
+  },
+  {
+    "id": 34,
+    "name": "Langue entière de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4100,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/langue-entiere-de-boeuf.png"
+  },
+  {
+    "id": 35,
+    "name": "Merguez",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4500,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/merguez.png"
+  },
+  {
+    "id": 36,
+    "name": "Mouton entier decoupé",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 5000,
+    "weight": 3.0,
+    "availableInBox": true,
+    "image": "/images/slices/mouton-entier-decoupe.png"
+  },
+  {
+    "id": 37,
+    "name": "Noix de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6100,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/noix-de-boeuf.png"
+  },
+  {
+    "id": 38,
+    "name": "Osso bucco",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4600,
+    "weight": 3.0,
+    "availableInBox": true,
+    "image": "/images/slices/osso-bucco.png"
+  },
+  {
+    "id": 39,
+    "name": "Paleron",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 5560,
+    "weight": 2.5,
+    "availableInBox": true,
+    "image": "/images/slices/paleron.png"
+  },
+  {
+    "id": 40,
+    "name": "Pilon de poulet",
+    "categoryId": 3,
+    "category": "Volaille",
+    "price": 3500,
+    "weight": 4.0,
+    "availableInBox": true,
+    "image": "/images/slices/pilon-de-poulet.png"
+  },
+  {
+    "id": 41,
+    "name": "Poulet entier",
+    "categoryId": 3,
+    "category": "Volaille",
+    "price": 2750,
+    "weight": 5.0,
+    "availableInBox": true,
+    "image": "/images/slices/poulet-entier.png"
+  },
+  {
+    "id": 42,
+    "name": "Queue de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4000,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/queue-de-boeuf.png"
+  },
+  {
+    "id": 43,
+    "name": "Rognon de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 3500,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/rognon-de-boeuf.png"
+  },
+  {
+    "id": 44,
+    "name": "Rognon de mouton",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 3500,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/rognon-de-mouton.png"
+  },
+  {
+    "id": 45,
+    "name": "Rôti de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6500,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/roti-de-boeuf.png"
+  },
+  {
+    "id": 46,
+    "name": "Rôti de gigot de mouton désossé",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 7990,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/roti-de-gigot-de-mouton-desosse.png"
+  },
+  {
+    "id": 47,
+    "name": "Rumsteak de boeuf",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6260,
+    "weight": 2.5,
+    "availableInBox": true,
+    "image": "/images/slices/rumsteak-de-boeuf.png"
+  },
+  {
+    "id": 48,
+    "name": "Sauté d'agneau avec os",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 5500,
+    "weight": 2.5,
+    "availableInBox": true,
+    "image": "/images/slices/saute-d-agneau-avec-os.png"
+  },
+  {
+    "id": 49,
+    "name": "Sauté d'agneau sans os",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 6000,
+    "weight": 2.5,
+    "availableInBox": false,
+    "image": "/images/slices/saute-d-agneau-sans-os.png"
+  },
+  {
+    "id": 50,
+    "name": "Sauté de boeuf avec os",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4600,
+    "weight": 3.0,
+    "availableInBox": true,
+    "image": "/images/slices/saute-de-boeuf-avec-os.png"
+  },
+  {
+    "id": 51,
+    "name": "Sauté de boeuf sans os",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6050,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/saute-de-boeuf-sans-os.png"
+  },
+  {
+    "id": 52,
+    "name": "Souris d'agneau",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 6050,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/souris-d-agneau.png"
+  },
+  {
+    "id": 53,
+    "name": "Steak haché hamburger",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4370,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/steak-hache-hamburger.png"
+  },
+  {
+    "id": 55,
+    "name": "T-bone",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 5890,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/t-bone.png"
+  },
+  {
+    "id": 54,
+    "name": "Tête de mouton",
+    "categoryId": 2,
+    "category": "Mouton",
+    "price": 1000,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/tete-de-mouton.png"
+  },
+  {
+    "id": 56,
+    "name": "Tournedos",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 7500,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/tournedos.png"
+  },
+  {
+    "id": 57,
+    "name": "Tranche grasse",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 5500,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/tranche-grasse.png"
+  },
+  {
+    "id": 61,
+    "name": "Viande à brochette",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 6050,
+    "weight": 2.0,
+    "availableInBox": true,
+    "image": "/images/slices/viande-a-brochette.png"
+  },
+  {
+    "id": 60,
+    "name": "Viande hachée",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 4500,
+    "weight": 3.0,
+    "availableInBox": true,
+    "image": "/images/slices/viande-hachee.png"
+  },
+  {
+    "id": 58,
+    "name": "Viande hachée 1er choix",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 5000,
+    "weight": 0.0,
+    "availableInBox": true,
+    "image": "/images/slices/viande-hachee-1er-choix.png"
+  },
+  {
+    "id": 59,
+    "name": "Viande hachée pour animaux",
+    "categoryId": 1,
+    "category": "Boeuf",
+    "price": 1000,
+    "weight": 0.0,
+    "availableInBox": false,
+    "image": "/images/slices/viande-hachee-pour-animaux.png"
+  }
+]

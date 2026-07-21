@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "name": "Noflaye",
+    "price": 84600,
+    "capacity": 6,
+    "image": "/images/boxes/noflaye.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Téranga",
+    "price": 169200,
+    "capacity": 12,
+    "image": "/images/boxes/teranga.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Woyofal",
+    "price": 112800,
+    "capacity": 8,
+    "image": "/images/boxes/woyofal.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Xéweul",
+    "price": 141100,
+    "capacity": 10,
+    "image": "/images/boxes/xeweul.jpg"
+  }
+]

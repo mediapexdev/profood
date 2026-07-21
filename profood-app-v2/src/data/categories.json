@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "Boeuf",
+    "slicesCount": 39,
+    "image": "/images/categories/boeuf.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Mouton",
+    "slicesCount": 16,
+    "image": "/images/categories/mouton.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Volaille",
+    "slicesCount": 6,
+    "image": "/images/categories/volaille.jpg"
+  }
+]
