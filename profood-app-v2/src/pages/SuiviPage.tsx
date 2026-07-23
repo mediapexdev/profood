@@ -4,14 +4,18 @@ import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
-import { getOrder, currentStage, stageTime, estimatedDelivery, STAGES } from '../lib/orders'
+import { getOrder, currentStage, isCancelled, stageTime, estimatedDelivery, STAGES } from '../lib/orders'
+import { useServerOrders } from '../lib/useServerOrders'
 import { fmtFcfa } from '../lib/format'
-
-const hhmm = (ms: number) => new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+import { useI18n } from '../i18n'
 
 export function SuiviPage() {
+  const { t, locale } = useI18n()
+  const hhmm = (ms: number) => new Date(ms).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
   const { token } = useParams()
   const navigate = useNavigate()
+  // Reporte le statut réel du serveur sur la commande locale (si connecté).
+  useServerOrders()
   const order = getOrder(token)
 
   // Tic régulier : la chronologie « avance » sous les yeux du client.
@@ -24,36 +28,51 @@ export function SuiviPage() {
   if (!order) {
     return (
       <>
-        <AppBar title="Suivi" back />
-        <Page noTabbar><p className="p-6 text-taupe">Commande introuvable.</p></Page>
+        <AppBar title={t('suivi.notFoundTitle')} back />
+        <Page noTabbar><p className="p-6 text-taupe">{t('common.orderNotFound')}</p></Page>
       </>
     )
   }
 
   const stage = currentStage(order, now)
+  const cancelled = isCancelled(order)
   const activeIdx = STAGES.findIndex((s) => s.key === stage)
   const delivered = stage === 'delivered'
 
   return (
     <>
-      <AppBar title="Suivi de commande" back />
+      <AppBar title={t('suivi.title')} back />
       <Page noTabbar>
         <div className="mx-auto max-w-lg px-4 md:px-6 pt-4 flex flex-col gap-5">
           {/* Bandeau état */}
+          {cancelled ? (
+            <div className="bg-alerte/10 border border-alerte/30 rounded-card p-4 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-alerte text-white grid place-items-center shrink-0">
+                <Icon name="cancel" size={26} fill />
+              </div>
+              <div className="min-w-0">
+                <p className="font-title font-extrabold text-lg leading-tight">{t('suivi.cancelledTitle')}</p>
+                <p className="text-[13px] text-taupe">{t('suivi.cancelledHint', { refund: order.paid ? t('suivi.refundInProgress') : '' })}</p>
+              </div>
+              <span className="ml-auto text-[11px] font-bold tabular-nums text-taupe">{order.ref}</span>
+            </div>
+          ) : (
           <div className="bg-terre/10 border border-terre/30 rounded-card p-4 flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-terre text-white grid place-items-center shrink-0">
               <Icon name={STAGES[activeIdx].icon} size={26} fill />
             </div>
             <div className="min-w-0">
-              <p className="font-title font-extrabold text-lg leading-tight">{STAGES[activeIdx].label}</p>
+              <p className="font-title font-extrabold text-lg leading-tight">{t(STAGES[activeIdx].labelKey)}</p>
               <p className="text-[13px] text-taupe">
-                {delivered ? `Livrée à ${order.customer.commune}` : `Livraison estimée ~ ${estimatedDelivery(order)}`}
+                {delivered ? t('suivi.deliveredTo', { commune: order.customer.commune }) : t('suivi.estimatedAround', { time: estimatedDelivery(order) })}
               </p>
             </div>
             <span className="ml-auto text-[11px] font-bold tabular-nums text-taupe">{order.ref}</span>
           </div>
+          )}
 
           {/* Chronologie 4 états */}
+          {!cancelled && (
           <div className="bg-surface border border-sable rounded-card p-4">
             <ol className="relative">
               {STAGES.map((s, i) => {
@@ -69,9 +88,9 @@ export function SuiviPage() {
                       <Icon name={done ? s.icon : 'radio_button_unchecked'} size={done ? 18 : 16} fill={done} />
                     </span>
                     <div className="pt-1">
-                      <p className={`font-title font-bold text-[15px] ${done ? 'text-ink' : 'text-taupe'}`}>{s.label}</p>
+                      <p className={`font-title font-bold text-[15px] ${done ? 'text-ink' : 'text-taupe'}`}>{t(s.labelKey)}</p>
                       <p className="text-[12px] text-taupe tabular-nums">
-                        {done ? hhmm(reached) : `estimé ~ ${hhmm(reached)}`}
+                        {done ? hhmm(reached) : t('suivi.estimatedShort', { time: hhmm(reached) })}
                       </p>
                     </div>
                   </li>
@@ -79,18 +98,19 @@ export function SuiviPage() {
               })}
             </ol>
           </div>
+          )}
 
           {/* Preuve de livraison (à venir : photo/checklist du livreur) */}
-          {delivered && (
+          {delivered && !cancelled && (
             <div className="bg-halal/10 border border-halal/30 rounded-card p-4 flex items-center gap-3">
               <Icon name="verified" size={26} className="text-halal" fill />
-              <p className="text-[13px] text-ink">Commande livrée. Merci de votre confiance !</p>
+              <p className="text-[13px] text-ink">{t('suivi.deliveredMessage')}</p>
             </div>
           )}
 
           {/* Récapitulatif */}
           <div className="bg-surface border border-sable rounded-card p-4">
-            <h2 className="font-title font-extrabold mb-3">Votre commande</h2>
+            <h2 className="font-title font-extrabold mb-3">{t('suivi.orderHeading')}</h2>
             <div className="flex flex-col gap-2.5">
               {order.lines.map((l, i) => (
                 <div key={i} className="flex items-center gap-3">
@@ -102,12 +122,12 @@ export function SuiviPage() {
               ))}
             </div>
             <div className="filet w-full my-3" />
-            <div className="flex justify-between text-[13px]"><span className="text-taupe">Sous-total</span><span className="tabular-nums">{fmtFcfa(order.subtotal)}</span></div>
-            <div className="flex justify-between text-[13px] mt-1"><span className="text-taupe">Livraison</span><span className="tabular-nums">{order.deliveryFee === 0 ? 'Offerte' : fmtFcfa(order.deliveryFee)}</span></div>
-            <div className="flex justify-between mt-2"><span className="font-title font-extrabold">Total</span><span className="font-title font-extrabold tabular-nums">{fmtFcfa(order.total)}</span></div>
+            <div className="flex justify-between text-[13px]"><span className="text-taupe">{t('common.subtotal')}</span><span className="tabular-nums">{fmtFcfa(order.subtotal)}</span></div>
+            <div className="flex justify-between text-[13px] mt-1"><span className="text-taupe">{t('common.delivery')}</span><span className="tabular-nums">{order.deliveryFee === 0 ? t('common.free') : fmtFcfa(order.deliveryFee)}</span></div>
+            <div className="flex justify-between mt-2"><span className="font-title font-extrabold">{t('common.total')}</span><span className="font-title font-extrabold tabular-nums">{fmtFcfa(order.total)}</span></div>
           </div>
 
-          <Button full variant="ghost" className="mb-2" onClick={() => navigate('/')}>Retour à la boutique</Button>
+          <Button full variant="ghost" className="mb-2" onClick={() => navigate('/')}>{t('suivi.backToShop')}</Button>
         </div>
       </Page>
     </>

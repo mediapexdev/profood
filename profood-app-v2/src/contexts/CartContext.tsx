@@ -1,5 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { Slice } from '../lib/catalog'
+import { useCatalog } from './CatalogContext'
+import { ordersApiEnabled, fetchServerCartSlices } from '../api/orders'
+import { currentToken } from '../lib/auth'
 
 /**
  * Ligne de panier générique : une découpe à l'unité, ou une box composée.
@@ -44,6 +47,7 @@ function load(): CartLine[] {
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>(load)
+  const { slices: catalogSlices } = useCatalog()
 
   // Persistance panier invité : survit au rechargement / retour sur l'app.
   useEffect(() => {
@@ -53,6 +57,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       /* quota / mode privé : on ignore, le panier reste en mémoire */
     }
   }, [lines])
+
+  // À la connexion : fusionne le panier SERVEUR (laissé par l'app v1 ou un
+  // autre appareil) dans le panier local. Qté = max des deux (idempotent si
+  // l'évènement rejoue). Le serveur sera réaligné sur le local au checkout.
+  useEffect(() => {
+    if (!ordersApiEnabled) return
+    const onLogin = async () => {
+      const token = currentToken()
+      if (!token || token.startsWith('local:')) return
+      const serverSlices = await fetchServerCartSlices(token)
+      if (!serverSlices.length) return
+      setLines((prev) => {
+        let next = prev
+        for (const { sliceId, qty } of serverSlices) {
+          const slice = catalogSlices.find((s) => s.id === sliceId)
+          if (!slice) continue
+          const lineId = sliceLineId(sliceId)
+          const i = next.findIndex((l) => l.id === lineId)
+          if (i >= 0) {
+            if (next[i].qty < qty) {
+              next = next.slice()
+              next[i] = { ...next[i], qty }
+            }
+          } else {
+            next = [...next, { id: lineId, kind: 'slice', name: slice.name, unitPrice: slice.price, image: slice.image, qty }]
+          }
+        }
+        return next
+      })
+    }
+    window.addEventListener('auth:login', onLogin)
+    return () => window.removeEventListener('auth:login', onLogin)
+  }, [catalogSlices])
 
   const value = useMemo<CartValue>(() => {
     const bump = (lineId: string, make: () => CartLine) =>

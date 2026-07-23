@@ -3,17 +3,18 @@ import { useNavigate } from 'react-router-dom'
 import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
-import { PRICE_PER_CUT } from '../lib/catalog'
 import { DIAGRAMS, getCutInfo } from '../lib/anatomy'
 import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
 import { useCart } from '../contexts/CartContext'
 import { useCatalog } from '../contexts/CatalogContext'
+import { useI18n } from '../i18n'
 
 const CAPACITY = 8
 const BEEF = DIAGRAMS.boeuf
 
 export function ComposerPage() {
+  const { t } = useI18n()
   const [picks, setPicks] = useState<number[]>([])
   const { addBox } = useCart()
   const { slices: SLICES } = useCatalog()
@@ -46,24 +47,29 @@ export function ComposerPage() {
     return set
   }, [picks, SLICES])
 
-  const total = picks.length * PRICE_PER_CUT
+  // Somme des prix réels des découpes : identique au montant que le serveur
+  // recalcule quand la box est décomposée en lignes de découpes (API).
+  const total = useMemo(
+    () => picks.reduce((sum, id) => sum + (SLICES.find((x) => x.id === id)?.price ?? 0), 0),
+    [picks, SLICES],
+  )
 
   const addToCart = () => {
     if (!picks.length) return
     haptic('medium')
-    addBox(`Box composée · ${picks.length} découpes`, total, picks, BEEF.src)
+    addBox(t('box.composed', { count: picks.length }), total, picks, BEEF.src)
     setPicks([])
     navigate('/panier')
   }
 
   return (
     <>
-      <AppBar title="Composer ma box" />
+      <AppBar title={t('composer.title')} />
       <Page>
         <div className="mx-auto max-w-3xl px-4 md:px-6 pt-3 md:pt-6">
           {/* Planche gravure + zones */}
           <div className="relative rounded-card overflow-hidden border border-sable bg-surface aspect-[3/2]">
-            <img src={BEEF.src} alt="Planche de découpe du bœuf" className="absolute inset-0 h-full w-full object-contain" />
+            <img src={BEEF.src} alt={t('composer.chartAlt')} className="absolute inset-0 h-full w-full object-contain" />
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
               {Array.from(activeZones).map((zid) => {
                 const z = BEEF.zones[zid]
@@ -86,7 +92,7 @@ export function ComposerPage() {
             ))}
           </div>
           <div className="flex justify-between items-center mt-2 text-sm">
-            <span className="text-taupe">Sélection</span>
+            <span className="text-taupe">{t('composer.selection')}</span>
             <span className="font-bold tabular-nums">{picks.length} / {CAPACITY}</span>
           </div>
 
@@ -106,13 +112,15 @@ export function ComposerPage() {
           <div className="mt-5 flex items-end justify-between">
             <div className="flex flex-col">
               <span className="font-title font-extrabold text-2xl tabular-nums">{fmtFcfa(total)}</span>
-              <span className="text-[11px] font-bold text-terre-dark">soit {picks.length ? fmtFcfa(PRICE_PER_CUT) : '—'} la découpe</span>
+              <span className="text-[11px] font-bold text-terre-dark">
+                {t('composer.perCut', { amount: picks.length ? `~${fmtFcfa(Math.round(total / picks.length))}` : '—' })}
+              </span>
             </div>
           </div>
           <Button full disabled={!picks.length} className="mt-4" onClick={addToCart}>
-            {picks.length ? 'Ajouter la box au panier' : 'Choisissez vos découpes'}
+            {picks.length ? t('composer.addToCart') : t('composer.pickCuts')}
           </Button>
-          <p className="text-[12px] text-taupe mt-3">Le prix se met à jour à chaque choix — jamais recalculé côté client au moment de payer.</p>
+          <p className="text-[12px] text-taupe mt-3">{t('composer.priceNote')}</p>
         </div>
       </Page>
     </>

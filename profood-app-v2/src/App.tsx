@@ -25,6 +25,7 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { BottomNav } from './components/shell/BottomNav'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { I18nProvider } from './i18n'
 import { AuthProvider } from './contexts/AuthContext'
 import { CatalogProvider } from './contexts/CatalogContext'
 import { CartProvider } from './contexts/CartContext'
@@ -43,6 +44,7 @@ import { AdressesPage } from './pages/AdressesPage'
 import { ConnexionPage } from './pages/ConnexionPage'
 import { InscriptionPage } from './pages/InscriptionPage'
 import { MotDePasseOubliePage } from './pages/MotDePasseOubliePage'
+import { PaiementRetourPage } from './pages/PaiementRetourPage'
 
 function AppLayout() {
   return (
@@ -56,6 +58,7 @@ function AppLayout() {
 export default function App() {
   return (
     <ThemeProvider>
+      <I18nProvider>
       <AuthProvider>
         <CatalogProvider>
         <FavoritesProvider>
@@ -78,6 +81,11 @@ export default function App() {
                 <Route path="/connexion" element={<ConnexionPage />} />
                 <Route path="/inscription" element={<InscriptionPage />} />
                 <Route path="/mot-de-passe-oublie" element={<MotDePasseOubliePage />} />
+                {/* Retours PayTech — chemins construits côté serveur (client_app_url). */}
+                <Route path="/guest-order-success/:hash" element={<PaiementRetourPage outcome="success" />} />
+                <Route path="/orders/successful-order/:hash" element={<PaiementRetourPage outcome="success" />} />
+                <Route path="/orders/cancelled-order/:hash" element={<PaiementRetourPage outcome="cancelled" />} />
+                <Route path="/views/cart" element={<Navigate to="/panier" replace />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </BrowserRouter>
@@ -85,6 +93,7 @@ export default function App() {
         </FavoritesProvider>
         </CatalogProvider>
       </AuthProvider>
+      </I18nProvider>
     </ThemeProvider>
   )
 }

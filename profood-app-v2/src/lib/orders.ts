@@ -4,15 +4,15 @@
  * refonte). Isole toute la logique de commande derrière une seule surface :
  * quand l'API Laravel sera branchée, seules ces fonctions changent.
  */
-import type { CartLine } from '../contexts/CartContext'
+import type { MsgKey } from '../i18n/fr'
 
 export type OrderStage = 'received' | 'preparing' | 'delivering' | 'delivered'
 
-export const STAGES: { key: OrderStage; label: string; icon: string }[] = [
-  { key: 'received', label: 'Commande reçue', icon: 'receipt_long' },
-  { key: 'preparing', label: 'En préparation', icon: 'skillet' },
-  { key: 'delivering', label: 'En livraison', icon: 'local_shipping' },
-  { key: 'delivered', label: 'Livrée', icon: 'check_circle' },
+export const STAGES: { key: OrderStage; labelKey: MsgKey; icon: string }[] = [
+  { key: 'received', labelKey: 'order.stage.received', icon: 'receipt_long' },
+  { key: 'preparing', labelKey: 'order.stage.preparing', icon: 'skillet' },
+  { key: 'delivering', labelKey: 'order.stage.delivering', icon: 'local_shipping' },
+  { key: 'delivered', labelKey: 'order.stage.delivered', icon: 'check_circle' },
 ]
 
 export interface OrderCustomer {
@@ -41,6 +41,13 @@ export interface Order {
   subtotal: number
   deliveryFee: number
   total: number
+  /** Renseignés quand la commande est passée via l'API (VITE_USE_API_ORDERS). */
+  serverId?: number
+  serverRef?: string
+  paymentMethod?: 'cod' | 'online'
+  paid?: boolean
+  /** Statut réel du serveur (prime sur la simulation temporelle). */
+  serverStage?: OrderStage | 'cancelled'
 }
 
 const STORAGE_KEY = 'profood.orders.v1'
@@ -77,23 +84,43 @@ function humanRef(createdAt: number): string {
 
 export function createOrder(input: {
   customer: OrderCustomer
-  lines: CartLine[]
+  /** Structurel : les CartLine du panier conviennent telles quelles. */
+  lines: OrderLine[]
   subtotal: number
   deliveryFee: number
+  serverId?: number
+  serverRef?: string
+  paymentMethod?: 'cod' | 'online'
+  paid?: boolean
 }): Order {
   const createdAt = Date.now()
   const order: Order = {
     token: opaqueToken(),
-    ref: humanRef(createdAt),
+    // La référence serveur (string_id) fait foi quand elle existe.
+    ref: input.serverRef || humanRef(createdAt),
     createdAt,
     customer: input.customer,
     lines: input.lines.map((l) => ({ name: l.name, qty: l.qty, unitPrice: l.unitPrice, image: l.image })),
     subtotal: input.subtotal,
     deliveryFee: input.deliveryFee,
     total: input.subtotal + input.deliveryFee,
+    serverId: input.serverId,
+    serverRef: input.serverRef,
+    paymentMethod: input.paymentMethod,
+    paid: input.paid,
   }
   writeAll([order, ...readAll()])
   return order
+}
+
+/** Met à jour une commande locale (ex. statut réel rapporté par le serveur). */
+export function patchOrder(token: string, patch: Partial<Order>): Order | undefined {
+  const orders = readAll()
+  const i = orders.findIndex((o) => o.token === token)
+  if (i < 0) return undefined
+  orders[i] = { ...orders[i], ...patch, token: orders[i].token }
+  writeAll(orders)
+  return orders[i]
 }
 
 export function listOrders(): Order[] {
@@ -115,12 +142,21 @@ const OFFSETS_MIN: Record<OrderStage, number> = {
   delivered: 12,
 }
 
-/** Étape courante estimée d'après le temps écoulé depuis la commande. */
+/**
+ * Étape courante : le statut SERVEUR fait foi quand il est connu ; sinon
+ * simulation d'après le temps écoulé (mode démo). Une commande annulée est
+ * rendue comme 'received' ici — les écrans testent `isCancelled()` à part.
+ */
 export function currentStage(order: Order, now: number = Date.now()): OrderStage {
+  if (order.serverStage) return order.serverStage === 'cancelled' ? 'received' : order.serverStage
   const elapsed = (now - order.createdAt) / 60000
   let stage: OrderStage = 'received'
   for (const s of STAGES) if (elapsed >= OFFSETS_MIN[s.key]) stage = s.key
   return stage
+}
+
+export function isCancelled(order: Order): boolean {
+  return order.serverStage === 'cancelled'
 }
 
 /** Horodatage estimé (ms) auquel une étape est / sera atteinte. */
@@ -134,4 +170,38 @@ export function estimatedDelivery(order: Order): string {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+// ── Paiement en ligne : commande en attente de retour PayTech ─────────────
+// Avant la redirection vers PayTech, on gèle un brouillon de commande sous le
+// hash `order_id` transmis au serveur ; la page de retour le finalise
+// (succès → commande locale + panier vidé) ou le relâche (annulation).
+export interface PendingPayment {
+  hash: string
+  createdAt: number
+  customer: OrderCustomer
+  lines: OrderLine[]
+  subtotal: number
+  deliveryFee: number
+}
+
+const PENDING_KEY = 'profood.pending-payment.v1'
+
+export function savePendingPayment(p: PendingPayment): void {
+  localStorage.setItem(PENDING_KEY, JSON.stringify(p))
+}
+
+export function readPendingPayment(hash: string | undefined): PendingPayment | undefined {
+  try {
+    const raw = localStorage.getItem(PENDING_KEY)
+    if (!raw || !hash) return undefined
+    const p = JSON.parse(raw) as PendingPayment
+    return p.hash === hash ? p : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export function clearPendingPayment(): void {
+  localStorage.removeItem(PENDING_KEY)
 }

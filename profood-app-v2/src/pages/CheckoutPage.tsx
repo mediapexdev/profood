@@ -1,20 +1,33 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
+import { Icon } from '../components/ui/Icon'
 import { useCart } from '../contexts/CartContext'
-import { DELIVERY_ZONES, zoneById, deliveryFee } from '../lib/delivery'
-import { createOrder } from '../lib/orders'
+import { useAuth } from '../contexts/AuthContext'
+import {
+  DELIVERY_ZONES, zoneById, deliveryFee,
+  fetchLocalites, filterLocalites, quoteDeliveryFee,
+} from '../lib/delivery'
+import type { Localite } from '../lib/delivery'
+import { createOrder, savePendingPayment } from '../lib/orders'
+import type { OrderCustomer } from '../lib/orders'
+import {
+  ordersApiEnabled, makeOrderHash, apiPhone, OrderApiError,
+  placeGuestOrder, placeGuestOrderWithPayment,
+  syncServerCart, placeCustomerOrder, placeCustomerOrderWithPayment,
+} from '../api/orders'
+import { currentToken } from '../lib/auth'
 import { getProfile, defaultAddress, rememberFromOrder } from '../lib/profile'
 import type { SavedAddress } from '../lib/profile'
 import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
+import { useI18n } from '../i18n'
 
-/** Téléphone sénégalais : 9 chiffres commençant par 7, indicatif +221 toléré. */
+/** Téléphone sénégalais accepté par le serveur : 33x ou 70/75/76/77/78. */
 function isValidPhone(v: string): boolean {
-  const digits = v.replace(/[^\d]/g, '').replace(/^221/, '')
-  return /^7\d{8}$/.test(digits)
+  return /^(33|7[05678])\d{7}$/.test(apiPhone(v))
 }
 /** E-mail facultatif (décision projet) : vide accepté, sinon format valide. */
 function isValidEmail(v: string): boolean {
@@ -34,8 +47,12 @@ function Field({ label, children, error }: { label: string; children: React.Reac
 const inputCls =
   'w-full rounded-xl border-[1.5px] border-sable bg-surface px-3.5 py-2.5 text-[15px] text-ink outline-none focus:border-terre transition-colors'
 
+type PayMethod = 'cod' | 'online'
+
 export function CheckoutPage() {
+  const { t } = useI18n()
   const { lines, total: subtotal, clear } = useCart()
+  const { user, isAuthenticated, mode: authApiMode } = useAuth()
   const navigate = useNavigate()
 
   // Pré-remplissage depuis le profil invité (dernières coordonnées + adresse).
@@ -50,100 +67,241 @@ export function CheckoutPage() {
   const [address, setAddress] = useState(initialAddr?.address ?? '')
   const [note, setNote] = useState('')
   const [pickedAddrId, setPickedAddrId] = useState<string | undefined>(initialAddr?.id)
+  const [payMethod, setPayMethod] = useState<PayMethod>('cod')
   const [touched, setTouched] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+
+  // ── Localités API (mode commandes réelles) ──────────────────────────────
+  const [localites, setLocalites] = useState<Localite[]>([])
+  const [locQuery, setLocQuery] = useState('')
+  const [localite, setLocalite] = useState<Localite | null>(null)
+  const [locOpen, setLocOpen] = useState(false)
+  const [quote, setQuote] = useState<{ fee: number; threshold: number | null; applied: boolean } | null>(null)
+  const quoteSeq = useRef(0)
+
+  useEffect(() => {
+    if (!ordersApiEnabled) return
+    fetchLocalites().then(setLocalites).catch(() => setLocalites([]))
+  }, [])
+
+  // Restaure la localité mémorisée dans l'adresse par défaut (zoneId `loc:<id>`).
+  useEffect(() => {
+    if (!ordersApiEnabled || !localites.length) return
+    const m = /^loc:(\d+)$/.exec(zoneId)
+    if (m && !localite) {
+      const found = localites.find((l) => l.id === Number(m[1]))
+      if (found) {
+        setLocalite(found)
+        setLocQuery(found.wording)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localites])
+
+  // Frais officiels (serveur) à chaque changement de localité / sous-total.
+  useEffect(() => {
+    if (!ordersApiEnabled || !localite) {
+      setQuote(null)
+      return
+    }
+    const seq = ++quoteSeq.current
+    quoteDeliveryFee(localite.id, subtotal)
+      .then((q) => {
+        if (seq === quoteSeq.current) setQuote({ fee: q.fee, threshold: q.freeShippingThreshold, applied: q.freeShippingApplied })
+      })
+      .catch(() => {
+        if (seq === quoteSeq.current) setQuote(null)
+      })
+  }, [localite, subtotal])
+
+  const suggestions = useMemo(
+    () => (ordersApiEnabled && locOpen ? filterLocalites(localites, locQuery) : []),
+    [localites, locQuery, locOpen],
+  )
+
+  const pickLocalite = (l: Localite) => {
+    haptic('light')
+    setLocalite(l)
+    setLocQuery(l.wording)
+    setLocOpen(false)
+    if (savedAddresses.length) setPickedAddrId(undefined)
+  }
 
   const pickAddress = (a: SavedAddress) => {
     haptic('light')
     setPickedAddrId(a.id)
     setAddress(a.address)
     setZoneId(a.zoneId)
+    const m = /^loc:(\d+)$/.exec(a.zoneId)
+    if (ordersApiEnabled && m) {
+      const found = localites.find((l) => l.id === Number(m[1]))
+      setLocalite(found ?? null)
+      setLocQuery(found?.wording ?? '')
+    }
   }
   const useNewAddress = () => {
     setPickedAddrId(undefined)
     setAddress('')
     setZoneId('')
+    setLocalite(null)
+    setLocQuery('')
   }
 
+  // ── Frais / totaux ──────────────────────────────────────────────────────
   const zone = zoneById(zoneId)
-  const fee = useMemo(() => deliveryFee(zone, subtotal), [zone, subtotal])
-  const freeShipping = !!zone && fee === 0
+  const fee = ordersApiEnabled ? quote?.fee ?? 0 : deliveryFee(zone, subtotal)
+  const feeKnown = ordersApiEnabled ? !!localite && quote !== null : !!zone
+  const freeShipping = ordersApiEnabled ? !!quote?.applied : !!zone && fee === 0
+  const francoAmount = ordersApiEnabled ? quote?.threshold ?? null : zone?.franco ?? null
   const total = subtotal + fee
 
+  // Session API réelle (token serveur, pas un compte local de démo).
+  const apiToken = currentToken()
+  const loggedApi = ordersApiEnabled && authApiMode === 'api' && isAuthenticated
+    && !!apiToken && !apiToken.startsWith('local:') && !!user?.id
+
   const errors = {
-    name: name.trim().length < 2 ? 'Nom requis' : '',
-    phone: !isValidPhone(phone) ? 'Numéro sénégalais invalide (ex. 77 123 45 67)' : '',
-    email: !isValidEmail(email) ? 'E-mail invalide' : '',
-    zone: !zoneId ? 'Choisissez votre zone' : '',
-    address: address.trim().length < 4 ? 'Adresse requise' : '',
+    name: name.trim().length < 2 ? t('checkout.errorName') : '',
+    phone: !isValidPhone(phone) ? t('auth.phoneInvalid') : '',
+    email: !isValidEmail(email) ? t('auth.emailInvalid') : '',
+    zone: ordersApiEnabled
+      ? (localites.length > 0 && !localite ? t('checkout.errorZoneApi') : '')
+      : (!zoneId ? t('checkout.errorZone') : ''),
+    address: address.trim().length < 4 ? t('checkout.errorAddress') : '',
   }
   const valid = !Object.values(errors).some(Boolean) && lines.length > 0
 
   if (!lines.length) {
     return (
       <>
-        <AppBar title="Commander" back />
+        <AppBar title={t('checkout.title')} back />
         <Page noTabbar>
           <div className="px-6 pt-16 text-center text-taupe">
-            <p className="font-title font-extrabold text-lg text-ink">Panier vide</p>
-            <Button className="mt-4" onClick={() => navigate('/')}>Voir la boutique</Button>
+            <p className="font-title font-extrabold text-lg text-ink">{t('checkout.emptyTitle')}</p>
+            <Button className="mt-4" onClick={() => navigate('/')}>{t('common.viewShop')}</Button>
           </div>
         </Page>
       </>
     )
   }
 
-  const placeOrder = () => {
+  const buildCustomer = (): OrderCustomer => ({
+    name: name.trim(),
+    phone: phone.trim(),
+    email: email.trim() || undefined,
+    address: address.trim(),
+    zoneId: ordersApiEnabled && localite ? `loc:${localite.id}` : zoneId,
+    commune: ordersApiEnabled && localite ? localite.wording.split(',')[0].trim() : zone?.commune ?? '',
+    note: note.trim() || undefined,
+  })
+
+  const placeOrder = async () => {
     setTouched(true)
+    setSubmitError('')
     if (!valid || submitting) return
     setSubmitting(true)
     haptic('medium')
-    const order = createOrder({
-      customer: {
-        name: name.trim(),
-        phone: phone.trim(),
-        email: email.trim() || undefined,
-        address: address.trim(),
-        zoneId,
-        commune: zone!.commune,
-        note: note.trim() || undefined,
-      },
-      lines,
-      subtotal,
-      deliveryFee: fee,
-    })
-    rememberFromOrder(order.customer)
-    clear()
-    navigate(`/confirmation/${order.token}`, { replace: true })
+    const customer = buildCustomer()
+
+    // Mode démo (drapeau API commandes absent) : commande locale, comme avant.
+    if (!ordersApiEnabled) {
+      const order = createOrder({ customer, lines, subtotal, deliveryFee: fee })
+      rememberFromOrder(customer)
+      clear()
+      navigate(`/confirmation/${order.token}`, { replace: true })
+      return
+    }
+
+    try {
+      const localiteId = localite?.id ?? null
+
+      if (payMethod === 'online') {
+        // Brouillon gelé sous le hash → finalisé par la page de retour PayTech.
+        const hash = await makeOrderHash()
+        savePendingPayment({
+          hash,
+          createdAt: Date.now(),
+          customer,
+          lines: lines.map((l) => ({ name: l.name, qty: l.qty, unitPrice: l.unitPrice, image: l.image })),
+          subtotal,
+          deliveryFee: fee,
+        })
+        let url: string
+        if (loggedApi) {
+          await syncServerCart(lines, user!.id!, apiToken!)
+          url = await placeCustomerOrderWithPayment({
+            customerId: user!.id!, token: apiToken!, address: customer.address,
+            localiteId, montant: total, orderHash: hash,
+          })
+        } else {
+          url = await placeGuestOrderWithPayment(
+            { name: customer.name, phone: customer.phone, email: customer.email, address: customer.address, localiteId, lines },
+            hash,
+          )
+        }
+        rememberFromOrder(customer)
+        window.location.href = url // panier conservé jusqu'au retour de paiement
+        return
+      }
+
+      // Paiement à la livraison.
+      let serverRef = ''
+      let serverId: number | undefined
+      if (loggedApi) {
+        await syncServerCart(lines, user!.id!, apiToken!)
+        await placeCustomerOrder({
+          customerId: user!.id!, token: apiToken!, address: customer.address,
+          localiteId, montant: total, orderHash: await makeOrderHash(),
+        })
+      } else {
+        const placed = await placeGuestOrder({
+          name: customer.name, phone: customer.phone, email: customer.email,
+          address: customer.address, localiteId, lines,
+        })
+        serverRef = placed.serverRef
+        serverId = placed.serverId
+      }
+      const order = createOrder({
+        customer, lines, subtotal, deliveryFee: fee,
+        serverRef: serverRef || undefined, serverId, paymentMethod: 'cod',
+      })
+      rememberFromOrder(customer)
+      clear()
+      navigate(`/confirmation/${order.token}`, { replace: true })
+    } catch (e) {
+      setSubmitError(e instanceof OrderApiError ? e.message : t('checkout.orderError'))
+      setSubmitting(false)
+    }
   }
 
   return (
     <>
-      <AppBar title="Commander" back />
+      <AppBar title={t('checkout.title')} back />
       <Page noTabbar>
         <div className="mx-auto max-w-2xl px-4 md:px-6 pt-3 md:pt-6 flex flex-col gap-5">
           {/* Coordonnées */}
           <section className="bg-surface border border-sable rounded-card p-4 flex flex-col gap-3.5">
-            <h2 className="font-title font-extrabold text-lg">Vos coordonnées</h2>
-            <Field label="Nom complet" error={touched ? errors.name : ''}>
-              <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Awa Ndiaye" autoComplete="name" />
+            <h2 className="font-title font-extrabold text-lg">{t('checkout.sectionContact')}</h2>
+            <Field label={t('checkout.fieldName')} error={touched ? errors.name : ''}>
+              <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder={t('checkout.fieldNamePlaceholder')} autoComplete="name" />
             </Field>
-            <Field label="Téléphone" error={touched ? errors.phone : ''}>
-              <input className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="77 123 45 67" inputMode="tel" autoComplete="tel" />
+            <Field label={t('common.phone')} error={touched ? errors.phone : ''}>
+              <input className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={t('common.phonePlaceholder')} inputMode="tel" autoComplete="tel" />
             </Field>
-            <Field label="E-mail (facultatif)" error={touched ? errors.email : ''}>
-              <input className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="awa@exemple.sn" inputMode="email" autoComplete="email" />
+            <Field label={t('auth.emailOptionalLabel')} error={touched ? errors.email : ''}>
+              <input className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('auth.emailPlaceholder')} inputMode="email" autoComplete="email" />
             </Field>
           </section>
 
           {/* Livraison */}
           <section className="bg-surface border border-sable rounded-card p-4 flex flex-col gap-3.5">
-            <h2 className="font-title font-extrabold text-lg">Livraison</h2>
+            <h2 className="font-title font-extrabold text-lg">{t('checkout.sectionDelivery')}</h2>
 
             {/* Adresses enregistrées (si profil connu) */}
             {savedAddresses.length > 0 && (
               <div className="flex flex-col gap-2">
-                <span className="text-[13px] font-bold text-taupe">Mes adresses</span>
+                <span className="text-[13px] font-bold text-taupe">{t('checkout.myAddresses')}</span>
                 <div className="flex flex-wrap gap-2">
                   {savedAddresses.map((a) => (
                     <button
@@ -161,54 +319,125 @@ export function CheckoutPage() {
                     onClick={useNewAddress}
                     className={`rounded-xl border-[1.5px] border-dashed px-3 py-2 text-[13px] font-bold transition-colors ${pickedAddrId === undefined ? 'border-terre text-terre' : 'border-sable text-taupe'}`}
                   >
-                    + Nouvelle adresse
+                    {t('checkout.newAddress')}
                   </button>
                 </div>
               </div>
             )}
 
-            <Field label="Zone (commune)" error={touched ? errors.zone : ''}>
-              <select className={inputCls} value={zoneId} onChange={(e) => { setZoneId(e.target.value); if (savedAddresses.length) setPickedAddrId(undefined) }}>
-                <option value="">— Choisir une commune —</option>
-                {DELIVERY_ZONES.map((z) => (
-                  <option key={z.id} value={z.id}>{z.commune} · {fmtFcfa(z.fee)}</option>
-                ))}
-              </select>
-            </Field>
-            {zone && (
+            {ordersApiEnabled ? (
+              <div className="relative">
+                <Field label={t('checkout.fieldLocalite')} error={touched ? errors.zone : ''}>
+                  <input
+                    className={inputCls}
+                    value={locQuery}
+                    onChange={(e) => { setLocQuery(e.target.value); setLocalite(null); setLocOpen(true) }}
+                    onFocus={() => setLocOpen(true)}
+                    onBlur={() => setTimeout(() => setLocOpen(false), 150)}
+                    placeholder={t('checkout.localitePlaceholder')}
+                    autoComplete="off"
+                  />
+                </Field>
+                {suggestions.length > 0 && !localite && (
+                  <ul className="absolute z-20 left-0 right-0 mt-1 bg-surface border border-sable rounded-xl shadow-lg overflow-hidden">
+                    {suggestions.map((l) => (
+                      <li key={l.id}>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => pickLocalite(l)}
+                          className="w-full text-left px-3.5 py-2.5 text-[14px] active:bg-creme-dark hover:bg-creme-dark transition-colors"
+                        >
+                          {l.wording}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : (
+              <Field label={t('checkout.fieldZone')} error={touched ? errors.zone : ''}>
+                <select className={inputCls} value={zoneId} onChange={(e) => { setZoneId(e.target.value); if (savedAddresses.length) setPickedAddrId(undefined) }}>
+                  <option value="">{t('checkout.chooseCommune')}</option>
+                  {DELIVERY_ZONES.map((z) => (
+                    <option key={z.id} value={z.id}>{z.commune} · {fmtFcfa(z.fee)}</option>
+                  ))}
+                </select>
+              </Field>
+            )}
+            {feeKnown && (
               <p className="-mt-1 text-[12px] text-taupe">
                 {freeShipping
-                  ? '🎉 Livraison offerte pour cette commande.'
-                  : `Livraison offerte dès ${fmtFcfa(zone.franco)} d'achat sur cette zone.`}
+                  ? t('checkout.freeShippingApplied')
+                  : francoAmount != null
+                    ? t('checkout.freeShippingThreshold', { amount: fmtFcfa(francoAmount) })
+                    : t('checkout.deliveryFeeAmount', { amount: fmtFcfa(fee) })}
               </p>
             )}
-            <Field label="Adresse précise" error={touched ? errors.address : ''}>
-              <input className={inputCls} value={address} onChange={(e) => { setAddress(e.target.value); if (savedAddresses.length) setPickedAddrId(undefined) }} placeholder="Rue, immeuble, point de repère" autoComplete="street-address" />
+            <Field label={t('checkout.fieldAddress')} error={touched ? errors.address : ''}>
+              <input className={inputCls} value={address} onChange={(e) => { setAddress(e.target.value); if (savedAddresses.length) setPickedAddrId(undefined) }} placeholder={t('checkout.addressPlaceholder')} autoComplete="street-address" />
             </Field>
-            <Field label="Note pour le livreur (facultatif)">
-              <textarea className={`${inputCls} min-h-[64px] resize-none`} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Étage, code, horaire…" />
+            <Field label={t('checkout.fieldNote')}>
+              <textarea className={`${inputCls} min-h-[64px] resize-none`} value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('checkout.notePlaceholder')} />
             </Field>
           </section>
 
+          {/* Paiement (choix réel seulement quand les commandes passent par l'API) */}
+          {ordersApiEnabled && (
+            <section className="bg-surface border border-sable rounded-card p-4 flex flex-col gap-2.5">
+              <h2 className="font-title font-extrabold text-lg">{t('checkout.sectionPayment')}</h2>
+              {([
+                { key: 'cod' as PayMethod, icon: 'payments', label: t('checkout.payCod'), hint: t('checkout.payCodHint') },
+                { key: 'online' as PayMethod, icon: 'credit_card', label: t('checkout.payOnline'), hint: t('checkout.payOnlineHint') },
+              ]).map((m) => (
+                <button
+                  key={m.key}
+                  type="button"
+                  onClick={() => { haptic('light'); setPayMethod(m.key) }}
+                  className={`flex items-center gap-3 rounded-xl border-[1.5px] px-3.5 py-3 text-left transition-colors ${payMethod === m.key ? 'border-terre bg-terre/10' : 'border-sable'}`}
+                >
+                  <Icon name={m.icon} size={22} className={payMethod === m.key ? 'text-terre' : 'text-taupe'} />
+                  <span className="flex-1">
+                    <span className="block font-bold text-[15px]">{m.label}</span>
+                    <span className="block text-[12px] text-taupe">{m.hint}</span>
+                  </span>
+                  <span className={`w-5 h-5 rounded-full border-[2px] grid place-items-center ${payMethod === m.key ? 'border-terre' : 'border-sable'}`}>
+                    {payMethod === m.key && <span className="w-2.5 h-2.5 rounded-full bg-terre" />}
+                  </span>
+                </button>
+              ))}
+            </section>
+          )}
+
           {/* Récapitulatif */}
           <section className="bg-creme-dark rounded-card p-4">
-            <div className="flex justify-between text-[14px]"><span className="text-taupe">Sous-total</span><span className="tabular-nums font-semibold">{fmtFcfa(subtotal)}</span></div>
+            <div className="flex justify-between text-[14px]"><span className="text-taupe">{t('common.subtotal')}</span><span className="tabular-nums font-semibold">{fmtFcfa(subtotal)}</span></div>
             <div className="flex justify-between text-[14px] mt-1.5">
-              <span className="text-taupe">Livraison{zone ? ` · ${zone.commune}` : ''}</span>
-              <span className="tabular-nums font-semibold">{zone ? (freeShipping ? 'Offerte' : fmtFcfa(fee)) : '—'}</span>
+              <span className="text-taupe">{t('common.delivery')}{ordersApiEnabled ? (localite ? ` · ${localite.wording.split(',')[0].trim()}` : '') : (zone ? ` · ${zone.commune}` : '')}</span>
+              <span className="tabular-nums font-semibold">{feeKnown ? (freeShipping ? t('common.free') : fmtFcfa(fee)) : '—'}</span>
             </div>
             <div className="filet w-full my-3" />
             <div className="flex justify-between items-center">
-              <span className="font-title font-extrabold">Total</span>
+              <span className="font-title font-extrabold">{t('common.total')}</span>
               <span className="font-title font-extrabold text-xl tabular-nums">{fmtFcfa(total)}</span>
             </div>
           </section>
 
-          <Button full disabled={touched && !valid} onClick={placeOrder}>
-            Valider ma commande · {fmtFcfa(total)}
+          {submitError && (
+            <p className="text-[13px] font-semibold text-alerte text-center -mt-2">{submitError}</p>
+          )}
+
+          <Button full disabled={(touched && !valid) || submitting} onClick={placeOrder}>
+            {submitting
+              ? t('checkout.submitting')
+              : payMethod === 'online' && ordersApiEnabled
+                ? t('checkout.payOnlineCta', { total: fmtFcfa(total) })
+                : t('checkout.confirmCta', { total: fmtFcfa(total) })}
           </Button>
           <p className="text-[12px] text-taupe -mt-2 mb-1 text-center">
-            Paiement à la livraison. Le poids exact est confirmé avant préparation.
+            {ordersApiEnabled && payMethod === 'online'
+              ? t('checkout.noteOnline')
+              : t('checkout.noteCod')}
           </p>
         </div>
       </Page>

@@ -11,6 +11,11 @@ interface ImportMetaEnv {
    * locales (défaut). Bascule progressive — cf. src/contexts/CatalogContext.
    */
   readonly VITE_USE_API_CATALOG?: string
+  /**
+   * Commandes réelles via l'API ('true') : localités + frais serveur,
+   * guest-order / add-order-*, PayTech. Défaut : commandes locales de démo.
+   */
+  readonly VITE_USE_API_ORDERS?: string
 }
 
 interface ImportMeta {

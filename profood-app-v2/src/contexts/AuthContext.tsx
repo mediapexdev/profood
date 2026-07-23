@@ -29,8 +29,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       isAuthenticated: !!user,
       mode: authMode,
-      login: async (phone, password) => setUser(await doLogin(phone, password)),
-      register: async (input) => setUser(await registerLocal(input)),
+      login: async (phone, password) => {
+        setUser(await doLogin(phone, password))
+        // Le panier écoute cet évènement pour fusionner le panier serveur.
+        window.dispatchEvent(new CustomEvent('auth:login'))
+      },
+      register: async (input) => {
+        setUser(await registerLocal(input))
+        window.dispatchEvent(new CustomEvent('auth:login'))
+      },
       logout: async () => { await doLogout(); setUser(null) },
     }),
     [user],
