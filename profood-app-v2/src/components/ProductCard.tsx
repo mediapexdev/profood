@@ -7,6 +7,7 @@ import { Icon } from './ui/Icon'
 import { useCart } from '../contexts/CartContext'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { haptic } from '../lib/haptics'
+import { useI18n } from '../i18n'
 
 /**
  * Carte produit — reprend le patron du site vitrine : image carrée, pastille
@@ -14,6 +15,7 @@ import { haptic } from '../lib/haptics'
  * (desktop). Sur mobile, le schéma vit sur la fiche produit.
  */
 export function ProductCard({ slice }: { slice: Slice }) {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const { qtyOf, add, setQty } = useCart()
   const { has, toggle } = useFavorites()
@@ -36,7 +38,7 @@ export function ProductCard({ slice }: { slice: Slice }) {
         <span
           role="button"
           tabIndex={0}
-          aria-label={fav ? `Retirer ${slice.name} des favoris` : `Ajouter ${slice.name} aux favoris`}
+          aria-label={fav ? t('productCard.removeFavorite', { name: slice.name }) : t('productCard.addFavorite', { name: slice.name })}
           aria-pressed={fav}
           onClick={(e) => { e.stopPropagation(); haptic('light'); toggle(slice.id) }}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); haptic('light'); toggle(slice.id) } }}
@@ -60,13 +62,13 @@ export function ProductCard({ slice }: { slice: Slice }) {
               onClick={() => { haptic('medium'); add(slice) }}
               className="rounded-full bg-encre dark:bg-terre px-4 py-2 font-title text-xs font-bold text-white transition hover:bg-terre dark:hover:bg-terre-dark active:scale-95"
             >
-              Ajouter
+              {t('productCard.add')}
             </button>
           ) : (
             <div className="flex items-center gap-1 rounded-full bg-terre text-white">
-              <button aria-label={`Retirer ${slice.name}`} onClick={() => { haptic('light'); setQty(slice.id, qty - 1) }} className="h-8 w-8 rounded-full font-title text-base font-bold active:scale-90">−</button>
+              <button aria-label={t('productCard.removeQty', { name: slice.name })} onClick={() => { haptic('light'); setQty(slice.id, qty - 1) }} className="h-8 w-8 rounded-full font-title text-base font-bold active:scale-90">−</button>
               <span className="min-w-4 text-center font-title text-sm font-bold tabular-nums">{qty}</span>
-              <button aria-label={`Ajouter ${slice.name}`} onClick={() => { haptic('light'); setQty(slice.id, qty + 1) }} className="h-8 w-8 rounded-full font-title text-base font-bold active:scale-90">+</button>
+              <button aria-label={t('productCard.addQty', { name: slice.name })} onClick={() => { haptic('light'); setQty(slice.id, qty + 1) }} className="h-8 w-8 rounded-full font-title text-base font-bold active:scale-90">+</button>
             </div>
           )}
         </div>

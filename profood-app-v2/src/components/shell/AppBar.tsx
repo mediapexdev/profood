@@ -3,13 +3,7 @@ import { Icon } from '../ui/Icon'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useCart } from '../../contexts/CartContext'
 import { haptic } from '../../lib/haptics'
-
-const LINKS = [
-  { to: '/', label: 'Boutique', end: true },
-  { to: '/composer', label: 'Composer' },
-  { to: '/panier', label: 'Panier' },
-  { to: '/compte', label: 'Compte' },
-]
+import { useI18n } from '../../i18n'
 
 /**
  * Barre supérieure fixe, responsive :
@@ -17,9 +11,17 @@ const LINKS = [
  *  - desktop (≥768px) : marque + liens de navigation + actions (vraie appli web).
  */
 export function AppBar({ title, back = false }: { title: string; back?: boolean }) {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const { isDark, toggle } = useTheme()
   const { count } = useCart()
+
+  const LINKS = [
+    { to: '/', label: t('nav.shop'), end: true },
+    { to: '/composer', label: t('nav.composer') },
+    { to: '/panier', label: t('nav.cart') },
+    { to: '/compte', label: t('nav.account') },
+  ]
 
   return (
     <header
@@ -30,7 +32,7 @@ export function AppBar({ title, back = false }: { title: string; back?: boolean 
         {/* Mobile : retour ou titre */}
         <div className="flex items-center gap-2 md:hidden flex-1 min-w-0">
           {back && (
-            <button onClick={() => { haptic('light'); navigate(-1) }} className="w-10 h-10 -ml-1 grid place-items-center rounded-full active:bg-creme-dark text-ink" aria-label="Retour">
+            <button onClick={() => { haptic('light'); navigate(-1) }} className="w-10 h-10 -ml-1 grid place-items-center rounded-full active:bg-creme-dark text-ink" aria-label={t('common.back')}>
               <Icon name="arrow_back_ios_new" size={22} />
             </button>
           )}
@@ -57,10 +59,10 @@ export function AppBar({ title, back = false }: { title: string; back?: boolean 
         </nav>
 
         {/* Actions communes */}
-        <button onClick={toggle} aria-label="Changer de thème" className="w-10 h-10 grid place-items-center rounded-full active:bg-creme-dark text-ink">
+        <button onClick={toggle} aria-label={t('appbar.toggleTheme')} className="w-10 h-10 grid place-items-center rounded-full active:bg-creme-dark text-ink">
           <Icon name={isDark ? 'light_mode' : 'dark_mode'} size={22} />
         </button>
-        <button onClick={() => navigate('/panier')} aria-label="Panier" className="hidden md:grid w-10 h-10 place-items-center rounded-full active:bg-creme-dark text-ink relative">
+        <button onClick={() => navigate('/panier')} aria-label={t('nav.cart')} className="hidden md:grid w-10 h-10 place-items-center rounded-full active:bg-creme-dark text-ink relative">
           <Icon name="shopping_bag" size={22} />
           {count > 0 && (
             <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] px-1 rounded-full bg-terre text-white text-[10px] font-bold grid place-items-center">

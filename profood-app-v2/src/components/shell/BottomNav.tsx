@@ -2,22 +2,24 @@ import { NavLink } from 'react-router-dom'
 import { Icon } from '../ui/Icon'
 import { useCart } from '../../contexts/CartContext'
 import { haptic } from '../../lib/haptics'
+import { useI18n } from '../../i18n'
 
 interface Tab { to: string; label: string; icon: string; end?: boolean }
-
-const TABS: Tab[] = [
-  { to: '/', label: 'Boutique', icon: 'storefront', end: true },
-  { to: '/composer', label: 'Composer', icon: 'takeout_dining' },
-  { to: '/panier', label: 'Panier', icon: 'shopping_bag' },
-  { to: '/compte', label: 'Compte', icon: 'person' },
-]
 
 /**
  * Barre d'onglets — mobile uniquement (masquée en ≥768px où la nav passe en
  * haut, cf. AppBar). Le signal le plus net « app native ».
  */
 export function BottomNav() {
+  const { t } = useI18n()
   const { count } = useCart()
+
+  const TABS: Tab[] = [
+    { to: '/', label: t('nav.shop'), icon: 'storefront', end: true },
+    { to: '/composer', label: t('nav.composer'), icon: 'takeout_dining' },
+    { to: '/panier', label: t('nav.cart'), icon: 'shopping_bag' },
+    { to: '/compte', label: t('nav.account'), icon: 'person' },
+  ]
 
   return (
     <nav

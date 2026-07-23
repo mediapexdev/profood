@@ -6,21 +6,23 @@ import { Icon } from '../components/ui/Icon'
 import { useCart } from '../contexts/CartContext'
 import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
+import { useI18n } from '../i18n'
 
 export function PanierPage() {
+  const { t } = useI18n()
   const { lines, total, count, setLineQty, clear } = useCart()
   const navigate = useNavigate()
 
   if (!lines.length) {
     return (
       <>
-        <AppBar title="Mon panier" />
+        <AppBar title={t('cart.title')} />
         <Page>
           <div className="flex flex-col items-center justify-center text-center gap-3 px-8 pt-24 text-taupe">
             <span className="opacity-40"><Icon name="shopping_bag" size={54} /></span>
-            <p className="font-title font-extrabold text-lg text-ink">Votre panier est vide</p>
-            <p className="text-[14px]">Parcourez la boutique et ajoutez vos découpes préférées.</p>
-            <Button className="mt-2" onClick={() => navigate('/')}>Voir la boutique</Button>
+            <p className="font-title font-extrabold text-lg text-ink">{t('cart.emptyTitle')}</p>
+            <p className="text-[14px]">{t('cart.emptyHint')}</p>
+            <Button className="mt-2" onClick={() => navigate('/')}>{t('common.viewShop')}</Button>
           </div>
         </Page>
       </>
@@ -29,13 +31,13 @@ export function PanierPage() {
 
   return (
     <>
-      <AppBar title="Mon panier" />
+      <AppBar title={t('cart.title')} />
       <Page>
         <div className="mx-auto max-w-2xl px-4 md:px-6 pt-3 flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] text-taupe">{count} article{count > 1 ? 's' : ''}</span>
+            <span className="text-[13px] text-taupe">{t('cart.items', { count })}</span>
             <button onClick={() => { haptic('light'); clear() }} className="text-[13px] font-bold text-taupe active:text-alerte inline-flex items-center gap-1">
-              <Icon name="delete" size={16} /> Vider
+              <Icon name="delete" size={16} /> {t('cart.clear')}
             </button>
           </div>
 
@@ -44,24 +46,24 @@ export function PanierPage() {
               <img src={l.image} alt={l.name} className="w-16 h-16 shrink-0 rounded-lg object-cover bg-creme" />
               <div className="flex-1 min-w-0">
                 <p className="font-title font-bold text-[15px] truncate">{l.name}</p>
-                {l.kind === 'box' && <p className="text-[11px] font-bold text-terre-deep">Box composée · {l.cutIds?.length ?? 0} découpes</p>}
+                {l.kind === 'box' && <p className="text-[11px] font-bold text-terre-deep">{t('box.composed', { count: l.cutIds?.length ?? 0 })}</p>}
                 <p className="text-[12px] text-taupe tabular-nums">{fmtFcfa(l.unitPrice)}</p>
               </div>
               <div className="inline-flex items-center border-[1.5px] border-sable rounded-full overflow-hidden">
-                <button className="w-9 h-9 grid place-items-center active:bg-creme-dark" aria-label="Retirer" onClick={() => { haptic('light'); setLineQty(l.id, l.qty - 1) }}><Icon name="remove" size={18} /></button>
+                <button className="w-9 h-9 grid place-items-center active:bg-creme-dark" aria-label={t('cart.decrease')} onClick={() => { haptic('light'); setLineQty(l.id, l.qty - 1) }}><Icon name="remove" size={18} /></button>
                 <span className="min-w-9 text-center font-bold tabular-nums">{l.qty}</span>
-                <button className="w-9 h-9 grid place-items-center active:bg-creme-dark" aria-label="Ajouter" onClick={() => { haptic('light'); setLineQty(l.id, l.qty + 1) }}><Icon name="add" size={18} /></button>
+                <button className="w-9 h-9 grid place-items-center active:bg-creme-dark" aria-label={t('cart.increase')} onClick={() => { haptic('light'); setLineQty(l.id, l.qty + 1) }}><Icon name="add" size={18} /></button>
               </div>
             </div>
           ))}
 
           <div className="pt-3">
             <div className="flex justify-between items-center">
-              <span className="text-taupe">Sous-total</span>
+              <span className="text-taupe">{t('common.subtotal')}</span>
               <span className="font-title font-extrabold text-xl tabular-nums">{fmtFcfa(total)}</span>
             </div>
-            <p className="text-[12px] text-taupe mt-1">Frais de livraison calculés à l'étape suivante, selon votre zone.</p>
-            <Button full className="mt-4" onClick={() => navigate('/checkout')}>Commander</Button>
+            <p className="text-[12px] text-taupe mt-1">{t('cart.deliveryHint')}</p>
+            <Button full className="mt-4" onClick={() => navigate('/checkout')}>{t('checkout.title')}</Button>
           </div>
         </div>
       </Page>

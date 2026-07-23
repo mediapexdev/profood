@@ -10,8 +10,10 @@ import { fmtFcfa } from '../lib/format'
 import { useCart } from '../contexts/CartContext'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { haptic } from '../lib/haptics'
+import { useI18n } from '../i18n'
 
 export function ProduitPage() {
+  const { t } = useI18n()
   const { id } = useParams()
   const { slices } = useCatalog()
   const slice = slices.find((s) => String(s.id) === id)
@@ -21,8 +23,8 @@ export function ProduitPage() {
   if (!slice) {
     return (
       <>
-        <AppBar title="Produit" back />
-        <Page noTabbar><p className="p-6 text-taupe">Découpe introuvable.</p></Page>
+        <AppBar title={t('product.notFoundTitle')} back />
+        <Page noTabbar><p className="p-6 text-taupe">{t('product.notFound')}</p></Page>
       </>
     )
   }
@@ -42,7 +44,7 @@ export function ProduitPage() {
               <h2 className="text-2xl md:text-3xl">{slice.name}</h2>
               <button
                 onClick={() => { haptic('light'); toggle(slice.id) }}
-                aria-label={has(slice.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                aria-label={has(slice.id) ? t('product.removeFavorite') : t('product.addFavorite')}
                 aria-pressed={has(slice.id)}
                 className={`shrink-0 grid h-10 w-10 place-items-center rounded-full border-[1.5px] border-sable active:scale-90 transition ${has(slice.id) ? 'text-terre' : 'text-taupe'}`}
               >
@@ -52,16 +54,15 @@ export function ProduitPage() {
             <p className="font-title text-2xl font-extrabold text-terre tabular-nums mt-3">{fmtFcfa(slice.price)}</p>
 
             <div className="mt-5 bg-creme-dark rounded-card p-4">
-              <p className="text-[11px] font-bold tracking-[.16em] uppercase text-taupe mb-2">Sur l'animal</p>
+              <p className="text-[11px] font-bold tracking-[.16em] uppercase text-taupe mb-2">{t('product.onAnimal')}</p>
               <CutDiagram sliceName={slice.name} size="lg" />
             </div>
 
             <p className="text-[14px] text-taupe leading-relaxed mt-5">
-              Découpe de {categoryLabel(slice.category).toLowerCase()} sélectionnée le jour même, préparée par nos
-              bouchers et livrée en chaîne du froid maîtrisée. Le poids exact est confirmé avant préparation.
+              {t('product.description', { category: categoryLabel(slice.category).toLowerCase() })}
             </p>
 
-            <Button full className="mt-6" onClick={() => { haptic('medium'); add(slice) }}>Ajouter au panier</Button>
+            <Button full className="mt-6" onClick={() => { haptic('medium'); add(slice) }}>{t('product.addToCart')}</Button>
           </div>
         </div>
       </Page>

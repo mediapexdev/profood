@@ -7,6 +7,8 @@ import { listOrders } from '../lib/orders'
 import { getProfile } from '../lib/profile'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { useAuth } from '../contexts/AuthContext'
+import { useI18n } from '../i18n'
+import type { Lang } from '../i18n'
 import { haptic } from '../lib/haptics'
 
 export function ComptePage() {
@@ -15,26 +17,33 @@ export function ComptePage() {
   const lastOrder = orders[0]
   const { count: favCount } = useFavorites()
   const { user, isAuthenticated, logout } = useAuth()
+  const { t, lang, setLang } = useI18n()
   const profile = getProfile()
-  const displayName = user?.name || profile.name || 'Invité'
-  const displaySub = user?.phone || profile.phone || 'Connectez-vous pour retrouver vos commandes'
+  const displayName = user?.name || profile.name || t('account.guest')
+  const displaySub = user?.phone || profile.phone || t('account.guestHint')
 
   const rows: { icon: string; label: string; hint?: string; onClick?: () => void; disabled?: boolean }[] = [
-    { icon: 'receipt_long', label: 'Mes commandes', hint: orders.length ? String(orders.length) : undefined, onClick: () => navigate('/commandes') },
+    { icon: 'receipt_long', label: t('account.orders'), hint: orders.length ? String(orders.length) : undefined, onClick: () => navigate('/commandes') },
     {
       icon: 'local_shipping',
-      label: 'Suivre ma dernière commande',
+      label: t('account.trackLast'),
       onClick: lastOrder ? () => navigate(`/suivi/${lastOrder.token}`) : undefined,
       disabled: !lastOrder,
     },
-    { icon: 'favorite', label: 'Mes découpes favorites', hint: favCount ? String(favCount) : undefined, onClick: () => navigate('/favoris') },
-    { icon: 'location_on', label: 'Mes adresses', hint: profile.addresses.length ? String(profile.addresses.length) : undefined, onClick: () => navigate('/adresses') },
-    { icon: 'help', label: 'Aide & contact', disabled: true },
+    { icon: 'favorite', label: t('account.favorites'), hint: favCount ? String(favCount) : undefined, onClick: () => navigate('/favoris') },
+    { icon: 'location_on', label: t('account.addresses'), hint: profile.addresses.length ? String(profile.addresses.length) : undefined, onClick: () => navigate('/adresses') },
+    { icon: 'help', label: t('account.help'), disabled: true },
   ]
+
+  const pickLang = (l: Lang) => {
+    if (l === lang) return
+    haptic('light')
+    setLang(l)
+  }
 
   return (
     <>
-      <AppBar title="Mon compte" />
+      <AppBar title={t('account.title')} />
       <Page>
         <div className="mx-auto max-w-2xl px-4 md:px-6 pt-4">
           <div className="flex items-center gap-3 bg-surface border border-sable rounded-card p-4">
@@ -47,15 +56,15 @@ export function ComptePage() {
             </div>
             {isAuthenticated && (
               <span className="shrink-0 inline-flex items-center gap-1 text-[11px] font-bold text-halal bg-halal/12 rounded-full px-2.5 py-1">
-                <Icon name="verified" size={14} fill /> Connecté
+                <Icon name="verified" size={14} fill /> {t('account.connected')}
               </span>
             )}
           </div>
 
           {!isAuthenticated && (
             <div className="mt-3 flex gap-2">
-              <Button className="flex-1" onClick={() => navigate('/connexion')}>Se connecter</Button>
-              <Button variant="ghost" className="flex-1" onClick={() => navigate('/inscription')}>Créer un compte</Button>
+              <Button className="flex-1" onClick={() => navigate('/connexion')}>{t('account.signIn')}</Button>
+              <Button variant="ghost" className="flex-1" onClick={() => navigate('/inscription')}>{t('account.signUp')}</Button>
             </div>
           )}
 
@@ -73,6 +82,23 @@ export function ComptePage() {
                 {!r.disabled && <Icon name="chevron_right" size={20} className="text-taupe" />}
               </button>
             ))}
+            {/* Langue — FR par défaut, EN conservé (décision projet) */}
+            <div className="w-full flex items-center gap-3 px-4 py-3.5 border-t border-sable">
+              <Icon name="language" size={22} className="text-taupe" />
+              <span className="flex-1 font-semibold text-[15px]">{t('account.language')}</span>
+              <div className="inline-flex rounded-full border-[1.5px] border-sable overflow-hidden">
+                {(['fr', 'en'] as Lang[]).map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => pickLang(l)}
+                    aria-pressed={lang === l}
+                    className={`px-3 py-1 text-[12px] font-bold uppercase transition-colors ${lang === l ? 'bg-terre text-white' : 'text-taupe'}`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {isAuthenticated && (
@@ -80,7 +106,7 @@ export function ComptePage() {
               onClick={() => { haptic('medium'); logout() }}
               className="w-full mt-4 flex items-center justify-center gap-2 rounded-card border border-sable py-3 font-title font-bold text-taupe active:bg-creme-dark active:text-alerte transition-colors"
             >
-              <Icon name="logout" size={20} /> Se déconnecter
+              <Icon name="logout" size={20} /> {t('account.signOut')}
             </button>
           )}
         </div>

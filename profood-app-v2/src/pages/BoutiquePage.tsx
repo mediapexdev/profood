@@ -6,19 +6,20 @@ import { Icon } from '../components/ui/Icon'
 import { categoryLabel } from '../lib/catalog'
 import type { Slice } from '../lib/catalog'
 import { useCatalog } from '../contexts/CatalogContext'
+import { useI18n } from '../i18n'
 
 type Sort = 'pertinence' | 'prix-asc' | 'prix-desc'
-
-const SORTS: { key: Sort; label: string }[] = [
-  { key: 'pertinence', label: 'Pertinence' },
-  { key: 'prix-asc', label: 'Prix ↑' },
-  { key: 'prix-desc', label: 'Prix ↓' },
-]
 
 /** Normalise pour une recherche tolérante aux accents/casse. */
 const norm = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 
 export function BoutiquePage() {
+  const { t } = useI18n()
+  const SORTS: { key: Sort; label: string }[] = [
+    { key: 'pertinence', label: t('shop.sortRelevance') },
+    { key: 'prix-asc', label: t('shop.sortPriceAsc') },
+    { key: 'prix-desc', label: t('shop.sortPriceDesc') },
+  ]
   const { slices: SLICES, categories: CATEGORIES, slicesByCategory } = useCatalog()
   const [catId, setCatId] = useState<number>(CATEGORIES[0]?.id ?? 1)
   const [query, setQuery] = useState('')
@@ -42,11 +43,11 @@ export function BoutiquePage() {
       <Page>
         <div className="mx-auto max-w-6xl">
           <section className="px-4 md:px-6 pt-3 md:pt-8 pb-1">
-            <p className="text-[11px] font-bold tracking-[.18em] uppercase text-taupe">Boucherie halal · Dakar</p>
+            <p className="text-[11px] font-bold tracking-[.18em] uppercase text-taupe">{t('shop.kicker')}</p>
             <h2 className="text-[26px] md:text-4xl leading-tight mt-1 max-w-2xl">
-              Chaque morceau à sa <span className="text-terre">juste place</span>.
+              {t('shop.headingLead')} <span className="text-terre">{t('shop.headingHighlight')}</span>.
             </h2>
-            <p className="text-taupe text-[14px] md:text-base mt-1.5 max-w-xl">Choisissez vos découpes, nous préparons et livrons à Dakar.</p>
+            <p className="text-taupe text-[14px] md:text-base mt-1.5 max-w-xl">{t('shop.subtitle')}</p>
             <span className="filet w-24 mt-4" />
           </section>
 
@@ -57,13 +58,13 @@ export function BoutiquePage() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Rechercher une découpe…"
+                placeholder={t('shop.searchPlaceholder')}
                 className="w-full rounded-full border-[1.5px] border-sable bg-surface pl-10 pr-10 py-2.5 text-[15px] text-ink outline-none focus:border-terre transition-colors"
                 type="search"
-                aria-label="Rechercher une découpe"
+                aria-label={t('shop.searchAriaLabel')}
               />
               {searching && (
-                <button onClick={() => setQuery('')} aria-label="Effacer" className="absolute right-2.5 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-full text-taupe active:bg-creme-dark">
+                <button onClick={() => setQuery('')} aria-label={t('shop.clearSearch')} className="absolute right-2.5 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-full text-taupe active:bg-creme-dark">
                   <Icon name="close" size={18} />
                 </button>
               )}
@@ -89,8 +90,8 @@ export function BoutiquePage() {
           <div className="flex items-center justify-between gap-3 px-4 md:px-6 pt-3">
             <span className="text-[13px] text-taupe">
               {searching
-                ? `${slices.length} résultat${slices.length > 1 ? 's' : ''} pour « ${query.trim()} »`
-                : `${slices.length} découpe${slices.length > 1 ? 's' : ''}`}
+                ? t('shop.resultsFor', { count: slices.length, query: query.trim() })
+                : t('shop.cutsCount', { count: slices.length })}
             </span>
             <div className="flex gap-1.5 shrink-0">
               {SORTS.map((s) => (
@@ -108,8 +109,8 @@ export function BoutiquePage() {
           {slices.length === 0 ? (
             <div className="flex flex-col items-center text-center gap-2 px-8 pt-16 text-taupe">
               <span className="opacity-40"><Icon name="search_off" size={48} /></span>
-              <p className="font-title font-extrabold text-ink">Aucune découpe trouvée</p>
-              <p className="text-[14px]">Essayez un autre terme de recherche.</p>
+              <p className="font-title font-extrabold text-ink">{t('shop.noResultsTitle')}</p>
+              <p className="text-[14px]">{t('shop.noResultsHint')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5 px-4 md:px-6 pt-3 md:pt-4">

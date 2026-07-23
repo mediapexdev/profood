@@ -1,4 +1,5 @@
 import { DIAGRAMS, getCutInfo, zoneLabels } from '../lib/anatomy'
+import { useI18n } from '../i18n'
 
 /**
  * Planche de découpe : illustration gravure de l'animal (asset PROFOOD) avec
@@ -6,6 +7,7 @@ import { DIAGRAMS, getCutInfo, zoneLabels } from '../lib/anatomy'
  * zones et le mapping découpe→zone du site vitrine.
  */
 export function CutDiagram({ sliceName, size = 'sm' }: { sliceName: string; size?: 'sm' | 'lg' }) {
+  const { t } = useI18n()
   const info = getCutInfo(sliceName)
   if (!info) return null
 
@@ -15,7 +17,7 @@ export function CutDiagram({ sliceName, size = 'sm' }: { sliceName: string; size
   return (
     <div className="flex items-center gap-3">
       <div className={`relative shrink-0 overflow-hidden rounded-md bg-surface ${size === 'lg' ? 'h-32' : 'h-16'} aspect-[3/2]`}>
-        <img src={diagram.src} alt={`Croquis : ${zoneLabels(info)}`} className="absolute inset-0 h-full w-full object-contain" />
+        <img src={diagram.src} alt={t('cutDiagram.sketchAlt', { zones: zoneLabels(info) })} className="absolute inset-0 h-full w-full object-contain" />
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
           {whole ? (
             <ellipse cx="52" cy="48" rx="42" ry="38" fill="var(--color-terre)" fillOpacity="0.3" stroke="var(--color-terre)" strokeWidth="0.8" strokeDasharray="3 2" />
@@ -40,8 +42,10 @@ export function CutDiagram({ sliceName, size = 'sm' }: { sliceName: string; size
         <p className="font-title text-xs font-bold leading-tight text-ink">{zoneLabels(info)}</p>
         <p className="text-[11px] text-taupe">
           {whole
-            ? info.animal === 'volaille' ? 'Volaille entière' : "Sélection sur l'ensemble"
-            : `Découpe ${info.animal === 'volaille' ? 'de la volaille' : `du ${info.animal}`}`}
+            ? info.animal === 'volaille' ? t('cutDiagram.wholePoultry') : t('cutDiagram.wholeSelection')
+            : info.animal === 'volaille'
+              ? t('cutDiagram.cutPoultry')
+              : t('cutDiagram.cutOfAnimal', { animal: info.animal === 'boeuf' ? t('cutDiagram.animalBoeuf') : t('cutDiagram.animalMouton') })}
         </p>
       </div>
     </div>
