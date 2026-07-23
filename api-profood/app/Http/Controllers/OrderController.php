@@ -1125,7 +1125,12 @@ class OrderController extends Controller
             );
         }
         catch(\Exception $exception) {
-            return response()->json(['message' => $exception->getMessage()], 500);
+            // L'annulation est déjà effective : un échec de notification ne doit
+            // pas faire échouer la requête (même règle qu'à la création).
+            Log::warning('Notification SMS d\'annulation échouée', [
+                'order_id' => $order->id,
+                'error' => $exception->getMessage(),
+            ]);
         }
         return response()->json(['message' => 'Commande annulée']);
     }
