@@ -40,6 +40,8 @@ export interface Order {
   lines: OrderLine[]
   subtotal: number
   deliveryFee: number
+  /** Remise promo appliquée (indicative — le serveur fait foi). */
+  discount?: number
   total: number
   /** Renseignés quand la commande est passée via l'API (VITE_USE_API_ORDERS). */
   serverId?: number
@@ -88,6 +90,7 @@ export function createOrder(input: {
   lines: OrderLine[]
   subtotal: number
   deliveryFee: number
+  discount?: number
   serverId?: number
   serverRef?: string
   paymentMethod?: 'cod' | 'online'
@@ -103,7 +106,8 @@ export function createOrder(input: {
     lines: input.lines.map((l) => ({ name: l.name, qty: l.qty, unitPrice: l.unitPrice, image: l.image })),
     subtotal: input.subtotal,
     deliveryFee: input.deliveryFee,
-    total: input.subtotal + input.deliveryFee,
+    discount: input.discount,
+    total: Math.max(0, input.subtotal + input.deliveryFee - (input.discount ?? 0)),
     serverId: input.serverId,
     serverRef: input.serverRef,
     paymentMethod: input.paymentMethod,
@@ -183,6 +187,7 @@ export interface PendingPayment {
   lines: OrderLine[]
   subtotal: number
   deliveryFee: number
+  discount?: number
 }
 
 const PENDING_KEY = 'profood.pending-payment.v1'

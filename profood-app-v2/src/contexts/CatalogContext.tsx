@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import type { Slice, Category } from '../lib/catalog'
-import { SLICES as LOCAL_SLICES, CATEGORIES as LOCAL_CATEGORIES } from '../lib/catalog'
+import type { Slice, Category, Box } from '../lib/catalog'
+import { SLICES as LOCAL_SLICES, CATEGORIES as LOCAL_CATEGORIES, BOXES as LOCAL_BOXES } from '../lib/catalog'
 import { fetchApiCatalog } from '../api/catalog'
 
 /**
@@ -18,6 +18,7 @@ const USE_API = import.meta.env.VITE_USE_API_CATALOG === 'true'
 interface CatalogValue {
   slices: Slice[]
   categories: Category[]
+  boxes: Box[]
   slicesByCategory: (categoryId: number) => Slice[]
   source: 'local' | 'api'
   loading: boolean
@@ -36,16 +37,18 @@ export function CatalogProvider({ children }: { children: React.ReactNode }) {
   const usingApi = USE_API && !!data && !isError
   const slices = usingApi ? data!.slices : LOCAL_SLICES
   const categories = usingApi ? data!.categories : LOCAL_CATEGORIES
+  const boxes = usingApi && data!.boxes.length ? data!.boxes : LOCAL_BOXES
 
   const value = useMemo<CatalogValue>(
     () => ({
       slices,
       categories,
+      boxes,
       slicesByCategory: (categoryId) => slices.filter((s) => s.categoryId === categoryId),
       source: usingApi ? 'api' : 'local',
       loading: USE_API && isLoading,
     }),
-    [slices, categories, usingApi, isLoading],
+    [slices, categories, boxes, usingApi, isLoading],
   )
 
   return <CatalogContext value={value}>{children}</CatalogContext>

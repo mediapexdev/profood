@@ -10,6 +10,8 @@ interface AuthValue {
   /** Inscription immédiate (mode local uniquement) — connecte l'utilisateur. */
   register: (input: { firstName: string; lastName: string; email?: string; phone: string; password: string }) => Promise<void>
   logout: () => Promise<void>
+  /** Relit la session persistée (après convert-guest-order, édition profil…). */
+  refresh: () => void
 }
 
 const AuthContext = createContext<AuthValue | null>(null)
@@ -39,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         window.dispatchEvent(new CustomEvent('auth:login'))
       },
       logout: async () => { await doLogout(); setUser(null) },
+      refresh: () => setUser(currentUser()),
     }),
     [user],
   )

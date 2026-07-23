@@ -16,8 +16,10 @@ import type { OrderCustomer } from '../lib/orders'
 import {
   ordersApiEnabled, makeOrderHash, apiPhone, OrderApiError,
   placeGuestOrder, placeGuestOrderWithPayment,
-  syncServerCart, placeCustomerOrder, placeCustomerOrderWithPayment,
+  syncServerCart, placeCustomerOrder, placeCustomerOrderWithPayment, fetchCustomerOrders,
+  validatePromoCode,
 } from '../api/orders'
+import type { PromoResult } from '../api/orders'
 import { currentToken } from '../lib/auth'
 import { getProfile, defaultAddress, rememberFromOrder } from '../lib/profile'
 import type { SavedAddress } from '../lib/profile'
@@ -71,6 +73,12 @@ export function CheckoutPage() {
   const [touched, setTouched] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+
+  // Code promo (mode API) — remise indicative, le serveur re-valide.
+  const [promoInput, setPromoInput] = useState('')
+  const [promo, setPromo] = useState<PromoResult | null>(null)
+  const [promoBusy, setPromoBusy] = useState(false)
+  const [promoError, setPromoError] = useState('')
 
   // ── Localités API (mode commandes réelles) ──────────────────────────────
   const [localites, setLocalites] = useState<Localite[]>([])
@@ -154,7 +162,27 @@ export function CheckoutPage() {
   const feeKnown = ordersApiEnabled ? !!localite && quote !== null : !!zone
   const freeShipping = ordersApiEnabled ? !!quote?.applied : !!zone && fee === 0
   const francoAmount = ordersApiEnabled ? quote?.threshold ?? null : zone?.franco ?? null
-  const total = subtotal + fee
+  const discount = promo?.valid ? Math.min(promo.discountAmount, subtotal + fee) : 0
+  const total = Math.max(0, subtotal + fee - discount)
+
+  const applyPromo = async () => {
+    if (!promoInput.trim() || promoBusy) return
+    setPromoBusy(true)
+    setPromoError('')
+    haptic('light')
+    const res = await validatePromoCode(promoInput, subtotal, fee)
+    if (res.valid) {
+      setPromo(res)
+      setPromoInput('')
+    } else {
+      setPromoError(res.message)
+    }
+    setPromoBusy(false)
+  }
+  const removePromo = () => {
+    setPromo(null)
+    setPromoError('')
+  }
 
   // Session API réelle (token serveur, pas un compte local de démo).
   const apiToken = currentToken()
@@ -226,6 +254,7 @@ export function CheckoutPage() {
           lines: lines.map((l) => ({ name: l.name, qty: l.qty, unitPrice: l.unitPrice, image: l.image })),
           subtotal,
           deliveryFee: fee,
+          discount: discount || undefined,
         })
         let url: string
         if (loggedApi) {
@@ -233,10 +262,12 @@ export function CheckoutPage() {
           url = await placeCustomerOrderWithPayment({
             customerId: user!.id!, token: apiToken!, address: customer.address,
             localiteId, montant: total, orderHash: hash,
+            promotionCode: promo?.valid ? promo.code : undefined,
           })
         } else {
           url = await placeGuestOrderWithPayment(
-            { name: customer.name, phone: customer.phone, email: customer.email, address: customer.address, localiteId, lines },
+            { name: customer.name, phone: customer.phone, email: customer.email, address: customer.address,
+              localiteId, lines, promotionCode: promo?.valid ? promo.code : undefined },
             hash,
           )
         }
@@ -253,17 +284,26 @@ export function CheckoutPage() {
         await placeCustomerOrder({
           customerId: user!.id!, token: apiToken!, address: customer.address,
           localiteId, montant: total, orderHash: await makeOrderHash(),
+          promotionCode: promo?.valid ? promo.code : undefined,
         })
+        // La réponse ne renvoie pas la commande : on récupère la plus récente
+        // pour rattacher réf + id serveur (suivi réel, annulation).
+        const latest = (await fetchCustomerOrders(user!.userId!, apiToken!))[0]
+        if (latest) {
+          serverRef = latest.serverRef
+          serverId = latest.serverId
+        }
       } else {
         const placed = await placeGuestOrder({
           name: customer.name, phone: customer.phone, email: customer.email,
           address: customer.address, localiteId, lines,
+          promotionCode: promo?.valid ? promo.code : undefined,
         })
         serverRef = placed.serverRef
         serverId = placed.serverId
       }
       const order = createOrder({
-        customer, lines, subtotal, deliveryFee: fee,
+        customer, lines, subtotal, deliveryFee: fee, discount: discount || undefined,
         serverRef: serverRef || undefined, serverId, paymentMethod: 'cod',
       })
       rememberFromOrder(customer)
@@ -409,6 +449,42 @@ export function CheckoutPage() {
             </section>
           )}
 
+          {/* Code promo (mode API) */}
+          {ordersApiEnabled && (
+            <section className="bg-surface border border-sable rounded-card p-4 flex flex-col gap-2.5">
+              <h2 className="font-title font-extrabold text-lg">{t('promo.title')}</h2>
+              {promo?.valid ? (
+                <div className="flex items-center gap-3 rounded-xl border-[1.5px] border-halal/40 bg-halal/10 px-3.5 py-2.5">
+                  <Icon name="sell" size={20} className="text-halal" fill />
+                  <div className="flex-1 min-w-0">
+                    <span className="block font-bold text-[14px]">{promo.code}</span>
+                    <span className="block text-[12px] text-taupe">{t('promo.applied', { amount: fmtFcfa(discount) })}</span>
+                  </div>
+                  <button onClick={removePromo} className="text-[13px] font-bold text-taupe active:text-alerte">
+                    {t('promo.remove')}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex gap-2">
+                    <input
+                      className={`${inputCls} uppercase`}
+                      value={promoInput}
+                      onChange={(e) => { setPromoInput(e.target.value); setPromoError('') }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') applyPromo() }}
+                      placeholder={t('promo.placeholder')}
+                      autoComplete="off"
+                    />
+                    <Button disabled={promoBusy || !promoInput.trim()} onClick={applyPromo}>
+                      {promoBusy ? '…' : t('promo.apply')}
+                    </Button>
+                  </div>
+                  {promoError && <p className="text-[13px] font-semibold text-alerte">{promoError}</p>}
+                </>
+              )}
+            </section>
+          )}
+
           {/* Récapitulatif */}
           <section className="bg-creme-dark rounded-card p-4">
             <div className="flex justify-between text-[14px]"><span className="text-taupe">{t('common.subtotal')}</span><span className="tabular-nums font-semibold">{fmtFcfa(subtotal)}</span></div>
@@ -416,6 +492,12 @@ export function CheckoutPage() {
               <span className="text-taupe">{t('common.delivery')}{ordersApiEnabled ? (localite ? ` · ${localite.wording.split(',')[0].trim()}` : '') : (zone ? ` · ${zone.commune}` : '')}</span>
               <span className="tabular-nums font-semibold">{feeKnown ? (freeShipping ? t('common.free') : fmtFcfa(fee)) : '—'}</span>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-[14px] mt-1.5 text-halal">
+                <span>{t('promo.discountLine', { code: promo!.code })}</span>
+                <span className="tabular-nums font-semibold">-{fmtFcfa(discount)}</span>
+              </div>
+            )}
             <div className="filet w-full my-3" />
             <div className="flex justify-between items-center">
               <span className="font-title font-extrabold">{t('common.total')}</span>

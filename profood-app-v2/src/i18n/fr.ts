@@ -267,6 +267,60 @@ export const fr = {
 
   // Coquille (AppBar)
   'appbar.toggleTheme': 'Changer de thème',
+
+  // Annulation de commande (Suivi)
+  'suivi.cancelCta': 'Annuler la commande',
+  'suivi.cancelConfirm': "Confirmer l'annulation",
+  'suivi.cancelKeep': 'Finalement non, je la garde',
+
+  // Conversion commande invitée → compte (Confirmation)
+  'convert.title': 'Gardez un œil sur vos commandes',
+  'convert.hint': 'Créez un compte avec le numéro de cette commande — il ne manque qu’un mot de passe.',
+  'convert.passwordPlaceholder': 'Mot de passe (8 caractères min.)',
+  'convert.confirmPlaceholder': 'Confirmez le mot de passe',
+  'convert.passwordTooShort': 'Mot de passe : 8 caractères minimum.',
+  'convert.passwordMismatch': 'Les deux mots de passe ne correspondent pas.',
+  'convert.cta': 'Créer mon compte',
+  'convert.done': 'Compte créé — vous êtes connecté. Vos commandes sont rattachées.',
+
+  // Code promo (Checkout)
+  'promo.title': 'Code promo',
+  'promo.placeholder': 'Ex. BIENVENUE10',
+  'promo.apply': 'Appliquer',
+  'promo.remove': 'Retirer',
+  'promo.applied': 'Vous économisez {amount}',
+  'promo.discountLine': 'Réduction ({code})',
+  'promo.discount': 'Réduction',
+
+  // Box prédéfinis
+  'nav.boxes': 'Nos Box',
+  'boxes.title': 'Nos Box',
+  'boxes.subtitle': 'Des formules prêtes à remplir : le modèle fixe le prix, vous choisissez les découpes.',
+  'boxes.bannerTitle': 'Nos Box toutes prêtes',
+  'boxes.bannerHint': 'Noflaye, Woyofal, Xéweul, Téranga — prix fixe, contenu au choix.',
+  'boxes.capacity': '{count} découpes',
+  'boxes.fill': 'Composer',
+  'boxes.notFound': 'Box introuvable.',
+  'boxes.detailHint': 'Choisissez {count} découpes pour remplir cette box.',
+  'boxes.progress': 'Votre sélection',
+  'boxes.cartLabel': 'Box {name}',
+  'boxes.addToCart': 'Ajouter la box au panier',
+  'boxes.fillFirst': 'Encore {count} découpe(s) à choisir',
+
+  // Profil (édition + mot de passe)
+  'account.editProfile': 'Modifier mon profil',
+  'profil.title': 'Mon profil',
+  'profil.sectionIdentity': 'Mes informations',
+  'profil.firstName': 'Prénom',
+  'profil.lastName': 'Nom',
+  'profil.phoneLocked': 'Le numéro identifie votre compte — il ne peut pas être modifié.',
+  'profil.nameRequired': 'Prénom et nom requis.',
+  'profil.saved': 'Profil mis à jour.',
+  'profil.sectionPassword': 'Mot de passe',
+  'profil.currentPassword': 'Mot de passe actuel',
+  'profil.newPassword': 'Nouveau mot de passe',
+  'profil.passwordSaved': 'Mot de passe mis à jour.',
+  'profil.changePasswordCta': 'Changer le mot de passe',
 } as const
 
 export type MsgKey = keyof typeof fr

@@ -4,9 +4,13 @@ import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
-import { getOrder, currentStage, isCancelled, stageTime, estimatedDelivery, STAGES } from '../lib/orders'
+import { getOrder, currentStage, isCancelled, patchOrder, stageTime, estimatedDelivery, STAGES } from '../lib/orders'
 import { useServerOrders } from '../lib/useServerOrders'
+import { cancelOrder, ordersApiEnabled, OrderApiError } from '../api/orders'
+import { currentToken } from '../lib/auth'
+import { useAuth } from '../contexts/AuthContext'
 import { fmtFcfa } from '../lib/format'
+import { haptic } from '../lib/haptics'
 import { useI18n } from '../i18n'
 
 export function SuiviPage() {
@@ -14,9 +18,16 @@ export function SuiviPage() {
   const hhmm = (ms: number) => new Date(ms).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
   const { token } = useParams()
   const navigate = useNavigate()
+  const { user, isAuthenticated, mode } = useAuth()
   // Reporte le statut réel du serveur sur la commande locale (si connecté).
   useServerOrders()
   const order = getOrder(token)
+
+  // Annulation en deux temps (pas de confirm() bloquant) : armer puis confirmer.
+  const [cancelArmed, setCancelArmed] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState('')
+  const [, bump] = useState(0)
 
   // Tic régulier : la chronologie « avance » sous les yeux du client.
   const [now, setNow] = useState(() => Date.now())
@@ -38,6 +49,37 @@ export function SuiviPage() {
   const cancelled = isCancelled(order)
   const activeIdx = STAGES.findIndex((s) => s.key === stage)
   const delivered = stage === 'delivered'
+
+  // Annulable : uniquement au stade « reçue » (règle v1 — le serveur, lui,
+  // ne borne pas), commande serveur connue, session API réelle (le serveur
+  // vérifie la propriété).
+  const apiToken = currentToken()
+  const canCancel =
+    ordersApiEnabled && !cancelled && stage === 'received'
+    && !!order.serverId && mode === 'api' && isAuthenticated
+    && !!apiToken && !apiToken.startsWith('local:') && !!user?.id
+
+  const doCancel = async () => {
+    if (!canCancel || cancelling) return
+    if (!cancelArmed) {
+      haptic('light')
+      setCancelArmed(true)
+      return
+    }
+    setCancelling(true)
+    setCancelError('')
+    haptic('medium')
+    try {
+      await cancelOrder(user!.id!, apiToken!, order.serverId!)
+      patchOrder(order.token, { serverStage: 'cancelled' })
+      setCancelArmed(false)
+      bump((v) => v + 1)
+    } catch (e) {
+      setCancelError(e instanceof OrderApiError ? e.message : t('common.genericError'))
+    } finally {
+      setCancelling(false)
+    }
+  }
 
   return (
     <>
@@ -124,8 +166,31 @@ export function SuiviPage() {
             <div className="filet w-full my-3" />
             <div className="flex justify-between text-[13px]"><span className="text-taupe">{t('common.subtotal')}</span><span className="tabular-nums">{fmtFcfa(order.subtotal)}</span></div>
             <div className="flex justify-between text-[13px] mt-1"><span className="text-taupe">{t('common.delivery')}</span><span className="tabular-nums">{order.deliveryFee === 0 ? t('common.free') : fmtFcfa(order.deliveryFee)}</span></div>
+            {(order.discount ?? 0) > 0 && (
+              <div className="flex justify-between text-[13px] mt-1 text-halal"><span>{t('promo.discount')}</span><span className="tabular-nums">-{fmtFcfa(order.discount!)}</span></div>
+            )}
             <div className="flex justify-between mt-2"><span className="font-title font-extrabold">{t('common.total')}</span><span className="font-title font-extrabold tabular-nums">{fmtFcfa(order.total)}</span></div>
           </div>
+
+          {/* Annulation (client connecté, avant départ en livraison) */}
+          {canCancel && (
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={doCancel}
+                disabled={cancelling}
+                className={`w-full flex items-center justify-center gap-2 rounded-card border py-3 font-title font-bold transition-colors ${cancelArmed ? 'border-alerte bg-alerte/10 text-alerte' : 'border-sable text-taupe active:bg-creme-dark'}`}
+              >
+                <Icon name="cancel" size={20} />
+                {cancelling ? t('checkout.submitting') : cancelArmed ? t('suivi.cancelConfirm') : t('suivi.cancelCta')}
+              </button>
+              {cancelArmed && !cancelling && (
+                <button onClick={() => setCancelArmed(false)} className="text-[13px] font-bold text-taupe">
+                  {t('suivi.cancelKeep')}
+                </button>
+              )}
+              {cancelError && <p className="text-[13px] font-semibold text-alerte text-center">{cancelError}</p>}
+            </div>
+          )}
 
           <Button full variant="ghost" className="mb-2" onClick={() => navigate('/')}>{t('suivi.backToShop')}</Button>
         </div>

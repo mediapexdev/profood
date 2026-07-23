@@ -25,6 +25,16 @@ import { saveContact } from './profile'
 const APP_KEY = import.meta.env.VITE_APP_KEY as string | undefined
 export const authMode: 'api' | 'local' = APP_KEY ? 'api' : 'local'
 
+// Une session de DÉMO (token `local:…`) n'a aucun sens en mode API : purgée
+// au chargement, sinon l'app se croirait connectée après bascule de mode.
+if (authMode === 'api') {
+  const stale = localStorage.getItem(TOKEN_KEY)
+  if (stale?.startsWith('local:')) {
+    localStorage.removeItem(stale)
+    localStorage.removeItem(TOKEN_KEY)
+  }
+}
+
 export interface AuthUser {
   id: number | null
   userId: number | null
@@ -204,6 +214,132 @@ export async function completeSignup(input: {
       password_confirmation: input.passwordConfirmation, avatar_input_action: 'none', app_key: APP_KEY,
     })
   } catch (e) { fail(e, 'Inscription impossible. Réessayez.') }
+}
+
+// ── Édition du profil / changement de mot de passe ────────────────────────
+async function refetchCustomer(token: string): Promise<AuthUser> {
+  const res = await api.get('/customer', { headers: { Authorization: `Bearer ${token}` } })
+  const u = res.data.user
+  const user: AuthUser = {
+    id: res.data.id ?? null, userId: u.id ?? null,
+    firstName: u.first_name ?? '', lastName: u.last_name ?? '',
+    name: fullName(u.first_name, u.last_name), phone: u.phone_number ?? '',
+    email: u.email ?? undefined, avatar: u.avatar ?? null, role: u.role,
+  }
+  persist(token, user)
+  return user
+}
+
+/**
+ * Met à jour prénom/nom/e-mail (POST /update-profile-details — le téléphone
+ * est la clé d'identité, non modifiable). 204 = aucune modification.
+ */
+export async function updateProfile(input: { firstName: string; lastName: string; email?: string }): Promise<AuthUser> {
+  const token = currentToken()
+  const me = currentUser()
+  if (!token || !me) throw new AuthError('Session expirée. Reconnectez-vous.')
+  if (authMode === 'local') {
+    const accounts = readAccounts()
+    const i = accounts.findIndex((a) => normalizePhone(a.phone) === normalizePhone(me.phone))
+    if (i < 0) throw new AuthError('Compte introuvable.')
+    accounts[i] = {
+      ...accounts[i],
+      firstName: input.firstName.trim(), lastName: input.lastName.trim(),
+      name: fullName(input.firstName, input.lastName), email: input.email?.trim() || undefined,
+    }
+    writeAccounts(accounts)
+    const user = toUser(accounts[i])
+    persist(token, user)
+    return user
+  }
+  try {
+    await api.post(
+      '/update-profile-details',
+      {
+        first_name: input.firstName.trim(), last_name: input.lastName.trim(),
+        phone_number: me.phone, email: input.email?.trim() || '',
+        avatar_input_action: 'none',
+      },
+      { headers: { Authorization: `Bearer ${token}` } },
+    )
+  } catch (e) { fail(e, 'Mise à jour impossible. Réessayez.') }
+  return refetchCustomer(token)
+}
+
+/** Change le mot de passe (POST /change-password — vérifie l'actuel). */
+export async function changePassword(input: {
+  currentPassword: string; newPassword: string; newPasswordConfirmation: string
+}): Promise<void> {
+  const token = currentToken()
+  const me = currentUser()
+  if (!token || !me) throw new AuthError('Session expirée. Reconnectez-vous.')
+  if (authMode === 'local') {
+    const accounts = readAccounts()
+    const i = accounts.findIndex((a) => normalizePhone(a.phone) === normalizePhone(me.phone))
+    if (i < 0) throw new AuthError('Compte introuvable.')
+    if ((await hash(input.currentPassword, accounts[i].salt)) !== accounts[i].passwordHash) {
+      throw new AuthError('Le mot de passe actuel saisi est incorrect')
+    }
+    const salt = randId()
+    accounts[i] = { ...accounts[i], salt, passwordHash: await hash(input.newPassword, salt) }
+    writeAccounts(accounts)
+    return
+  }
+  try {
+    await api.post(
+      '/change-password',
+      {
+        current_password: input.currentPassword, new_password: input.newPassword,
+        new_password_confirmation: input.newPasswordConfirmation, phone_number: me.phone,
+      },
+      { headers: { Authorization: `Bearer ${token}` } },
+    )
+  } catch (e) { fail(e, 'Changement de mot de passe impossible. Réessayez.') }
+}
+
+// ── Conversion commande invitée → compte ──────────────────────────────────
+/**
+ * Crée un compte à partir d'une commande invitée (POST /convert-guest-order,
+ * public + app_key). Le téléphone vient de la commande côté serveur ; toutes
+ * les commandes invitées au même numéro sont rattachées. 409 si un compte
+ * existe déjà. Connecte directement (token + profil via /customer).
+ */
+export async function convertGuestOrder(input: {
+  orderRef: string
+  password: string
+  passwordConfirmation: string
+  email?: string
+}): Promise<AuthUser> {
+  if (authMode === 'local') throw new AuthError('Indisponible en mode démo.')
+  let token: string
+  try {
+    const res = await api.post('/convert-guest-order', {
+      order_string_id: input.orderRef,
+      password: input.password,
+      password_confirmation: input.passwordConfirmation,
+      email: input.email ?? '',
+      app_key: APP_KEY,
+    })
+    token = res.data.token
+  } catch (e) {
+    const status = (e as { response?: { status?: number } })?.response?.status
+    if (status === 409) throw new AuthError('Un compte existe déjà avec ce numéro. Connectez-vous.')
+    fail(e, 'Création du compte impossible. Réessayez.')
+  }
+  try {
+    const res = await api.get('/customer', { headers: { Authorization: `Bearer ${token}` } })
+    const u = res.data.user
+    const user: AuthUser = {
+      id: res.data.id ?? null, userId: u.id ?? null,
+      firstName: u.first_name ?? '', lastName: u.last_name ?? '',
+      name: fullName(u.first_name, u.last_name), phone: u.phone_number ?? '',
+      email: u.email ?? undefined, avatar: u.avatar ?? null, role: u.role,
+    }
+    persist(token, user)
+    return user
+  } catch (e) {
+    fail(e, 'Compte créé — connectez-vous avec votre numéro.')
+  }
 }
 
 // ── Réinitialisation du mot de passe ──────────────────────────────────────

@@ -48,28 +48,73 @@ export function splitName(full: string): { first: string; last: string } {
 /** Numéro au format attendu par le serveur : 9 chiffres, sans indicatif. */
 export const apiPhone = (v: string) => v.replace(/[^\d]/g, '').replace(/^221/, '')
 
-interface ApiCartItem {
-  type: 'slice'
-  slice_id: number
-  quantity: number
+type ApiCartItem =
+  | { type: 'slice'; slice_id: number; quantity: number }
+  | { type: 'box'; box_type_id: number; quantity: number; slices: { slice_id: number; quantity: number }[] }
+
+const aggregate = (ids: number[]): { slice_id: number; quantity: number }[] => {
+  const m = new Map<number, number>()
+  for (const id of ids) m.set(id, (m.get(id) ?? 0) + 1)
+  return [...m.entries()].map(([slice_id, quantity]) => ({ slice_id, quantity }))
 }
 
 /**
- * Panier v2 → cart_items API. Les découpes passent telles quelles ; une box
- * composée devient ses découpes (qté = qté de box), agrégées par slice_id.
+ * Panier v2 → cart_items API.
+ *   • Découpes : telles quelles (agrégées par slice_id).
+ *   • Box PRÉDÉFINIE (boxTypeId) : {type:'box'} — le serveur facture le prix
+ *     du modèle, les découpes sont le contenu.
+ *   • Box COMPOSÉE (sans boxTypeId serveur) : décomposée en découpes.
  */
 export function toCartItems(lines: CartLine[]): ApiCartItem[] {
   const qtyBySlice = new Map<number, number>()
   const bump = (id: number, qty: number) => qtyBySlice.set(id, (qtyBySlice.get(id) ?? 0) + qty)
+  const boxes: ApiCartItem[] = []
   for (const l of lines) {
     if (l.kind === 'slice') {
       const id = Number(l.id.replace('slice:', ''))
       if (Number.isFinite(id)) bump(id, l.qty)
+    } else if (l.boxTypeId) {
+      boxes.push({ type: 'box', box_type_id: l.boxTypeId, quantity: l.qty, slices: aggregate(l.cutIds ?? []) })
     } else {
       for (const cutId of l.cutIds ?? []) bump(cutId, l.qty)
     }
   }
-  return [...qtyBySlice.entries()].map(([slice_id, quantity]) => ({ type: 'slice', slice_id, quantity }))
+  return [
+    ...boxes,
+    ...[...qtyBySlice.entries()].map(([slice_id, quantity]) => ({ type: 'slice' as const, slice_id, quantity })),
+  ]
+}
+
+// ── Codes promo ───────────────────────────────────────────────────────────
+export interface PromoResult {
+  valid: boolean
+  code: string
+  discountAmount: number
+  message: string
+}
+
+/**
+ * POST /validate-promo-code (public). La remise affichée est indicative :
+ * le serveur re-valide et recalcule à la création de la commande. Les cas
+ * « invalide » reviennent en 200 {valid:false, error}.
+ */
+export async function validatePromoCode(code: string, orderAmount: number, deliveryFee: number): Promise<PromoResult> {
+  const upper = code.trim().toUpperCase()
+  const token = localStorage.getItem('token')
+  try {
+    const res = await api.post(
+      '/validate-promo-code',
+      { code: upper, order_amount: orderAmount, delivery_fee: deliveryFee },
+      token && !token.startsWith('local:') ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
+    )
+    if (res.data?.valid) {
+      return { valid: true, code: upper, discountAmount: Number(res.data.discount_amount ?? 0), message: res.data.message ?? '' }
+    }
+    return { valid: false, code: upper, discountAmount: 0, message: res.data?.error ?? 'Code promotionnel invalide.' }
+  } catch (e) {
+    const data = (e as { response?: { data?: { error?: string; message?: string } } })?.response?.data
+    return { valid: false, code: upper, discountAmount: 0, message: data?.error || data?.message || 'Code promotionnel invalide.' }
+  }
 }
 
 export interface GuestOrderInput {
@@ -79,6 +124,7 @@ export interface GuestOrderInput {
   address: string
   localiteId: number | null
   lines: CartLine[]
+  promotionCode?: string
 }
 
 function guestPayload(input: GuestOrderInput) {
@@ -90,6 +136,7 @@ function guestPayload(input: GuestOrderInput) {
     guest_email: input.email ?? '',
     address: input.address,
     ...(input.localiteId != null ? { localite_id: input.localiteId } : {}),
+    ...(input.promotionCode ? { promotion_code: input.promotionCode } : {}),
     cart_items: toCartItems(input.lines),
   }
 }
@@ -158,10 +205,22 @@ export async function syncServerCart(lines: CartLine[], customerId: number, toke
     await api.post('/delete-slice-from-cart', { slice_id: s.slice?.id ?? s.id, customer_id: customerId }, bearer(token))
   }
   const items = toCartItems(lines)
-  if (items.length) {
+  const sliceItems = items.filter((i) => i.type === 'slice')
+  const boxItems = items.filter((i) => i.type === 'box')
+  // Une box par appel (contrat add-box-to-cart) — répété par quantité.
+  for (const b of boxItems) {
+    for (let n = 0; n < b.quantity; n++) {
+      await api.post(
+        '/add-box-to-cart',
+        { customer_id: customerId, box_type_id: b.box_type_id, slices: b.slices.map((s) => ({ id: s.slice_id, quantity: s.quantity })) },
+        bearer(token),
+      )
+    }
+  }
+  if (sliceItems.length) {
     await api.post(
       '/add-slices-to-cart',
-      { customer_id: customerId, slices: items.map((i) => ({ id: i.slice_id, quantity: i.quantity })) },
+      { customer_id: customerId, slices: sliceItems.map((i) => ({ id: i.slice_id, quantity: i.quantity })) },
       bearer(token),
     )
   }
@@ -187,6 +246,7 @@ export interface CustomerOrderInput {
   /** Indicatif seulement — le serveur recalcule. */
   montant: number
   orderHash: string
+  promotionCode?: string
 }
 
 /** Commande connectée « à la livraison » (le panier serveur doit être à jour). */
@@ -200,6 +260,7 @@ export async function placeCustomerOrder(input: CustomerOrderInput): Promise<voi
         montant: input.montant,
         order_id: input.orderHash,
         ...(input.localiteId != null ? { localite_id: input.localiteId } : {}),
+        ...(input.promotionCode ? { promotion_code: input.promotionCode } : {}),
       },
       bearer(input.token),
     )
@@ -219,6 +280,7 @@ export async function placeCustomerOrderWithPayment(input: CustomerOrderInput): 
         montant: input.montant,
         order_id: input.orderHash,
         ...(input.localiteId != null ? { localite_id: input.localiteId } : {}),
+        ...(input.promotionCode ? { promotion_code: input.promotionCode } : {}),
       },
       bearer(input.token),
     )
@@ -228,6 +290,15 @@ export async function placeCustomerOrderWithPayment(input: CustomerOrderInput): 
   } catch (e) {
     if (e instanceof OrderApiError) throw e
     fail(e, 'Le paiement en ligne est momentanément indisponible. Choisissez le paiement à la livraison.')
+  }
+}
+
+/** Annulation par le client (auth requise ; le serveur restaure le stock). */
+export async function cancelOrder(customerId: number, token: string, orderId: number): Promise<void> {
+  try {
+    await api.post('/cancel-order', { customer_id: customerId, order_id: orderId }, bearer(token))
+  } catch (e) {
+    fail(e, 'Annulation impossible pour le moment. Réessayez.')
   }
 }
 

@@ -48,7 +48,7 @@ npm run open:ios       # Xcode
 
 ## 5. Côté serveur (rappels)
 
-- `PROFOOD_APP_KEY` non vide dans le `.env` prod → l'API **rejette** signin/signup CUSTOMER sans `app_key` correspondant.
+- `PROFOOD_APP_KEY` non vide dans le `.env` prod → l'API **rejette** signin/signup CUSTOMER sans `app_key` correspondant. ⚠️ Une ligne `PROFOOD_APP_KEY=` avec **chaîne vide** compte déjà comme « posée » (l'auth se met à exiger l'app_key) : soit une vraie valeur, soit pas de ligne du tout.
 - SMS : la vérification par code (inscription, reset) consomme du **Twilio réel** en prod ; en local un OTP fixe est utilisé. Chaque commande (invité) envoie aussi un SMS Twilio + e-mails Postmark.
 - **PayTech** (`.env` serveur) : `PAY_TECH_API_KEY` / `PAY_TECH_API_SECRET` posés, et `PAYTECH_TEST_MODE=false` pour encaisser réellement (fail-safe : toute autre valeur = sandbox). L'IPN est en dur sur `https://api.profood-app.com/api/redirect-payment`.
 - ⚠️ **`services.paytech.client_app_url` doit pointer sur le domaine où la v2 est déployée** : le serveur construit les URLs de retour de paiement (`/guest-order-success/{hash}?ref=`, `/orders/successful-order/{hash}`, `/orders/cancelled-order/{hash}`, `/views/cart`) à partir de cette valeur. La v2 route ces quatre chemins ; s'il pointe encore sur l'app v1, le client revient sur la v1 après paiement.
@@ -60,35 +60,33 @@ Voir la section « Conformité v1 » ci-dessous pour le détail feature par feat
 
 - **Suivi invité** : sans compte, le statut reste **simulé par le temps écoulé** (aucun endpoint public de statut côté API). Le statut réel s'affiche pour les clients connectés.
 - **Box composée** : envoyée à l'API **décomposée en découpes** (pas de `box_type_id` serveur pour une composition libre) — le total affiché = somme des prix réels, identique au recalcul serveur.
-- **Annulation de commande** : pas encore d'action côté client (endpoint `cancel-order` existant ; l'annulation faite par le manager s'affiche bien).
-- **Codes promo** : toujours absents de la v2 (supportés par l'API).
 - **Images produits** : servies en local même avec le catalogue API.
 - **Commits sur `main` non poussés** vers origin — pousser avant tout déploiement.
 
 ## 7. Conformité v1 (profood-app Ionic) — état feature par feature
 
-Audit du 2026-07-23, **mis à jour après l'ajout PayTech + panier serveur + i18n** (mêmes date). Légende : ✅ équivalent · 🟡 présent mais local/partiel · ❌ absent.
+Audit du 2026-07-23, mis à jour après les deux vagues de la journée (PayTech + panier serveur + i18n, puis promos + annulation + conversion invité + box prédéfinis + édition de profil). Légende : ✅ équivalent · 🟡 présent mais local/partiel · ❌ absent.
 
-En une phrase : **avec les trois drapeaux posés (`VITE_APP_KEY`, `VITE_USE_API_CATALOG`, `VITE_USE_API_ORDERS`), la v2 est réelle sur l'auth, le catalogue, les commandes (invité + connecté), le paiement PayTech, les frais par zone et le statut ; restent locaux : adresses, favoris, suivi invité (simulé), et absents : promos, annulation client, box prédéfinis.**
+En une phrase : **avec les trois drapeaux posés (`VITE_APP_KEY`, `VITE_USE_API_CATALOG`, `VITE_USE_API_ORDERS`), la v2 couvre tout le périmètre transactionnel de la v1** (auth, catalogue, box prédéfinis, commandes invité + connecté, PayTech, promos, frais par zone, statut réel, annulation, conversion invité → compte, profil) **et la dépasse** (favoris, i18n à clés stables, jetons opaques) ; restent locaux : adresses, favoris, suivi invité (simulé) ; restent absents : recherche serveur, vues serveur `/views/*`, FAQ/CGU, Firebase, push.
 
 | Feature v1 | v2 | Détail |
 |---|---|---|
 | Connexion / inscription 3 étapes OTP / reset OTP / signout | ✅ | Mêmes endpoints que la v1 (`/signin`, `/check-verification-code`, `/signup`, `/password-reset`) en mode API ; mode local sans OTP si pas de `VITE_APP_KEY`. Purge session sur 401 identique. |
 | Catalogue découpes + catégories | 🟡 | API derrière `VITE_USE_API_CATALOG`, sinon JSON local. Images toujours locales. Catégories « mer » retirées (décision verrouillée). |
-| **Box prédéfinis** (Noflaye, Woyofal…) | ❌ | `data/boxes.json` existe mais n'est importé nulle part (données mortes) — aucune page de box prédéfinis. |
+| **Box prédéfinis** (Noflaye, Woyofal…) | ✅ | Pages `/box` + `/box/:id` (lien nav desktop + bannière boutique) : le modèle fixe prix et capacité, remplissage EXACT à la capacité (règle v1), découpes `available_in_box`. Part à l'API en `{type:'box', box_type_id, slices}` — le serveur facture le prix du modèle. Modèles depuis `get-box-types` (catalogue API) sinon `boxes.json`. |
 | Composer un box | 🟡 | Planche anatomique bœuf uniquement, capacité fixe 8 — pas de modèles de box. Prix = **somme des prix réels des découpes** (aligné sur le recalcul serveur ; l'ancien forfait 14 100/découpe est abandonné) ; la box part à l'API décomposée en découpes. |
 | Recherche | 🟡 | Client-side dans la boutique (insensible aux accents) ; pas de `/search` API ni page dédiée. |
 | Panier serveur connecté (`/add-slices-to-cart`…) | ✅ | Panier local = source de vérité (UX rapide, offline) ; **fusion du panier serveur au login** (`auth:login` → `get-cart`, qté max des deux) et **réalignement serveur au checkout** (`syncServerCart` : purge + ré-ajout) avant `add-order-*` — le serveur commande son propre panier, donc identique au local. |
 | Checkout invité (`/guest-order`) | ✅ (drapeau) | Avec `VITE_USE_API_ORDERS=true` : `POST /guest-order` (à la livraison) ou `/guest-order-with-payment` (PayTech). Réf. serveur (`string_id`) affichée ; enregistrement local conservé sous jeton opaque. Sans drapeau : démo locale. |
 | Commande connectée (`/add-order-without-payment`) | ✅ (drapeau) | Panier serveur synchronisé puis `add-order-without-payment` / `add-order-with-payment` (session API réelle uniquement — un compte local de démo passe par le flux invité). |
 | **Paiement PayTech** | ✅ (drapeau) | Choix « à la livraison / payer en ligne » au checkout. Pas de `paytech.min.js` : l'API renvoie `{token, redirect_url}` → redirection ; brouillon gelé sous le hash `order_id` et finalisé par les routes de retour (`/guest-order-success/:hash?ref=`, `/orders/successful-order/:hash`, `/orders/cancelled-order/:hash`) ; panier conservé jusqu'au succès, annulation = panier intact. |
-| Conversion invité → compte (`/convert-guest-order`) | ❌ | Toujours absent. |
+| Conversion invité → compte (`/convert-guest-order`) | ✅ | Carte « créer un compte » sur la confirmation d'une commande invitée (mode auth API) : mot de passe seul, téléphone repris de la commande, toutes les commandes au même numéro rattachées, connexion immédiate. Nécessite `VITE_APP_KEY` (l'endpoint exige l'app_key). |
 | Localités / frais par zone (`/get-localites-with-full-info`, ~2000 localités, frais serveur) | ✅ (drapeau) | Autocomplete sur les localités API (marcheur de pagination, cache session), frais **officiels** via `POST /quote-delivery-fee` (franco inclus) à chaque changement de localité/sous-total. La table statique de 10 communes ne sert plus qu'au mode démo. |
-| Codes promo (`/validate-promo-code`) | ❌ | Aucun champ promo, aucune logique. |
+| Codes promo (`/validate-promo-code`) | ✅ (drapeau) | Champ promo au checkout (endpoint public, remise indicative — le serveur re-valide et recalcule à la commande), ligne de réduction dans récap/suivi, `promotion_code` envoyé sur les 4 endpoints de commande. |
 | Historique commandes | ✅ (connecté) / 🟡 (invité) | Connecté : `get-customer-orders-by-user` → statut réel reporté sur les commandes locales + affichage des commandes passées depuis un autre appareil. Invité : liste locale. |
 | Suivi de commande | ✅ (connecté) / 🟡 (invité) | Le statut serveur (8/16/32/64/80 → 4 étapes + annulée) **prime** sur la simulation ; invité sans compte : simulation temporelle (pas d'endpoint public de statut). |
-| Annulation commande (`/cancel-order`) | 🟡 | Pas encore d'action côté client, mais une annulation faite côté manager s'affiche (badge + bandeau « Commande annulée »). |
-| Édition profil / changement mot de passe | ❌ | Profil = blob invité local ; seul le reset par OTP existe. |
+| Annulation commande (`/cancel-order`) | ✅ | Bouton d'annulation en deux temps sur le suivi — règle v1 : uniquement au stade « reçue », client connecté, commande serveur connue. Le statut serveur rattrape l'affichage même si la requête échoue après coup (ex. SMS). |
+| Édition profil / changement mot de passe | ✅ | Page `/profil` (entrée « Modifier mon profil » dans le Compte, connecté) : prénom/nom/e-mail via `update-profile-details` (téléphone = clé d'identité, verrouillé), mot de passe via `change-password` (vérifie l'actuel). Double mode (comptes locaux en démo). |
 | Adresses enregistrées | 🟡 | CRUD complet mais localStorage, non lié au compte serveur. |
 | **i18n FR/EN** | ✅ | i18n maison typé (`src/i18n/`) à **clés stables** (décision projet — pas de phrases FR comme clés, contrairement à la v1), sélecteur FR/EN dans le Compte, persisté (`localStorage.lang`, même clé que la v1), dates localisées. Hors périmètre : messages d'erreur renvoyés par l'API (en français côté serveur). |
 | Dark mode | ✅ | Persisté, suit `prefers-color-scheme`. |

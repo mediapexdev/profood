@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { ProductCard } from '../components/ProductCard'
@@ -14,6 +15,7 @@ type Sort = 'pertinence' | 'prix-asc' | 'prix-desc'
 const norm = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 
 export function BoutiquePage() {
+  const navigate = useNavigate()
   const { t } = useI18n()
   const SORTS: { key: Sort; label: string }[] = [
     { key: 'pertinence', label: t('shop.sortRelevance') },
@@ -83,6 +85,23 @@ export function BoutiquePage() {
                   {categoryLabel(c.name)} <span className="opacity-60 tabular-nums">{c.slicesCount}</span>
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* Bannière Nos Box (modèles prédéfinis) */}
+          {!searching && (
+            <div className="px-4 md:px-6 pt-3">
+              <button
+                onClick={() => navigate('/box')}
+                className="w-full flex items-center gap-3 bg-terre/10 border border-terre/30 rounded-card px-4 py-3 text-left active:bg-terre/15 transition-colors"
+              >
+                <Icon name="package_2" size={26} className="text-terre" fill />
+                <span className="flex-1 min-w-0">
+                  <span className="block font-title font-extrabold">{t('boxes.bannerTitle')}</span>
+                  <span className="block text-[12px] text-taupe truncate">{t('boxes.bannerHint')}</span>
+                </span>
+                <Icon name="chevron_right" size={22} className="text-terre" />
+              </button>
             </div>
           )}
 

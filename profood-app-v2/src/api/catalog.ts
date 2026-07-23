@@ -8,10 +8,11 @@
  * récentes) → évite d'embarquer le base64 lourd.
  */
 import api from './client'
-import type { Slice, Category } from '../lib/catalog'
-import { SLICES as LOCAL_SLICES, CATEGORIES as LOCAL_CATEGORIES, categoryLabel } from '../lib/catalog'
+import type { Slice, Category, Box } from '../lib/catalog'
+import { SLICES as LOCAL_SLICES, CATEGORIES as LOCAL_CATEGORIES, BOXES as LOCAL_BOXES, categoryLabel } from '../lib/catalog'
 
 const localImageBySliceId = new Map(LOCAL_SLICES.map((s) => [s.id, s.image]))
+const localImageByBoxId = new Map(LOCAL_BOXES.map((b) => [b.id, b.image]))
 const localImageByCategoryId = new Map(LOCAL_CATEGORIES.map((c) => [c.id, c.image]))
 const localCategoryNameById = new Map(LOCAL_CATEGORIES.map((c) => [c.id, c.name]))
 
@@ -26,6 +27,16 @@ interface ApiSlice {
   stock_quantity: number | null
   illustration: string | null
   category?: { id: number; wording: string }
+}
+
+interface ApiBoxType {
+  id: number
+  wording: string
+  price: number
+  capacity: number
+  illustration: string | null
+  effective_price?: number | string
+  is_on_promotion?: boolean
 }
 
 interface ApiCategory {
@@ -68,21 +79,36 @@ function normalizeCategory(r: ApiCategory): Category {
   }
 }
 
+function normalizeBoxType(r: ApiBoxType): Box {
+  return {
+    id: r.id,
+    name: r.wording,
+    // effective_price intègre une éventuelle promo du modèle de box.
+    price: Number(r.effective_price ?? r.price),
+    capacity: Number(r.capacity),
+    image: resolveImage(r.id, r.illustration, localImageByBoxId),
+  }
+}
+
 export interface ApiCatalog {
   slices: Slice[]
   categories: Category[]
+  boxes: Box[]
 }
 
 /** Récupère et normalise le catalogue complet (61 découpes tiennent en 1 page). */
 export async function fetchApiCatalog(): Promise<ApiCatalog> {
-  const [slicesRes, catsRes] = await Promise.all([
+  const [slicesRes, catsRes, boxesRes] = await Promise.all([
     api.get('/get-slices', { params: { per_page: 100 } }),
     api.get('/get-categories-with-slices-count', { params: { per_page: 100 } }),
+    api.get('/get-box-types', { params: { per_page: 100 } }),
   ])
   const sliceRows: ApiSlice[] = slicesRes.data?.data ?? slicesRes.data ?? []
   const catRows: ApiCategory[] = catsRes.data?.data ?? catsRes.data ?? []
+  const boxRows: ApiBoxType[] = boxesRes.data?.data ?? boxesRes.data ?? []
   return {
     slices: sliceRows.map(normalizeSlice),
     categories: catRows.map(normalizeCategory),
+    boxes: boxRows.map(normalizeBoxType),
   }
 }

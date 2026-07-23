@@ -32,6 +32,9 @@ export function ComptePage() {
     },
     { icon: 'favorite', label: t('account.favorites'), hint: favCount ? String(favCount) : undefined, onClick: () => navigate('/favoris') },
     { icon: 'location_on', label: t('account.addresses'), hint: profile.addresses.length ? String(profile.addresses.length) : undefined, onClick: () => navigate('/adresses') },
+    ...(isAuthenticated
+      ? [{ icon: 'manage_accounts', label: t('account.editProfile'), onClick: () => navigate('/profil') }]
+      : []),
     { icon: 'help', label: t('account.help'), disabled: true },
   ]
 

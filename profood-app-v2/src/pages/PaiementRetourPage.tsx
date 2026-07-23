@@ -46,6 +46,7 @@ export function PaiementRetourPage({ outcome }: { outcome: 'success' | 'cancelle
       lines: pending.lines,
       subtotal: pending.subtotal,
       deliveryFee: pending.deliveryFee,
+      discount: pending.discount,
       serverRef: params.get('ref') ?? undefined,
       paymentMethod: 'online',
       paid: true,

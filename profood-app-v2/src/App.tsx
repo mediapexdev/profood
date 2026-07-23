@@ -45,6 +45,8 @@ import { ConnexionPage } from './pages/ConnexionPage'
 import { InscriptionPage } from './pages/InscriptionPage'
 import { MotDePasseOubliePage } from './pages/MotDePasseOubliePage'
 import { PaiementRetourPage } from './pages/PaiementRetourPage'
+import { BoxesPage, BoxDetailPage } from './pages/BoxPage'
+import { ProfilPage } from './pages/ProfilPage'
 
 function AppLayout() {
   return (
@@ -68,16 +70,19 @@ export default function App() {
                 <Route element={<AppLayout />}>
                   <Route path="/" element={<BoutiquePage />} />
                   <Route path="/composer" element={<ComposerPage />} />
+                  <Route path="/box" element={<BoxesPage />} />
                   <Route path="/panier" element={<PanierPage />} />
                   <Route path="/compte" element={<ComptePage />} />
                 </Route>
                 <Route path="/produit/:id" element={<ProduitPage />} />
+                <Route path="/box/:id" element={<BoxDetailPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
                 <Route path="/confirmation/:token" element={<ConfirmationPage />} />
                 <Route path="/suivi/:token" element={<SuiviPage />} />
                 <Route path="/commandes" element={<CommandesPage />} />
                 <Route path="/favoris" element={<FavorisPage />} />
                 <Route path="/adresses" element={<AdressesPage />} />
+                <Route path="/profil" element={<ProfilPage />} />
                 <Route path="/connexion" element={<ConnexionPage />} />
                 <Route path="/inscription" element={<InscriptionPage />} />
                 <Route path="/mot-de-passe-oublie" element={<MotDePasseOubliePage />} />

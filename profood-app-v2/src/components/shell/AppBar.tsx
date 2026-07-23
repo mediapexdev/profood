@@ -18,6 +18,7 @@ export function AppBar({ title, back = false }: { title: string; back?: boolean 
 
   const LINKS = [
     { to: '/', label: t('nav.shop'), end: true },
+    { to: '/box', label: t('nav.boxes') },
     { to: '/composer', label: t('nav.composer') },
     { to: '/panier', label: t('nav.cart') },
     { to: '/compte', label: t('nav.account') },

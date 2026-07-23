@@ -16,6 +16,8 @@ export interface CartLine {
   image: string
   qty: number
   cutIds?: number[]
+  /** Box PRÉDÉFINIE : id du modèle serveur (box composée libre : absent). */
+  boxTypeId?: number
 }
 
 interface CartValue {
@@ -24,7 +26,7 @@ interface CartValue {
   total: number
   qtyOf: (id: number) => number
   add: (slice: Slice) => void
-  addBox: (label: string, unitPrice: number, cutIds: number[], image: string) => void
+  addBox: (label: string, unitPrice: number, cutIds: number[], image: string, boxTypeId?: number) => void
   setLineQty: (lineId: string, qty: number) => void
   setQty: (sliceId: number, qty: number) => void
   clear: () => void
@@ -113,9 +115,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         qty: 1,
       }))
 
-    const addBox = (label: string, unitPrice: number, cutIds: number[], image: string) => {
-      const id = `box:${[...cutIds].sort((a, b) => a - b).join('-')}`
-      bump(id, () => ({ id, kind: 'box', name: label, unitPrice, image, qty: 1, cutIds }))
+    const addBox = (label: string, unitPrice: number, cutIds: number[], image: string, boxTypeId?: number) => {
+      const key = [...cutIds].sort((a, b) => a - b).join('-')
+      const id = boxTypeId ? `boxtype:${boxTypeId}:${key}` : `box:${key}`
+      bump(id, () => ({ id, kind: 'box', name: label, unitPrice, image, qty: 1, cutIds, boxTypeId }))
     }
 
     const setLineQty = (lineId: string, qty: number) =>
