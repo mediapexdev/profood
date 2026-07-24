@@ -110,6 +110,19 @@ button { font-family: inherit; }
 .animate-pop { animation: pop .3s var(--ease) both; transform-origin: center; }
 @keyframes pop { from { opacity:0; transform: scale(.6); } to { opacity:1; transform: scale(1); } }
 
+/* Révélation au scroll (cartes « Comment ça marche », accueil) : la carte
+   monte en fondu avec un décalage par carte (--reveal-delay), puis la
+   pastille d'icône « pop » juste après. Neutralisé par le kill-switch
+   prefers-reduced-motion global ci-dessous. */
+.reveal { opacity: 0; transform: translateY(18px); }
+.reveal-in { animation: reveal-up .55s var(--ease) both; animation-delay: var(--reveal-delay, 0ms); }
+@keyframes reveal-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.reveal-in .step-icon {
+  animation: pop .4s var(--ease) both;
+  animation-delay: calc(var(--reveal-delay, 0ms) + .3s);
+  transform-origin: center;
+}
+
 /* ---------- Bottom sheet ---------- */
 .sheet-backdrop { position: fixed; inset: 0; background: rgba(20,12,8,.45); z-index: 60; animation: fade .2s var(--ease) both; }
 .sheet {

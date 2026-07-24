@@ -7,6 +7,7 @@ import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
 import { useCatalog } from '../contexts/CatalogContext'
 import { fmtFcfa } from '../lib/format'
+import { useReveal } from '../lib/useReveal'
 import { haptic } from '../lib/haptics'
 import { useI18n } from '../i18n'
 import type { MsgKey } from '../i18n/fr'
@@ -40,6 +41,7 @@ export function AccueilPage() {
   }, [persons, days, boxes])
 
   const preview = slices.slice(0, 4)
+  const how = useReveal<HTMLDivElement>()
 
   const P_OPTS: MsgKey[] = ['home.quizP1', 'home.quizP2', 'home.quizP3', 'home.quizP4']
   const D_OPTS: MsgKey[] = ['home.quizD1', 'home.quizD2', 'home.quizD3', 'home.quizD4']
@@ -89,15 +91,19 @@ export function AccueilPage() {
           <section className="pt-8 md:pt-14">
             <h2 className="text-[24px] md:text-3xl">{t('home.howTitle')}</h2>
             <span className="filet w-24 mt-3" />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-5 mt-5">
+            <div ref={how.ref} className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-5 mt-5">
               {([
                 ['home.how1Title', 'home.how1Text', 'takeout_dining'],
                 ['home.how2Title', 'home.how2Text', 'shopping_basket'],
                 ['home.how3Title', 'home.how3Text', 'local_shipping'],
               ] as [MsgKey, MsgKey, string][]).map(([title, text, icon], i) => (
-                <div key={title} className="bg-surface border border-sable rounded-card p-4 md:p-5">
+                <div
+                  key={title}
+                  style={{ '--reveal-delay': `${i * 130}ms` } as React.CSSProperties}
+                  className={`bg-surface border border-sable rounded-card p-4 md:p-5 transition-[translate,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-card-hover ${how.visible ? 'reveal-in' : 'reveal'}`}
+                >
                   <div className="flex items-center justify-between">
-                    <span className="grid h-11 w-11 place-items-center rounded-full bg-terre/12 text-terre">
+                    <span className="step-icon grid h-11 w-11 place-items-center rounded-full bg-terre/12 text-terre">
                       <Icon name={icon} size={24} fill />
                     </span>
                     <span className="text-[11px] font-bold tracking-[.14em] uppercase text-taupe">
