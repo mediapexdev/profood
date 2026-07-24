@@ -20,6 +20,9 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- Les clés applicatives du .env local ne doivent pas fuiter dans les
+             tests : la suite couvre les deux régimes elle-même. -->
+        <env name="PROFOOD_APP_KEY" value=""/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>
         <env name="MAIL_MAILER" value="array"/>

@@ -222,4 +222,49 @@ class GuestOrderTest extends TestCase
 
         $this->postJson('/api/guest-order', $payload)->assertStatus(422);
     }
+
+    /**
+     * Public guest-order-status: returns codes for the right ref+phone pair,
+     * generic 404 for a wrong phone (anti-enumeration) or an unknown ref.
+     */
+    public function test_guest_order_status_requires_matching_reference_and_phone()
+    {
+        $reference = $this->postJson('/api/guest-order', $this->guestOrderPayload())
+            ->assertStatus(201)
+            ->json('order.string_id');
+
+        $this->postJson('/api/guest-order-status', [
+            'reference'    => $reference,
+            'phone_number' => '771234567',
+        ])->assertStatus(200)
+            ->assertJsonStructure(['status' => ['code'], 'payment_status' => ['code']]);
+
+        $this->postJson('/api/guest-order-status', [
+            'reference'    => $reference,
+            'phone_number' => '770000000',
+        ])->assertStatus(404);
+
+        $this->postJson('/api/guest-order-status', [
+            'reference'    => 'inconnue',
+            'phone_number' => '771234567',
+        ])->assertStatus(404);
+    }
+
+    /**
+     * A registered customer's order must not leak through the guest endpoint.
+     */
+    public function test_guest_order_status_ignores_non_guest_orders()
+    {
+        $order = Order::whereNotNull('customer_id')->where('is_guest_order', false)->first()
+            ?? Order::where('is_guest_order', false)->first();
+
+        if (! $order || ! $order->string_id) {
+            $this->markTestSkipped('No non-guest order in the seeded database.');
+        }
+
+        $this->postJson('/api/guest-order-status', [
+            'reference'    => $order->string_id,
+            'phone_number' => '771234567',
+        ])->assertStatus(404);
+    }
 }

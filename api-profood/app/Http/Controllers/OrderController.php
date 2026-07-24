@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -2410,6 +2411,43 @@ class OrderController extends Controller
             'user'          => $user,
             'token'         => $token,
             'linked_orders' => $linkedCount
+        ], 200);
+    }
+
+    /**
+     * Public : statut d'une commande INVITÉ. Clé composite référence +
+     * téléphone (la référence seule est énumérable) ; réponse minimale,
+     * 404 générique et throttle par IP contre l'énumération.
+     */
+    public function guestOrderStatus(Request $request)
+    {
+        // La référence peut arriver en nombre JSON : cast + bornage manuels.
+        $reference = substr(trim((string) $request->input('reference')), 0, 20);
+        $phone = substr(preg_replace('/\D/', '', (string) $request->input('phone_number')), -9);
+
+        if ($reference === '' || $phone === '' || strlen($phone) < 9) {
+            return response()->json(['message' => 'Commande introuvable'], 404);
+        }
+
+        $key = 'guest-order-status:'.$request->ip();
+        if (RateLimiter::tooManyAttempts($key, 30)) {
+            return response()->json(['message' => 'Trop de requêtes. Réessayez plus tard.'], 429);
+        }
+        RateLimiter::hit($key, 60);
+
+        $order = Order::with(['status', 'paymentStatus'])
+            ->where('string_id', $reference)
+            ->where('is_guest_order', true)
+            ->first();
+
+        $orderPhone = $order ? substr(preg_replace('/\D/', '', (string) $order->guest_phone_number), -9) : null;
+        if (!$order || $phone === '' || $orderPhone !== $phone) {
+            return response()->json(['message' => 'Commande introuvable'], 404);
+        }
+
+        return response()->json([
+            'status'         => ['code' => optional($order->status)->code],
+            'payment_status' => ['code' => optional($order->paymentStatus)->code],
         ], 200);
     }
 }

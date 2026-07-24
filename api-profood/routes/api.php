@@ -64,6 +64,7 @@ Route::get('image/{path}', [ImageController::class, 'show'])->where('path', '.*'
 Route::middleware('throttle:10,1')->group(function () {
     Route::post('guest-order', [OrderController::class, 'addGuestOrder']);
     Route::post('guest-order-with-payment', [OrderController::class, 'addGuestOrderWithPayment']);
+    Route::post('guest-order-status', [OrderController::class, 'guestOrderStatus']);
     Route::post('convert-guest-order', [OrderController::class, 'convertGuestOrder']);
 });
 Route::post('redirect-payment', [OrderController::class, 'redirectPayment']);
