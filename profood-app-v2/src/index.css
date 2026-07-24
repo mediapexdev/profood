@@ -50,8 +50,9 @@
   --sai-top: env(safe-area-inset-top, 0px);
   --sai-bottom: env(safe-area-inset-bottom, 0px);
   --bar-h: 56px;
-  --tabbar-h: 60px;
+  --tabbar-h: 76px; /* dock flottant : 64px de barre + 12px de marge basse */
   --ease: cubic-bezier(.22,.61,.36,1);
+  --ease-spring: cubic-bezier(.34,1.56,.64,1); /* léger dépassement « ressort » */
 }
 
 /* ---------- Resets « app native » ---------- */
