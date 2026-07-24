@@ -47,7 +47,7 @@ export function CommandesPage() {
               <span className="opacity-40"><Icon name="receipt_long" size={54} /></span>
               <p className="font-title font-extrabold text-lg text-ink">{t('commandes.emptyTitle')}</p>
               <p className="text-[14px]">{t('commandes.emptyHint')}</p>
-              <Button className="mt-2" onClick={() => navigate('/')}>{t('common.viewShop')}</Button>
+              <Button className="mt-2" onClick={() => navigate('/boutique')}>{t('common.viewShop')}</Button>
             </div>
           ) : (
             <>

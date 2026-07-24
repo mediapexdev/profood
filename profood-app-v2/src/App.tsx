@@ -2,7 +2,8 @@
  * App — routeur et structure de navigation.
  *
  *   / (AppLayout : AppBar responsive + contenu + BottomNav mobile)
- *     ├── /            → BoutiquePage
+ *     ├── /            → AccueilPage (vitrine)
+ *     ├── /boutique    → BoutiquePage
  *     ├── /composer    → ComposerPage
  *     ├── /panier      → PanierPage
  *     └── /compte      → ComptePage
@@ -30,6 +31,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { CatalogProvider } from './contexts/CatalogContext'
 import { CartProvider } from './contexts/CartContext'
 import { FavoritesProvider } from './contexts/FavoritesContext'
+import { AccueilPage } from './pages/AccueilPage'
 import { BoutiquePage } from './pages/BoutiquePage'
 import { ComposerPage } from './pages/ComposerPage'
 import { PanierPage } from './pages/PanierPage'
@@ -68,7 +70,8 @@ export default function App() {
             <BrowserRouter>
               <Routes>
                 <Route element={<AppLayout />}>
-                  <Route path="/" element={<BoutiquePage />} />
+                  <Route path="/" element={<AccueilPage />} />
+                  <Route path="/boutique" element={<BoutiquePage />} />
                   <Route path="/composer" element={<ComposerPage />} />
                   <Route path="/box" element={<BoxesPage />} />
                   <Route path="/panier" element={<PanierPage />} />

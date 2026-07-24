@@ -24,7 +24,7 @@ export function FavorisPage() {
             <span className="opacity-40"><Icon name="favorite" size={54} /></span>
             <p className="font-title font-extrabold text-lg text-ink">{t('favoris.emptyTitle')}</p>
             <p className="text-[14px]">{t('favoris.emptyHint')}</p>
-            <Button className="mt-2" onClick={() => navigate('/')}>{t('common.viewShop')}</Button>
+            <Button className="mt-2" onClick={() => navigate('/boutique')}>{t('common.viewShop')}</Button>
           </div>
         ) : (
           <div className="mx-auto max-w-6xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5 px-4 md:px-6 pt-4">

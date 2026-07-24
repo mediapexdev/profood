@@ -207,7 +207,7 @@ export function CheckoutPage() {
         <Page noTabbar>
           <div className="px-6 pt-16 text-center text-taupe">
             <p className="font-title font-extrabold text-lg text-ink">{t('checkout.emptyTitle')}</p>
-            <Button className="mt-4" onClick={() => navigate('/')}>{t('common.viewShop')}</Button>
+            <Button className="mt-4" onClick={() => navigate('/boutique')}>{t('common.viewShop')}</Button>
           </div>
         </Page>
       </>

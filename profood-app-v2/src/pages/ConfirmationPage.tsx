@@ -130,7 +130,7 @@ export function ConfirmationPage() {
           <Button full className="mt-6" onClick={() => navigate(`/suivi/${order.token}`)}>
             <Icon name="local_shipping" size={20} /> {t('confirmation.trackOrder')}
           </Button>
-          <Button full variant="ghost" className="mt-3" onClick={() => navigate('/')}>{t('confirmation.continueShopping')}</Button>
+          <Button full variant="ghost" className="mt-3" onClick={() => navigate('/boutique')}>{t('confirmation.continueShopping')}</Button>
         </div>
       </Page>
     </>

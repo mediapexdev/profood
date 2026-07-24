@@ -192,7 +192,7 @@ export function SuiviPage() {
             </div>
           )}
 
-          <Button full variant="ghost" className="mb-2" onClick={() => navigate('/')}>{t('suivi.backToShop')}</Button>
+          <Button full variant="ghost" className="mb-2" onClick={() => navigate('/boutique')}>{t('suivi.backToShop')}</Button>
         </div>
       </Page>
     </>

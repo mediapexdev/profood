@@ -22,7 +22,7 @@ export function PanierPage() {
             <span className="opacity-40"><Icon name="shopping_bag" size={54} /></span>
             <p className="font-title font-extrabold text-lg text-ink">{t('cart.emptyTitle')}</p>
             <p className="text-[14px]">{t('cart.emptyHint')}</p>
-            <Button className="mt-2" onClick={() => navigate('/')}>{t('common.viewShop')}</Button>
+            <Button className="mt-2" onClick={() => navigate('/boutique')}>{t('common.viewShop')}</Button>
           </div>
         </Page>
       </>

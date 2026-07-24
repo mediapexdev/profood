@@ -68,7 +68,7 @@ export function PaiementRetourPage({ outcome }: { outcome: 'success' | 'cancelle
             <h2 className="font-title font-extrabold text-2xl mt-4">{t('paiement.cancelledTitle')}</h2>
             <p className="text-taupe mt-1">{t('paiement.cancelledHint')}</p>
             <Button full className="mt-6" onClick={() => navigate('/panier')}>{t('paiement.backToCart')}</Button>
-            <Button full variant="ghost" className="mt-3" onClick={() => navigate('/')}>{t('common.viewShop')}</Button>
+            <Button full variant="ghost" className="mt-3" onClick={() => navigate('/boutique')}>{t('common.viewShop')}</Button>
           </div>
         </Page>
       </>
@@ -90,7 +90,7 @@ export function PaiementRetourPage({ outcome }: { outcome: 'success' | 'cancelle
                 {t('paiement.receivedHint')}
               </p>
               <Button full className="mt-6" onClick={() => navigate('/commandes')}>{t('commandes.title')}</Button>
-              <Button full variant="ghost" className="mt-3" onClick={() => navigate('/')}>{t('common.viewShop')}</Button>
+              <Button full variant="ghost" className="mt-3" onClick={() => navigate('/boutique')}>{t('common.viewShop')}</Button>
             </>
           ) : (
             <p className="text-taupe pt-6">{t('paiement.wait')}</p>

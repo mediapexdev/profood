@@ -41,7 +41,7 @@ export function BoutiquePage() {
 
   return (
     <>
-      <AppBar title="PROFOOD" />
+      <AppBar title={t('nav.shop')} />
       <Page>
         <div className="mx-auto max-w-6xl">
           <section className="px-4 md:px-6 pt-3 md:pt-8 pb-1">

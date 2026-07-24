@@ -10,14 +10,15 @@ import { useI18n } from '../../i18n'
  *  - mobile : titre (ou retour) + actions, compacte, calée sur la safe-area ;
  *  - desktop (≥768px) : marque + liens de navigation + actions (vraie appli web).
  */
-export function AppBar({ title, back = false }: { title: string; back?: boolean }) {
+export function AppBar({ title, back = false, brand = false }: { title: string; back?: boolean; brand?: boolean }) {
   const { t } = useI18n()
   const navigate = useNavigate()
   const { isDark, toggle } = useTheme()
   const { count } = useCart()
 
   const LINKS = [
-    { to: '/', label: t('nav.shop'), end: true },
+    { to: '/', label: t('nav.home'), end: true },
+    { to: '/boutique', label: t('nav.shop') },
     { to: '/box', label: t('nav.boxes') },
     { to: '/composer', label: t('nav.composer') },
     { to: '/panier', label: t('nav.cart') },
@@ -37,12 +38,16 @@ export function AppBar({ title, back = false }: { title: string; back?: boolean 
               <Icon name="arrow_back_ios_new" size={22} />
             </button>
           )}
-          <h1 className="text-[19px] font-extrabold truncate">{title}</h1>
+          {brand ? (
+            <img src="/logo-profood-mini.svg" alt={title} className="h-6 w-auto dark:[filter:invert(1)_hue-rotate(180deg)]" />
+          ) : (
+            <h1 className="text-[19px] font-extrabold truncate">{title}</h1>
+          )}
         </div>
 
         {/* Desktop : marque + liens */}
-        <button onClick={() => navigate('/')} className="hidden md:block font-title text-xl font-extrabold tracking-tight">
-          PRO<span className="text-terre">FOOD</span>
+        <button onClick={() => navigate('/')} aria-label="PROFOOD" className="hidden md:block shrink-0">
+          <img src="/logo-profood-mini.svg" alt="PROFOOD" className="h-7 w-auto dark:[filter:invert(1)_hue-rotate(180deg)]" />
         </button>
         <nav className="hidden md:flex items-center gap-1 ml-6 flex-1">
           {LINKS.map((l) => (
