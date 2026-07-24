@@ -308,6 +308,19 @@ export const fr = {
   'boxes.addToCart': 'Ajouter la box au panier',
   'boxes.fillFirst': 'Encore {count} découpe(s) à choisir',
 
+  // Composition d'une box (calquée sur le site vitrine)
+  'boxDetail.all': 'Tous',
+  'boxDetail.autoFill': 'Remplir automatiquement',
+  'boxDetail.autoFilled': 'Sélection équilibrée proposée — modifiez-la librement.',
+  'boxDetail.choose': 'Choisissez {count} découpes parmi {total} produits.',
+  'boxDetail.complete': 'Votre box est complète ✓ — validez-la quand vous êtes prêt.',
+  'boxDetail.completeShort': 'Votre box est complète ✓',
+  'boxDetail.cuts': '{n} / {total} découpes',
+  'boxDetail.viewMyBox': 'Voir ma box ({n}/{total})',
+  'boxDetail.myBox': 'Ma Box {name}',
+  'boxDetail.removeAll': 'Tout retirer',
+  'boxDetail.validate': 'Valider ma box',
+
   // Profil (édition + mot de passe)
   'account.editProfile': 'Modifier mon profil',
   'profil.title': 'Mon profil',

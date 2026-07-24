@@ -75,7 +75,7 @@ export function BoutiquePage() {
 
           {/* Onglets catégories (masqués pendant une recherche) + tri */}
           {!searching && (
-            <div className="sticky top-14 md:top-16 z-10 bg-creme/85 backdrop-blur px-4 md:px-6 py-2.5 flex gap-2 overflow-x-auto no-select">
+            <div className="sticky top-0 z-10 bg-creme/85 backdrop-blur px-4 md:px-6 py-2.5 flex gap-2 overflow-x-auto no-select">
               {CATEGORIES.map((c) => (
                 <button
                   key={c.id}

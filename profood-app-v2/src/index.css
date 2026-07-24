@@ -89,7 +89,10 @@ button { font-family: inherit; }
 
 /* ---------- Coquille : scroll unique, barres calées sur la safe-area ---------- */
 .app-scroll {
-  min-height: 100dvh;
+  /* C'est MAIN qui défile (pas le document) : indispensable pour que les
+     éléments sticky internes (jauges, barres d'action) s'épinglent. */
+  height: 100dvh;
+  overflow-y: auto;
   overflow-x: hidden;
   padding-top: calc(var(--bar-h) + var(--sai-top));
   padding-bottom: calc(var(--tabbar-h) + var(--sai-bottom) + 8px);
