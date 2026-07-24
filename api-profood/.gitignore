@@ -17,3 +17,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Bundle d'illustrations généré par tools/build-catalog-images-bundle.py
+/catalog-images-bundle/
+/catalog-images-bundle.zip

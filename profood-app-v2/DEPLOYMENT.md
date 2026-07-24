@@ -53,6 +53,11 @@ npm run open:ios       # Xcode
 - **PayTech** (`.env` serveur) : `PAY_TECH_API_KEY` / `PAY_TECH_API_SECRET` posés, et `PAYTECH_TEST_MODE=false` pour encaisser réellement (fail-safe : toute autre valeur = sandbox). L'IPN est en dur sur `https://api.profood-app.com/api/redirect-payment`.
 - ⚠️ **`services.paytech.client_app_url` doit pointer sur le domaine où la v2 est déployée** : le serveur construit les URLs de retour de paiement (`/guest-order-success/{hash}?ref=`, `/orders/successful-order/{hash}`, `/orders/cancelled-order/{hash}`, `/views/cart`) à partir de cette valeur. La v2 route ces quatre chemins ; s'il pointe encore sur l'app v1, le client revient sur la v1 après paiement.
 - Frais de livraison : par **commune** (`communes.delivery_fee`) + franco global (`delivery_settings.free_shipping_threshold`), gérés dans l'app manager — la v2 les affiche via `POST /quote-delivery-fee` (public) et le serveur les recalcule à la commande.
+- **Migration des images produits** (remplace les base64 legacy par les visuels pro de la v2, IDs alignés) :
+  1. En local : `cd api-profood && python3 tools/build-catalog-images-bundle.py` → `catalog-images-bundle.zip` (~4 Mo, 61 découpes + 4 box + 3 catégories + manifest).
+  2. Téléverser et dézipper sur le serveur, puis `php artisan catalog-images:import /chemin/catalog-images-bundle --dry-run` (contrôle) puis sans `--dry-run`.
+  3. Pré-requis : lien `php artisan storage:link` (la route publique `api/image/{path}` lit `storage/app/public/`). Les PNG gardent leur transparence (aucun réencodage) ; l'ancienne illustration disque est nettoyée, les base64 sont simplement remplacés. Idempotent (re-lançable).
+  Bénéfices : `get-slices` sans base64 (payload divisé), mêmes visuels dans v1/manager/livreur que dans la v2.
 
 ## 6. Limites connues avant un go-live complet (état 2026-07-23, après ajout PayTech/panier/i18n)
 
