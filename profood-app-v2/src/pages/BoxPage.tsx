@@ -5,6 +5,7 @@ import { AppBar } from '../components/shell/AppBar'
 import { Sheet } from '../components/shell/Sheet'
 import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
+import { ProgressRing } from '../components/ui/ProgressRing'
 import { useCatalog } from '../contexts/CatalogContext'
 import { useCart } from '../contexts/CartContext'
 import { categoryLabel } from '../lib/catalog'
@@ -289,9 +290,19 @@ export function BoxDetailPage() {
           >
             <button
               onClick={() => { haptic('light'); setSheetOpen(true) }}
-              className="w-full flex items-center justify-between rounded-full bg-ink text-surface px-5 py-3.5 font-title font-bold text-[15px] active:opacity-90"
+              className="w-full flex items-center gap-3 rounded-full bg-ink text-surface pl-2.5 pr-5 py-2 font-title font-bold text-[15px] active:opacity-90"
             >
-              <span>{t('boxDetail.viewMyBox', { n: total, total: box.capacity })}</span>
+              {/* La box se remplit sous les yeux : anneau de progression. */}
+              <ProgressRing
+                value={total}
+                max={box.capacity}
+                size={38}
+                stroke={3.5}
+                className={full ? 'text-halal' : 'text-terre'}
+              >
+                <span className="text-[11px] font-extrabold tabular-nums">{total}</span>
+              </ProgressRing>
+              <span className="flex-1 text-left">{t('boxDetail.viewMyBox', { n: total, total: box.capacity })}</span>
               <span className="text-terre tabular-nums">{fmtFcfa(box.price)}</span>
             </button>
           </div>

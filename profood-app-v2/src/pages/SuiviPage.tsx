@@ -124,9 +124,22 @@ export function SuiviPage() {
                 return (
                   <li key={s.key} className="relative flex gap-3.5 pb-6 last:pb-0">
                     {i < STAGES.length - 1 && (
-                      <span className={`absolute left-[15px] top-8 bottom-0 w-0.5 ${i < activeIdx ? 'bg-terre' : 'bg-sable'}`} />
+                      <span className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-sable">
+                        {i < activeIdx && (
+                          <span
+                            className="timeline-grow absolute inset-0 bg-terre"
+                            style={{ animationDelay: `${200 + i * 320}ms` }}
+                          />
+                        )}
+                      </span>
                     )}
-                    <span className={`relative z-10 w-8 h-8 shrink-0 rounded-full grid place-items-center border-2 transition-colors ${done ? 'bg-terre border-terre text-white' : 'bg-surface border-sable text-taupe'} ${isCurrent && !delivered ? 'animate-pop' : ''}`}>
+                    <span
+                      className={`relative z-10 w-8 h-8 shrink-0 rounded-full grid place-items-center border-2 transition-colors ${done ? 'bg-terre border-terre text-white animate-pop' : 'bg-surface border-sable text-taupe'}`}
+                      style={done ? { animationDelay: `${i * 320}ms` } : undefined}
+                    >
+                      {isCurrent && !delivered && (
+                        <span className="absolute inset-0 rounded-full bg-terre/60 animate-ping [animation-duration:1.9s]" aria-hidden />
+                      )}
                       <Icon name={done ? s.icon : 'radio_button_unchecked'} size={done ? 18 : 16} fill={done} />
                     </span>
                     <div className="pt-1">

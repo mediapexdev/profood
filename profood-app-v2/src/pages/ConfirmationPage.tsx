@@ -99,8 +99,20 @@ export function ConfirmationPage() {
       <AppBar title={t('confirmation.title')} />
       <Page noTabbar>
         <div className="mx-auto max-w-lg px-5 md:px-6 pt-8 flex flex-col items-center text-center">
-          <div className="w-20 h-20 rounded-full bg-halal/15 grid place-items-center text-halal animate-pop">
-            <Icon name="check_circle" size={52} fill />
+          <div className="relative w-20 h-20 rounded-full bg-halal/15 grid place-items-center text-halal animate-pop">
+            {/* Coche dessinée au stylo (cercle puis trait), + éclat discret. */}
+            <svg className="check-draw" width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden>
+              <circle cx="28" cy="28" r="25" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+              <path d="M17 29.5 25 37 39 21" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="burst pointer-events-none absolute inset-0" aria-hidden>
+              <span style={{ '--bx': '-46px', '--by': '-34px', background: 'var(--color-terre)' } as React.CSSProperties} />
+              <span style={{ '--bx': '48px', '--by': '-28px', background: 'var(--color-lumiere)' } as React.CSSProperties} />
+              <span style={{ '--bx': '-38px', '--by': '40px', background: 'var(--color-halal)' } as React.CSSProperties} />
+              <span style={{ '--bx': '42px', '--by': '44px', background: 'var(--color-terre)' } as React.CSSProperties} />
+              <span style={{ '--bx': '0px', '--by': '-52px', background: 'var(--color-halal)' } as React.CSSProperties} />
+              <span style={{ '--bx': '56px', '--by': '8px', background: 'var(--color-lumiere)' } as React.CSSProperties} />
+            </span>
           </div>
           <h2 className="font-title font-extrabold text-2xl mt-4">{t('confirmation.thanks', { name: order.customer.name.split(' ')[0] })}</h2>
           <p className="text-taupe mt-1">{t('confirmation.received')}</p>

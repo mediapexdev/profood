@@ -4,6 +4,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { useCart } from '../../contexts/CartContext'
 import { haptic } from '../../lib/haptics'
 import { useI18n } from '../../i18n'
+import { withViewTransition } from '../../lib/vt'
 
 /**
  * Barre supérieure fixe, responsive :
@@ -34,7 +35,7 @@ export function AppBar({ title, back = false, brand = false }: { title: string; 
         {/* Mobile : retour ou titre */}
         <div className="flex items-center gap-2 md:hidden flex-1 min-w-0">
           {back && (
-            <button onClick={() => { haptic('light'); navigate(-1) }} className="w-10 h-10 -ml-1 grid place-items-center rounded-full active:bg-creme-dark text-ink" aria-label={t('common.back')}>
+            <button onClick={() => { haptic('light'); withViewTransition(() => navigate(-1)) }} className="w-10 h-10 -ml-1 grid place-items-center rounded-full active:bg-creme-dark text-ink" aria-label={t('common.back')}>
               <Icon name="arrow_back_ios_new" size={22} />
             </button>
           )}

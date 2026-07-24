@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
+import { ProgressRing } from '../components/ui/ProgressRing'
 import { DIAGRAMS, getCutInfo } from '../lib/anatomy'
 import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
@@ -37,14 +38,15 @@ export function ComposerPage() {
     })
   }
 
-  // Zones allumées = union des zones des découpes choisies.
+  // Zones allumées, avec leur intensité : plus une zone est demandée par la
+  // sélection, plus elle s'illumine.
   const activeZones = useMemo(() => {
-    const set = new Set<string>()
+    const map = new Map<string, number>()
     for (const id of picks) {
       const s = SLICES.find((x) => x.id === id)
-      if (s) getCutInfo(s.name)?.zones.forEach((z) => set.add(z))
+      if (s) getCutInfo(s.name)?.zones.forEach((z) => map.set(z, (map.get(z) ?? 0) + 1))
     }
-    return set
+    return map
   }, [picks, SLICES])
 
   // Somme des prix réels des découpes : identique au montant que le serveur
@@ -71,13 +73,19 @@ export function ComposerPage() {
           <div className="relative rounded-card overflow-hidden border border-sable bg-surface aspect-[3/2]">
             <img src={BEEF.src} alt={t('composer.chartAlt')} className="absolute inset-0 h-full w-full object-contain" />
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
-              {Array.from(activeZones).map((zid) => {
+              {Array.from(activeZones).map(([zid, n]) => {
                 const z = BEEF.zones[zid]
                 if (!z) return null
+                const intensity = Math.min(0.3 + n * 0.14, 0.62)
                 return (
-                  <ellipse key={zid} cx={z.cx} cy={z.cy} rx={z.rx} ry={z.ry}
-                    fill="var(--color-terre)" fillOpacity="0.45" stroke="var(--color-terre)"
-                    strokeWidth="1" strokeDasharray="3 2" className="animate-pop" />
+                  <g key={zid} className="zone-glow">
+                    {/* Halo doux qui respire, puis cœur de zone. */}
+                    <ellipse cx={z.cx} cy={z.cy} rx={z.rx * 1.35} ry={z.ry * 1.35}
+                      fill="var(--color-lumiere)" fillOpacity={intensity * 0.35} />
+                    <ellipse cx={z.cx} cy={z.cy} rx={z.rx} ry={z.ry}
+                      fill="var(--color-terre)" fillOpacity={intensity} stroke="var(--color-terre)"
+                      strokeWidth="1" strokeDasharray="3 2" />
+                  </g>
                 )
               })}
             </svg>
@@ -109,13 +117,23 @@ export function ComposerPage() {
             })}
           </div>
 
-          <div className="mt-5 flex items-end justify-between">
+          <div className="mt-5 flex items-center justify-between gap-3">
             <div className="flex flex-col">
               <span className="font-title font-extrabold text-2xl tabular-nums">{fmtFcfa(total)}</span>
               <span className="text-[11px] font-bold text-terre-dark">
                 {t('composer.perCut', { amount: picks.length ? `~${fmtFcfa(Math.round(total / picks.length))}` : '—' })}
               </span>
             </div>
+            {/* La box « se remplit » : anneau qui suit la sélection. */}
+            <ProgressRing
+              value={picks.length}
+              max={CAPACITY}
+              size={56}
+              stroke={5}
+              className={picks.length >= CAPACITY ? 'text-halal' : 'text-terre'}
+            >
+              <span className="font-title text-[13px] font-extrabold tabular-nums">{picks.length}/{CAPACITY}</span>
+            </ProgressRing>
           </div>
           <Button full disabled={!picks.length} className="mt-4" onClick={addToCart}>
             {picks.length ? t('composer.addToCart') : t('composer.pickCuts')}

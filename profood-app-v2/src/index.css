@@ -119,6 +119,29 @@ button { font-family: inherit; }
 .dark { --dock-rim: rgba(255, 255, 255, .07); }
 /* Verre : ombre portée + liseré lumineux interne en haut. */
 .dock { box-shadow: var(--shadow-card-hover), inset 0 1px 0 var(--dock-rim); }
+/* ---------- Suivi de commande ---------- */
+/* Segment de chronologie qui « se remplit » du haut vers le bas à l'arrivée. */
+.timeline-grow { animation: line-grow .4s var(--ease) both; transform-origin: top; }
+@keyframes line-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+/* Coche de confirmation : cercle puis trait dessinés au stylo (dashoffset). */
+.check-draw circle { stroke-dasharray: 166; stroke-dashoffset: 166; animation: draw .5s var(--ease) .1s forwards; }
+.check-draw path { stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw .3s var(--ease) .55s forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+/* Éclat discret : 6 confettis qui jaillissent puis retombent en fondu. */
+.burst span {
+  position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; border-radius: 999px;
+  opacity: 0; animation: burst .9s var(--ease) .6s both;
+}
+@keyframes burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(1); }
+}
+
+/* Zone anatomique sélectionnée : pop d'entrée puis respiration lumineuse. */
+.zone-glow { animation: pop .3s var(--ease) both, zone-breathe 2.6s ease-in-out .4s infinite; }
+@keyframes zone-breathe { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+
 /* Icône qui vient d'être activée : rebond organique « jelly ». */
 .tab-jelly { animation: tab-jelly .45s var(--ease); transform-origin: center; }
 @keyframes tab-jelly {
