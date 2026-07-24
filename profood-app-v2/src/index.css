@@ -114,6 +114,20 @@ button { font-family: inherit; }
 .animate-pop { animation: pop .3s var(--ease) both; transform-origin: center; }
 @keyframes pop { from { opacity:0; transform: scale(.6); } to { opacity:1; transform: scale(1); } }
 
+/* ---------- Dock flottant (BottomNav mobile) ---------- */
+:root { --dock-rim: rgba(255, 255, 255, .6); }
+.dark { --dock-rim: rgba(255, 255, 255, .07); }
+/* Verre : ombre portée + liseré lumineux interne en haut. */
+.dock { box-shadow: var(--shadow-card-hover), inset 0 1px 0 var(--dock-rim); }
+/* Icône qui vient d'être activée : rebond organique « jelly ». */
+.tab-jelly { animation: tab-jelly .45s var(--ease); transform-origin: center; }
+@keyframes tab-jelly {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.2, .82); }
+  55%  { transform: scale(.9, 1.08); }
+  100% { transform: scale(1); }
+}
+
 /* Révélation au scroll (cartes « Comment ça marche », accueil) : la carte
    monte en fondu avec un décalage par carte (--reveal-delay), puis la
    pastille d'icône « pop » juste après. Neutralisé par le kill-switch
