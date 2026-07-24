@@ -357,3 +357,22 @@ export async function fetchCustomerOrders(userId: number, token: string): Promis
     return []
   }
 }
+
+/**
+ * Statut serveur d'une commande INVITÉ — clé composite référence + téléphone
+ * (endpoint public throttlé, 404 générique). Renvoie null si la commande est
+ * inconnue OU n'est pas une commande invité (celles d'un compte passent par
+ * fetchCustomerOrders).
+ */
+export async function fetchGuestOrderStatus(
+  reference: string,
+  phone: string,
+): Promise<{ stage: ServerOrder['stage']; paid: boolean } | null> {
+  try {
+    const res = await api.post('/guest-order-status', { reference, phone_number: apiPhone(phone) })
+    const stage = STATUS_TO_STAGE[res.data?.status?.code ?? 8] ?? 'received'
+    return { stage, paid: res.data?.payment_status?.code === 8 }
+  } catch {
+    return null
+  }
+}

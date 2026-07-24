@@ -240,11 +240,7 @@ export function AccueilPage() {
 
           {/* ---- Pied de page marque ---- */}
           <footer className="py-10 md:py-14 text-center">
-            <img
-              src="/logo-profood-mini.svg"
-              alt="PROFOOD"
-              className="h-8 mx-auto dark:[filter:invert(1)_hue-rotate(180deg)]"
-            />
+            <img src="/logo-profood.png" alt="PROFOOD" className="h-8 w-auto mx-auto" />
             <p className="font-title font-extrabold mt-3">{t('home.footerTagline')}</p>
             <p className="text-taupe text-[13px] mt-1">{t('home.footerNote')}</p>
           </footer>

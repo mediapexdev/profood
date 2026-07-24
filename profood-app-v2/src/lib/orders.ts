@@ -112,6 +112,9 @@ export function createOrder(input: {
     serverRef: input.serverRef,
     paymentMethod: input.paymentMethod,
     paid: input.paid,
+    // Commande réelle (API) : statut serveur d'emblée — la simulation
+    // temporelle de démo ne doit jamais s'appliquer à une vraie commande.
+    serverStage: input.serverRef ? 'received' : undefined,
   }
   writeAll([order, ...readAll()])
   return order

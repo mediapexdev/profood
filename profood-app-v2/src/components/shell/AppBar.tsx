@@ -39,7 +39,7 @@ export function AppBar({ title, back = false, brand = false }: { title: string; 
             </button>
           )}
           {brand ? (
-            <img src="/logo-profood-mini.svg" alt={title} className="h-6 w-auto dark:[filter:invert(1)_hue-rotate(180deg)]" />
+            <img src="/logo-profood.png" alt={title} className="h-6 w-auto" />
           ) : (
             <h1 className="text-[19px] font-extrabold truncate">{title}</h1>
           )}
@@ -47,7 +47,7 @@ export function AppBar({ title, back = false, brand = false }: { title: string; 
 
         {/* Desktop : marque + liens */}
         <button onClick={() => navigate('/')} aria-label="PROFOOD" className="hidden md:block shrink-0">
-          <img src="/logo-profood-mini.svg" alt="PROFOOD" className="h-7 w-auto dark:[filter:invert(1)_hue-rotate(180deg)]" />
+          <img src="/logo-profood.png" alt="PROFOOD" className="h-7 w-auto" />
         </button>
         <nav className="hidden md:flex items-center gap-1 ml-6 flex-1">
           {LINKS.map((l) => (
