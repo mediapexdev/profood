@@ -8,6 +8,7 @@ import { useCart } from '../contexts/CartContext'
 import { useFavorites } from '../contexts/FavoritesContext'
 import { haptic } from '../lib/haptics'
 import { withViewTransition, sliceVtName } from '../lib/vt'
+import { retryImgOnError } from '../lib/imgRetry'
 import { useI18n } from '../i18n'
 
 /**
@@ -32,7 +33,7 @@ export function ProductCard({ slice }: { slice: Slice }) {
         className="relative aspect-square overflow-hidden bg-creme text-left"
         aria-label={slice.name}
       >
-        <img src={slice.image} alt={slice.name} loading="lazy" style={sliceVtName(slice.id)} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <img src={slice.image} alt={slice.name} loading="lazy" onError={retryImgOnError} style={sliceVtName(slice.id)} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <span className="absolute left-2 top-2 rounded-full bg-terre px-2.5 py-0.5 font-title text-[10px] font-bold uppercase tracking-wide text-white">
           {categoryLabel(slice.category)}
         </span>

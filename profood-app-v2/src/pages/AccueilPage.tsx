@@ -11,6 +11,7 @@ import { useReveal } from '../lib/useReveal'
 import { haptic } from '../lib/haptics'
 import { useI18n } from '../i18n'
 import type { MsgKey } from '../i18n/fr'
+import { retryImgOnError } from '../lib/imgRetry'
 
 /**
  * Accueil vitrine — reprend section par section la home du site profood-web
@@ -134,7 +135,7 @@ export function AccueilPage() {
                       {t('home.boxPopular')}
                     </span>
                   )}
-                  <img src={b.image} alt={b.name} className="w-full aspect-[4/3] object-cover bg-creme" />
+                  <img src={b.image} alt={b.name} onError={retryImgOnError} className="w-full aspect-[4/3] object-cover bg-creme" />
                   <div className="p-3.5">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-title font-extrabold text-lg">{b.name}</span>
@@ -184,7 +185,7 @@ export function AccueilPage() {
               ))}
               {reco && (
                 <div className="mt-5 flex flex-wrap items-center gap-3 bg-terre/10 border border-terre/30 rounded-card px-4 py-3">
-                  <img src={reco.image} alt={reco.name} className="w-14 h-14 rounded-xl object-cover bg-creme" />
+                  <img src={reco.image} alt={reco.name} onError={retryImgOnError} className="w-14 h-14 rounded-xl object-cover bg-creme" />
                   <div className="flex-1 min-w-[140px]">
                     <p className="text-[11px] font-bold tracking-[.14em] uppercase text-terre-deep">{t('home.quizReco')}</p>
                     <p className="font-title font-extrabold">

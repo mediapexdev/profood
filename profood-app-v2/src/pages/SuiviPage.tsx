@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
 import { useI18n } from '../i18n'
+import { retryImgOnError } from '../lib/imgRetry'
 
 export function SuiviPage() {
   const { t, locale } = useI18n()
@@ -169,7 +170,7 @@ export function SuiviPage() {
             <div className="flex flex-col gap-2.5">
               {order.lines.map((l, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <img src={l.image} alt={l.name} className="w-11 h-11 rounded-lg object-cover bg-creme shrink-0" />
+                  <img src={l.image} alt={l.name} onError={retryImgOnError} className="w-11 h-11 rounded-lg object-cover bg-creme shrink-0" />
                   <span className="flex-1 text-[14px] truncate">{l.name}</span>
                   <span className="text-[13px] text-taupe tabular-nums">×{l.qty}</span>
                   <span className="text-[14px] font-semibold tabular-nums">{fmtFcfa(l.unitPrice * l.qty)}</span>

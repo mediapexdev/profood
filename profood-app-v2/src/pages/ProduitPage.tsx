@@ -12,6 +12,7 @@ import { useFavorites } from '../contexts/FavoritesContext'
 import { haptic } from '../lib/haptics'
 import { sliceVtName } from '../lib/vt'
 import { useI18n } from '../i18n'
+import { retryImgOnError } from '../lib/imgRetry'
 
 export function ProduitPage() {
   const { t } = useI18n()
@@ -36,7 +37,7 @@ export function ProduitPage() {
       <Page noTabbar>
         <div className="mx-auto max-w-5xl md:px-6 md:pt-6 md:grid md:grid-cols-2 md:gap-8">
           <div className="aspect-square bg-creme md:rounded-card md:overflow-hidden md:border md:border-sable">
-            <img src={slice.image} alt={slice.name} style={sliceVtName(slice.id)} className="h-full w-full object-cover" />
+            <img src={slice.image} alt={slice.name} onError={retryImgOnError} style={sliceVtName(slice.id)} className="h-full w-full object-cover" />
           </div>
 
           <div className="px-4 pt-4 md:pt-0">

@@ -7,6 +7,7 @@ import { useCart } from '../contexts/CartContext'
 import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
 import { useI18n } from '../i18n'
+import { retryImgOnError } from '../lib/imgRetry'
 
 export function PanierPage() {
   const { t } = useI18n()
@@ -43,7 +44,7 @@ export function PanierPage() {
 
           {lines.map((l) => (
             <div key={l.id} className="flex items-center gap-3 bg-surface border border-sable rounded-card p-3">
-              <img src={l.image} alt={l.name} className="w-16 h-16 shrink-0 rounded-lg object-cover bg-creme" />
+              <img src={l.image} alt={l.name} onError={retryImgOnError} className="w-16 h-16 shrink-0 rounded-lg object-cover bg-creme" />
               <div className="flex-1 min-w-0">
                 <p className="font-title font-bold text-[15px] truncate">{l.name}</p>
                 {l.kind === 'box' && <p className="text-[11px] font-bold text-terre-deep">{t('box.composed', { count: l.cutIds?.length ?? 0 })}</p>}

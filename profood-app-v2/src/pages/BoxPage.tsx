@@ -13,6 +13,7 @@ import type { Slice } from '../lib/catalog'
 import { fmtFcfa } from '../lib/format'
 import { haptic } from '../lib/haptics'
 import { useI18n } from '../i18n'
+import { retryImgOnError } from '../lib/imgRetry'
 
 /**
  * Box prédéfinis (Noflaye, Woyofal, Xéweul, Téranga…) — le modèle fixe le
@@ -39,7 +40,7 @@ export function BoxesPage() {
                 onClick={() => { haptic('light'); navigate(`/box/${b.id}`) }}
                 className="text-left bg-surface border border-sable rounded-card overflow-hidden active:bg-creme-dark transition-colors"
               >
-                <img src={b.image} alt={b.name} className="w-full aspect-[4/3] object-cover bg-creme" />
+                <img src={b.image} alt={b.name} onError={retryImgOnError} className="w-full aspect-[4/3] object-cover bg-creme" />
                 <div className="p-3.5">
                   <div className="flex items-center justify-between">
                     <span className="font-title font-extrabold text-lg">{b.name}</span>
@@ -258,7 +259,7 @@ export function BoxDetailPage() {
                         {n}
                       </span>
                     )}
-                    <img src={s.image} alt={s.name} loading="lazy" className="w-full aspect-[4/3] object-cover bg-creme" />
+                    <img src={s.image} alt={s.name} loading="lazy" onError={retryImgOnError} className="w-full aspect-[4/3] object-cover bg-creme" />
                     <div className="p-2.5">
                       <p className="font-title font-bold text-[14px] leading-tight line-clamp-2">{s.name}</p>
                       <p className="text-[12px] text-taupe mt-0.5">{categoryLabel(s.category)} · {s.weight} kg</p>
