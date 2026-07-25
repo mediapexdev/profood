@@ -1079,6 +1079,9 @@ class UserController extends Controller
                 return response()->json(['message' => 'success'], 200);
             }
             catch (\Exception $e) {
+                // L'envoi a échoué : la tentative ne doit pas consommer le quota SMS.
+                $this->refundVerificationCodeThrottle('PASSWORD_RESET', $request->phone_number);
+
                 // Log Twilio SMS failure
                 Log::error('Failed to send SMS verification code for password reset', [
                     'phone_number' => $request->phone_number,
@@ -1261,6 +1264,14 @@ class UserController extends Controller
                 return response()->json(['message' => 'success'], 200);
             }
             catch (\Exception $e) {
+                // L'envoi a échoué : la tentative ne doit pas consommer le quota SMS.
+                $this->refundVerificationCodeThrottle('REGISTRATION', $request->phone_number);
+
+                Log::error('Failed to send SMS verification code for registration', [
+                    'phone_number' => $request->phone_number,
+                    'error' => $e->getMessage(),
+                    'action' => 'checkUserDataRequestingRegistration'
+                ]);
                 return response()->json(['message' => $e->getMessage()], 500);
             }
         }
@@ -1419,6 +1430,34 @@ class UserController extends Controller
             'for'           => $for,
             'phone_number'  => $phone_number
         ])->delete();
+    }
+
+    /**
+     * Refund one unit of the verification SMS quota.
+     *
+     * Called when the SMS could not be sent (Twilio failure) : no SMS ever
+     * reached the user, so the attempt must not count against their quota —
+     * otherwise three delivery failures lock a legitimate user out for the
+     * whole window without them having received a single code.
+     *
+     * @param  string  $for
+     * @param  string  $phone_number
+     *
+     * @return void
+     */
+    protected function refundVerificationCodeThrottle(string $for, string $phone_number): void
+    {
+        $phone_number = (string) Str::of($phone_number)->stripTags()->trim()->replaceMatches('/\s+/', '');
+
+        $v = VerificationCodesLog::where([
+            'for'           => $for,
+            'phone_number'  => $phone_number
+        ])->first();
+
+        if(isset($v) && (int)$v->sent > 0){
+            $v->sent = (int)$v->sent - 1;
+            $v->save();
+        }
     }
 
     /**

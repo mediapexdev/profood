@@ -86,7 +86,36 @@ class VerificationCodeThrottleTest extends TestCase
         ]);
 
         $this->assertNotEquals(429, $response->status());
-        $this->assertSame(1, (int) $log->fresh()->sent);
+        // The failed send is refunded : the quota is back to zero.
+        $this->assertSame(0, (int) $log->fresh()->sent);
+    }
+
+    /** @test */
+    public function a_failed_sms_send_does_not_consume_the_quota(): void
+    {
+        // Twilio is not reachable from the test suite : every request fails at
+        // the SMS step. Three failures in a row used to exhaust the quota and
+        // lock the user out for 30 minutes without a single SMS received.
+        for ($i = 0; $i < 3; $i++) {
+            $response = $this->postJson('/api/user-phonenumber-exists', [
+                'app_key'      => 'test-app-key',
+                'phone_number' => $this->phone,
+            ]);
+            $this->assertNotEquals(429, $response->status());
+        }
+
+        $log = VerificationCodesLog::where([
+            'phone_number' => $this->phone,
+            'for'          => 'PASSWORD_RESET',
+        ])->first();
+        $this->assertSame(0, (int) ($log->sent ?? 0));
+
+        // A fourth attempt is still allowed : nothing was ever delivered.
+        $response = $this->postJson('/api/user-phonenumber-exists', [
+            'app_key'      => 'test-app-key',
+            'phone_number' => $this->phone,
+        ]);
+        $this->assertNotEquals(429, $response->status());
     }
 
     /** @test */
