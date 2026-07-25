@@ -18,6 +18,6 @@ yarn-error.log
 /.idea
 /.vscode
 
-# Bundle d'illustrations généré par tools/build-catalog-images-bundle.py
+# Dossier dézippé du bundle d'illustrations (le .zip, lui, est versionné
+# pour pouvoir être récupéré directement sur le serveur)
 /catalog-images-bundle/
-/catalog-images-bundle.zip
