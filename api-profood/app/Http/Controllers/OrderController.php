@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
-use Twilio\Rest\Client as TwilioClient;
+use App\Core\Sms;
 
 /**
  * 
@@ -324,16 +324,6 @@ class OrderController extends Controller
             //     return response()->json(['message' => $exception->getMessage()], 422);
             // }
             try{
-                /**
-                 * Account SID and Auth Token from twilio.com/console
-                 * To set up environmental variables, see http://twil.io/secure
-                 */
-                $auth_token = env('TWILIO_AUTH_TOKEN');
-                $account_sid = env('TWILIO_ACCOUNT_SID');
-                /**
-                 *  A Twilio number "Profood" is used instead
-                 */
-                // $twilio_number = env('TWILIO_PHONE_NUMBER');
                 $order_date = (new \IntlDateFormatter(
                     'fr_SN',
                     \IntlDateFormatter::FULL,
@@ -343,14 +333,7 @@ class OrderController extends Controller
                 ))->format(new \DateTime($order->created_at));
 
                 $customer_phone_number = Str::of($order->customer->phoneNumber())->stripTags()->trim();
-                $client = new TwilioClient($account_sid, $auth_token);
-                $client->messages->create(
-                    "+221{$customer_phone_number}", // Where to send a text message
-                    array(
-                        'from' => "Profood",  // "Profood" is used instead of the phone number
-                        'body' => "{$order->string_id} est votre numéro de commande Profood du {$order_date}. Nous vous remercions pour votre commande. Nous vous remercions et vous informerons dès que la commande sera traitée et prête à être livrée.",
-                    )
-                );
+                Sms::send((string) $customer_phone_number, "{$order->string_id} est votre numéro de commande Profood du {$order_date}. Nous vous remercions pour votre commande. Nous vous remercions et vous informerons dès que la commande sera traitée et prête à être livrée.");
 
                 // Log successful SMS confirmation sent to customer
                 Log::info('Order confirmation SMS sent to customer', [
@@ -769,9 +752,6 @@ class OrderController extends Controller
 
         // Send SMS confirmation to guest
         try {
-            $auth_token = env('TWILIO_AUTH_TOKEN');
-            $account_sid = env('TWILIO_ACCOUNT_SID');
-
             $order_date = (new \IntlDateFormatter(
                 'fr_SN',
                 \IntlDateFormatter::FULL,
@@ -780,14 +760,7 @@ class OrderController extends Controller
                 \IntlDateFormatter::GREGORIAN
             ))->format(new \DateTime($order->created_at));
 
-            $client = new TwilioClient($account_sid, $auth_token);
-            $client->messages->create(
-                "+221{$guest_phone_number}", // Where to send a text message
-                array(
-                    'from' => "Profood",
-                    'body' => "{$order->string_id} est votre numéro de commande Profood du {$order_date}. Nous vous remercions pour votre commande. Nous vous informerons dès que la commande sera traitée et prête à être livrée.",
-                )
-            );
+            Sms::send((string) $guest_phone_number, "{$order->string_id} est votre numéro de commande Profood du {$order_date}. Nous vous remercions pour votre commande. Nous vous informerons dès que la commande sera traitée et prête à être livrée.");
 
             // Log successful SMS confirmation sent to guest
             Log::info('Guest order confirmation SMS sent', [
@@ -1097,16 +1070,6 @@ class OrderController extends Controller
             // $customer_email = Str::of($order->customer->email())->stripTags()->trim();
             // Mail::to($customer_email)->bcc('commercial@profood-app.com')->locale('fr')
             // ->queue(new CustomerOrderStatusNotificationEmail($order, "Votre commande n°{$order->string_id} a été annulée"));
-            /**
-             * Account SID and Auth Token from twilio.com/console
-             * To set up environmental variables, see http://twil.io/secure
-             */
-            $auth_token = env('TWILIO_AUTH_TOKEN');
-            $account_sid = env('TWILIO_ACCOUNT_SID');
-            /**
-             *  A Twilio number "Profood" is used instead
-             */
-            // $twilio_number = env('TWILIO_PHONE_NUMBER');
             $order_date = (new \IntlDateFormatter(
                 'fr_SN',
                 \IntlDateFormatter::FULL,
@@ -1116,14 +1079,7 @@ class OrderController extends Controller
             ))->format(new \DateTime($order->created_at));
 
             $customer_phone_number = Str::of($order->customer->phoneNumber())->stripTags()->trim();
-            $client = new TwilioClient($account_sid, $auth_token);
-            $client->messages->create(
-                "+221{$customer_phone_number}", // Where to send a text message
-                array(
-                    'from' => "Profood",  // "Profood" is used instead of the phone number
-                    'body' => "Votre commande n°{$order->string_id} du {$order_date} a été annulée.",
-                )
-            );
+            Sms::send((string) $customer_phone_number, "Votre commande n°{$order->string_id} du {$order_date} a été annulée.");
         }
         catch(\Exception $exception) {
             // L'annulation est déjà effective : un échec de notification ne doit
@@ -1486,14 +1442,7 @@ class OrderController extends Controller
                     \IntlDateFormatter::GREGORIAN
                 ))->format(new \DateTime($order->created_at));
 
-                $client = new TwilioClient(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
-                $client->messages->create(
-                    "+221{$order->guest_phone_number}",
-                    [
-                        'from' => 'Profood',
-                        'body' => "{$order->string_id} est votre numéro de commande Profood du {$order_date}. Merci pour votre commande.",
-                    ]
-                );
+                Sms::send((string) $order->guest_phone_number, "{$order->string_id} est votre numéro de commande Profood du {$order_date}. Merci pour votre commande.");
             } catch (\Throwable $exception) {
                 Log::error('Failed to send manual order SMS', [
                     'order_id' => $order->id,
@@ -2100,28 +2049,11 @@ class OrderController extends Controller
                 // $customer_email = Str::of($order->customer->email())->stripTags()->trim();
                 // Mail::to($customer_email)->bcc('commercial@profood-app.com')->locale('fr')
                 // ->queue(new CustomerOrderStatusNotificationEmail($order, $text));
-                /**
-                 * Account SID and Auth Token from twilio.com/console
-                 * To set up environmental variables, see http://twil.io/secure
-                 */
-                $auth_token = env('TWILIO_AUTH_TOKEN');
-                $account_sid = env('TWILIO_ACCOUNT_SID');
-                /**
-                 *  A Twilio number "Profood" is used instead
-                 */
-                // $twilio_number = env('TWILIO_PHONE_NUMBER');
                 // Guest orders have no customer relation; notify the guest phone.
                 $customer_phone_number = $order->customer
                     ? Str::of($order->customer->phoneNumber())->stripTags()->trim()
                     : Str::of($order->guest_phone_number)->stripTags()->trim();
-                $client = new TwilioClient($account_sid, $auth_token);
-                $client->messages->create(
-                    "+221{$customer_phone_number}", // Where to send a text message
-                    array(
-                        'from' => "Profood",  // "Profood" is used instead of the phone number
-                        'body' => $text,
-                    )
-                );
+                Sms::send((string) $customer_phone_number, (string) $text);
 
                 // Log successful status notification SMS
                 Log::info('Order status notification SMS sent to customer', [

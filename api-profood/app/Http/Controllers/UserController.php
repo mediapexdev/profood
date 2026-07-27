@@ -27,7 +27,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use App\Services\ImageService;
 use Throwable;
-use Twilio\Rest\Client as TwilioClient;
+use App\Core\Sms;
 
 /**
  * 
@@ -1046,26 +1046,8 @@ class UserController extends Controller
                 if(isset($throttled)){
                     return $throttled;
                 }
-                /**
-                 * Account SID and Auth Token from twilio.com/console
-                 * To set up environmental variables, see http://twil.io/secure
-                 */
-                $auth_token = env('TWILIO_AUTH_TOKEN');
-                $account_sid = env('TWILIO_ACCOUNT_SID');
-                /**
-                 *  A Twilio number "Profood" is used instead
-                 */
-                // $twilio_number = env('TWILIO_PHONE_NUMBER');
-
                 $code = $this->generateVerificationCode();
-                $client = new TwilioClient($account_sid, $auth_token);
-                $client->messages->create(
-                    "+221{$request->phone_number}", // Where to send a text message
-                    array(
-                        'from' => "Profood",  // "Profood" is used instead of the phone number
-                        'body' => "{$code} est votre code de vérification Profood"
-                    )
-                );
+                Sms::send((string) $request->phone_number, "{$code} est votre code de vérification Profood");
 
                 // Le code n'est connu que du serveur et du destinataire du SMS.
                 $this->issueVerificationCode('PASSWORD_RESET', $request->phone_number, $code);
@@ -1088,7 +1070,9 @@ class UserController extends Controller
                     'error' => $e->getMessage(),
                     'action' => 'userPhoneNumberExists'
                 ]);
-                return response()->json(['message' => $e->getMessage()], 500);
+                // Le détail technique (ex. « username is required ») reste dans
+                // les logs : l'utilisateur reçoit un message actionnable.
+                return response()->json(['message' => self::SMS_SEND_ERROR_MESSAGE], 500);
             }
         }
         return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 401);
@@ -1238,26 +1222,9 @@ class UserController extends Controller
                 if(isset($throttled)){
                     return $throttled;
                 }
-                /**
-                 * Account SID and Auth Token from twilio.com/console
-                 * To set up environmental variables, see http://twil.io/secure
-                 */
-                $auth_token = env('TWILIO_AUTH_TOKEN');
-                $account_sid = env('TWILIO_ACCOUNT_SID');
-                /**
-                 *  A Twilio number "Profood" is used instead
-                 */
-                // $twilio_number = env('TWILIO_PHONE_NUMBER');
-
                 $code = $this->generateVerificationCode();
-                $client = new TwilioClient($account_sid, $auth_token);
-                $client->messages->create(
-                    "+221{$request->phone_number}", // Where to send a text message
-                    array(
-                        'from' => "Profood",  // "Profood" is used instead of the phone number
-                        'body' => "{$code} est votre code de vérification Profood"
-                    )
-                );
+                Sms::send((string) $request->phone_number, "{$code} est votre code de vérification Profood");
+
                 // Le code n'est connu que du serveur et du destinataire du SMS.
                 $this->issueVerificationCode('REGISTRATION', $request->phone_number, $code);
 
@@ -1272,7 +1239,9 @@ class UserController extends Controller
                     'error' => $e->getMessage(),
                     'action' => 'checkUserDataRequestingRegistration'
                 ]);
-                return response()->json(['message' => $e->getMessage()], 500);
+                // Le détail technique (ex. « username is required ») reste dans
+                // les logs : l'utilisateur reçoit un message actionnable.
+                return response()->json(['message' => self::SMS_SEND_ERROR_MESSAGE], 500);
             }
         }
         return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 401);
@@ -1347,6 +1316,11 @@ class UserController extends Controller
      * Number of verification SMS allowed per phone number and per window.
      */
     protected const VERIFICATION_CODE_MAX_SENT = 3;
+
+    /**
+     * User-facing message when the verification SMS could not be sent.
+     */
+    protected const SMS_SEND_ERROR_MESSAGE = "L'envoi du SMS de vérification a échoué. Merci de réessayer dans quelques instants ou de contacter le service client.";
 
     /**
      * Length of the throttling window, in minutes.
