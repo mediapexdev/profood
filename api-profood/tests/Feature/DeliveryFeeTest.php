@@ -50,7 +50,10 @@ class DeliveryFeeTest extends TestCase
     private function guestOrderPayload(array $overrides = []): array
     {
         $boxType = BoxType::first();
-        $slices = Slice::take(2)->get();
+        // Sans ORDER BY, Postgres peut renvoyer les lignes dans un ordre qui
+        // varie d'un run à l'autre : le payload et expectedSubtotal() doivent
+        // impérativement voir les mêmes découpes.
+        $slices = Slice::orderBy('id')->take(2)->get();
 
         return array_merge([
             'order_id'           => sha1('delivery-test'),
@@ -78,7 +81,7 @@ class DeliveryFeeTest extends TestCase
     private function expectedSubtotal(): int
     {
         $boxType = BoxType::first();
-        $slice = Slice::take(2)->get()[0];
+        $slice = Slice::orderBy('id')->take(2)->get()[0];
 
         return $boxType->price + ($slice->price * 3);
     }
