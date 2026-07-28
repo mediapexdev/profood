@@ -4,7 +4,7 @@ import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
-import { getOrder, estimatedDelivery } from '../lib/orders'
+import { getOrder } from '../lib/orders'
 import { ordersApiEnabled } from '../api/orders'
 import { convertGuestOrder, AuthError } from '../lib/auth'
 import { useAuth } from '../contexts/AuthContext'
@@ -121,10 +121,6 @@ export function ConfirmationPage() {
             <div className="flex justify-between items-center">
               <span className="text-[13px] text-taupe">{t('confirmation.reference')}</span>
               <span className="font-title font-bold tabular-nums">{order.ref}</span>
-            </div>
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-[13px] text-taupe">{t('confirmation.estimatedDelivery')}</span>
-              <span className="font-bold">~ {estimatedDelivery(order)}</span>
             </div>
             <div className="flex justify-between items-center mt-2">
               <span className="text-[13px] text-taupe">{t('common.total')}</span>

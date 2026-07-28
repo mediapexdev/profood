@@ -4,7 +4,7 @@
  *   / (AppLayout : AppBar responsive + contenu + BottomNav mobile)
  *     ├── /            → AccueilPage (vitrine)
  *     ├── /boutique    → BoutiquePage
- *     ├── /composer    → ComposerPage
+ *     ├── /box         → BoxesPage (box prédéfinies ; /composer redirige ici)
  *     ├── /panier      → PanierPage
  *     └── /compte      → ComptePage
  *   Plein écran (sans tab-bar, avec retour) :
@@ -33,7 +33,6 @@ import { CartProvider } from './contexts/CartContext'
 import { FavoritesProvider } from './contexts/FavoritesContext'
 import { AccueilPage } from './pages/AccueilPage'
 import { BoutiquePage } from './pages/BoutiquePage'
-import { ComposerPage } from './pages/ComposerPage'
 import { PanierPage } from './pages/PanierPage'
 import { ComptePage } from './pages/ComptePage'
 import { ProduitPage } from './pages/ProduitPage'
@@ -72,7 +71,9 @@ export default function App() {
                 <Route element={<AppLayout />}>
                   <Route path="/" element={<AccueilPage />} />
                   <Route path="/boutique" element={<BoutiquePage />} />
-                  <Route path="/composer" element={<ComposerPage />} />
+                  {/* Composeur libre masqué : l'offre se limite aux box prédéfinies,
+                      pilotées depuis l'app manager (prix/capacité maîtrisés). */}
+                  <Route path="/composer" element={<Navigate to="/box" replace />} />
                   <Route path="/box" element={<BoxesPage />} />
                   <Route path="/panier" element={<PanierPage />} />
                   <Route path="/compte" element={<ComptePage />} />

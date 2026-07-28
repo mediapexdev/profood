@@ -21,7 +21,6 @@ export function AppBar({ title, back = false, brand = false }: { title: string; 
     { to: '/', label: t('nav.home'), end: true },
     { to: '/boutique', label: t('nav.shop') },
     { to: '/box', label: t('nav.boxes') },
-    { to: '/composer', label: t('nav.composer') },
     { to: '/panier', label: t('nav.cart') },
     { to: '/compte', label: t('nav.account') },
   ]

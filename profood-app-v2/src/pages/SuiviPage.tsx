@@ -4,7 +4,7 @@ import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
-import { getOrder, currentStage, isCancelled, patchOrder, stageTime, estimatedDelivery, STAGES } from '../lib/orders'
+import { getOrder, currentStage, isCancelled, patchOrder, STAGES } from '../lib/orders'
 import { useServerOrders } from '../lib/useServerOrders'
 import { cancelOrder, ordersApiEnabled, OrderApiError } from '../api/orders'
 import { currentToken } from '../lib/auth'
@@ -15,8 +15,7 @@ import { useI18n } from '../i18n'
 import { retryImgOnError } from '../lib/imgRetry'
 
 export function SuiviPage() {
-  const { t, locale } = useI18n()
-  const hhmm = (ms: number) => new Date(ms).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+  const { t } = useI18n()
   const { token } = useParams()
   const navigate = useNavigate()
   const { user, isAuthenticated, mode } = useAuth()
@@ -107,7 +106,7 @@ export function SuiviPage() {
             <div className="min-w-0">
               <p className="font-title font-extrabold text-lg leading-tight">{t(STAGES[activeIdx].labelKey)}</p>
               <p className="text-[13px] text-taupe">
-                {delivered ? t('suivi.deliveredTo', { commune: order.customer.commune }) : t('suivi.estimatedAround', { time: estimatedDelivery(order) })}
+                {delivered ? t('suivi.deliveredTo', { commune: order.customer.commune }) : t('suivi.deliveringTo', { commune: order.customer.commune })}
               </p>
             </div>
             <span className="ml-auto text-[11px] font-bold tabular-nums text-taupe">{order.ref}</span>
@@ -121,7 +120,6 @@ export function SuiviPage() {
               {STAGES.map((s, i) => {
                 const done = i <= activeIdx
                 const isCurrent = i === activeIdx
-                const reached = stageTime(order, s.key)
                 return (
                   <li key={s.key} className="relative flex gap-3.5 pb-6 last:pb-0">
                     {i < STAGES.length - 1 && (
@@ -143,11 +141,8 @@ export function SuiviPage() {
                       )}
                       <Icon name={done ? s.icon : 'radio_button_unchecked'} size={done ? 18 : 16} fill={done} />
                     </span>
-                    <div className="pt-1">
+                    <div className="pt-1.5">
                       <p className={`font-title font-bold text-[15px] ${done ? 'text-ink' : 'text-taupe'}`}>{t(s.labelKey)}</p>
-                      <p className="text-[12px] text-taupe tabular-nums">
-                        {done ? hhmm(reached) : t('suivi.estimatedShort', { time: hhmm(reached) })}
-                      </p>
                     </div>
                   </li>
                 )

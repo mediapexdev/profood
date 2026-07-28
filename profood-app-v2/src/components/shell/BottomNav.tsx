@@ -33,7 +33,7 @@ export function BottomNav() {
   const TABS: Tab[] = [
     { to: '/', label: t('nav.home'), icon: 'home', end: true },
     { to: '/boutique', label: t('nav.shop'), icon: 'storefront' },
-    { to: '/composer', label: t('nav.composer'), icon: 'takeout_dining' },
+    { to: '/box', label: t('nav.boxes'), icon: 'takeout_dining' },
     { to: '/panier', label: t('nav.cart'), icon: 'shopping_bag' },
     { to: '/compte', label: t('nav.account'), icon: 'person' },
   ]

@@ -37,7 +37,11 @@ export function CatalogProvider({ children }: { children: React.ReactNode }) {
   const usingApi = USE_API && !!data && !isError
   const slices = usingApi ? data!.slices : LOCAL_SLICES
   const categories = usingApi ? data!.categories : LOCAL_CATEGORIES
-  const boxes = usingApi && data!.boxes.length ? data!.boxes : LOCAL_BOXES
+  // Affichage toujours du moins cher au plus cher, quelle que soit la source.
+  const boxes = useMemo(
+    () => [...(usingApi && data!.boxes.length ? data!.boxes : LOCAL_BOXES)].sort((a, b) => a.price - b.price),
+    [usingApi, data],
+  )
 
   const value = useMemo<CatalogValue>(
     () => ({
