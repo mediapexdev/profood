@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Customer;
 use App\Models\Role;
 use App\Models\User;
+use App\Http\Controllers\UserController;
 use App\Models\VerificationCodesLog;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -274,5 +275,21 @@ class PasswordResetSecurityTest extends TestCase
         // Avec le bon code : accepté.
         $this->postJson('/api/signup', array_merge($payload, ['code' => $this->code]))->assertStatus(200);
         $this->assertDatabaseHas('users', ['phone_number' => $new_phone]);
+    }
+
+    /**
+     * Les champs OTP des apps (inputMode numeric) rejettent les lettres :
+     * un code alphanumérique était impossible à saisir, pour le reset comme
+     * pour l'inscription qui partagent ce générateur.
+     */
+    public function test_generated_verification_code_is_six_digits(): void
+    {
+        $method = new \ReflectionMethod(UserController::class, 'generateVerificationCode');
+        $method->setAccessible(true);
+        $controller = app(UserController::class);
+
+        for ($i = 0; $i < 200; $i++) {
+            $this->assertMatchesRegularExpression('/^\d{6}$/', $method->invoke($controller));
+        }
     }
 }

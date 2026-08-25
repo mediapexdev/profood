@@ -1555,14 +1555,8 @@ class UserController extends Controller
      */
     protected function generateVerificationCode(): string
     {
-        $alpha = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $alphaLen = strlen($alpha) - 1;
-        $code = '';
-
-        for($i = 0; $i < 6; $i++){
-            $code .= $alpha[\rand(0, $alphaLen)];
-        }
-        return $code;
+        // 6 chiffres : les champs OTP des apps (inputMode numeric) rejettent les lettres.
+        return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
     }
 
     /**
