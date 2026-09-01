@@ -310,12 +310,14 @@ class UserController extends Controller
         // if(!Hash::check($request['admin_password'], $admin->password)){
         //     return response()->json(['message' => 'Le mot de passe saisi est incorrect'], 403);
         // }
+        $request['email'] = $this->normalizeEmail($request->email);
+
         $validator = Validator::make($request->all(), [
             'customer_id'           => ['required', 'numeric', 'exists:customers,id'],
             'first_name'            => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
             'last_name'             => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
             'phone_number'          => ['required', 'regex:#(^3[3]|^7[5-80])[ ]?[0-9]{3}([ ]?[0-9]{2}){2}$#'],
-            'email'                 => ['required', 'regex:#^[^\s@]+@[^\s@]+\.[^\s@]+$#'],
+            'email'                 => ['nullable', 'regex:#^[^\s@]+@[^\s@]+\.[^\s@]+$#'],
             'avatar'                => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:1024', 'dimensions:min_width=200,min_height=200'],
             'avatar_input_action'   => ['required', 'regex:#(none|change|remove){1}#'],
             // 'password_confirmation' => ['required', Rules\Password::defaults()]
@@ -421,13 +423,15 @@ class UserController extends Controller
         // if(!Hash::check($request['admin_password'], $admin->password)){
         //     return response()->json(['message' => 'Le mot de passe saisi est incorrect'], 403);
         // }
+        $request['email'] = $this->normalizeEmail($request->email);
+
         $validator = Validator::make($request->all(), [
             'user_id'               => ['required', 'numeric', 'exists:users,id'],
             'first_name'            => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
             'last_name'             => ['required', 'regex:#^[\p{L}]+[\p{L} ]*$|^[\p{L} ]+[\p{L}]+[\p{L} ]*$#u', 'max:255'],
             'role_id'               => ['required', 'numeric', 'exists:roles,id'],
             'phone_number'          => ['required', 'regex:#(^3[3]|^7[5-80])[ ]?[0-9]{3}([ ]?[0-9]{2}){2}$#'],
-            'email'                 => ['required', 'regex:#^[^\s@]+@[^\s@]+\.[^\s@]+$#'],
+            'email'                 => ['nullable', 'regex:#^[^\s@]+@[^\s@]+\.[^\s@]+$#'],
             'avatar'                => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:1024', 'dimensions:min_width=200,min_height=200'],
             'avatar_input_action'   => ['required', 'regex:#(none|change|remove){1}#'],
             // 'password_confirmation' => ['required', Rules\Password::defaults()]

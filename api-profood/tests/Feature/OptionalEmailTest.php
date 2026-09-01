@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Admin;
+use App\Models\Customer;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\VerificationCodesLog;
@@ -118,5 +119,55 @@ class OptionalEmailTest extends TestCase
         $this->actingAs($this->admin, 'api')
             ->postJson('/api/add-user', $this->livreurPayload('778880006', $this->admin->email))
             ->assertStatus(422);
+    }
+
+    /** @test */
+    public function an_admin_can_edit_a_livreur_and_clear_its_email(): void
+    {
+        $this->actingAs($this->admin, 'api')
+            ->postJson('/api/add-user', $this->livreurPayload('778880007', 'moussa@profood.test'))
+            ->assertStatus(200);
+        $livreur = User::where('phone_number', '778880007')->first();
+
+        $this->actingAs($this->admin, 'api')
+            ->postJson('/api/update-user-profile-details-by-admin', [
+                'admin_phone_number'  => $this->admin->phone_number,
+                'user_id'             => $livreur->id,
+                'role_id'             => $livreur->role_id,
+                'first_name'          => 'Moussa',
+                'last_name'           => 'Fall',
+                'phone_number'        => '778880007',
+                'email'               => '',
+                'avatar_input_action' => 'none',
+            ])
+            ->assertStatus(200);
+
+        $this->assertNull($livreur->fresh()->email);
+    }
+
+    /** @test */
+    public function an_admin_can_edit_a_customer_without_an_email(): void
+    {
+        $payload = $this->livreurPayload('778880008', '');
+        unset($payload['role_id']);
+        $this->actingAs($this->admin, 'api')
+            ->postJson('/api/add-customer', $payload)
+            ->assertStatus(200);
+        $customer = Customer::where('user_id', User::where('phone_number', '778880008')->first()->id)->first();
+
+        $this->actingAs($this->admin, 'api')
+            ->postJson('/api/update-customer-profile-details', [
+                'admin_phone_number'  => $this->admin->phone_number,
+                'customer_id'         => $customer->id,
+                'first_name'          => 'Awa',
+                'last_name'           => 'Diop',
+                'phone_number'        => '778880008',
+                'email'               => '',
+                'avatar_input_action' => 'none',
+            ])
+            ->assertStatus(200);
+
+        $this->assertSame('Awa', $customer->user->fresh()->first_name);
+        $this->assertNull($customer->user->fresh()->email);
     }
 }
