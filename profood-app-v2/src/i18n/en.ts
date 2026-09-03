@@ -134,7 +134,8 @@ export const en: Record<MsgKey, string> = {
   'checkout.noteOnline': 'Secure PayTech payment. The exact weight is confirmed before preparation.',
   'checkout.noteCod': 'Cash on delivery. The exact weight is confirmed before preparation.',
   'checkout.errorName': 'Name required',
-  'checkout.errorZoneApi': 'Select your locality from the list',
+  'checkout.errorZoneApi': 'Enter your locality',
+  'checkout.localiteFreeText': 'Locality not in our list: standard delivery fee, we will confirm by phone.',
   'checkout.errorZone': 'Choose your zone',
   'checkout.errorAddress': 'Address required',
 
@@ -356,4 +357,12 @@ export const en: Record<MsgKey, string> = {
   'home.stat4Label': 'Happy customers',
   'home.footerTagline': 'Quality, from land to sea.',
   'home.footerNote': 'Senegalese brand \u00b7 Fresh products \u00b7 Halal',
+  'home.whatsapp': 'WhatsApp: {number}',
+  'wa.title': 'Profood',
+  'wa.subtitle': 'Usually replies within minutes',
+  'wa.greeting': 'Hello 👋 A question about our cuts, an order or a delivery? Write to us.',
+  'wa.placeholder': 'Your message…',
+  'wa.cta': 'Open WhatsApp',
+  'wa.open': 'Chat on WhatsApp',
+  'wa.close': 'Close',
 }

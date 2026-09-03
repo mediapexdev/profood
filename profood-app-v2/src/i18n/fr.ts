@@ -146,7 +146,8 @@ export const fr = {
   'checkout.noteOnline': 'Paiement sécurisé PayTech. Le poids exact est confirmé avant préparation.',
   'checkout.noteCod': 'Paiement à la livraison. Le poids exact est confirmé avant préparation.',
   'checkout.errorName': 'Nom requis',
-  'checkout.errorZoneApi': 'Sélectionnez votre localité dans la liste',
+  'checkout.errorZoneApi': 'Indiquez votre localité',
+  'checkout.localiteFreeText': 'Localité hors de notre liste : tarif de livraison standard, nous vous confirmons par téléphone.',
   'checkout.errorZone': 'Choisissez votre zone',
   'checkout.errorAddress': 'Adresse requise',
 
@@ -386,6 +387,14 @@ export const fr = {
   'home.stat4Label': 'Clients satisfaits',
   'home.footerTagline': 'La qualité, de la terre à la mer.',
   'home.footerNote': 'Marque sénégalaise · Produits frais · Halal',
+  'home.whatsapp': 'WhatsApp : {number}',
+  'wa.title': 'Profood',
+  'wa.subtitle': 'Répond en général en quelques minutes',
+  'wa.greeting': 'Bonjour 👋 Une question sur nos découpes, une commande ou une livraison ? Écrivez-nous.',
+  'wa.placeholder': 'Votre message…',
+  'wa.cta': 'Ouvrir WhatsApp',
+  'wa.open': 'Discuter sur WhatsApp',
+  'wa.close': 'Fermer',
 } as const
 
 export type MsgKey = keyof typeof fr

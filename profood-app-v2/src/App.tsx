@@ -25,6 +25,7 @@
  */
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { BottomNav } from './components/shell/BottomNav'
+import { WhatsAppWidget } from './components/WhatsAppWidget'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { I18nProvider } from './i18n'
 import { AuthProvider } from './contexts/AuthContext'
@@ -97,6 +98,7 @@ export default function App() {
                 <Route path="/views/cart" element={<Navigate to="/panier" replace />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
+              <WhatsAppWidget />
             </BrowserRouter>
           </CartProvider>
         </FavoritesProvider>

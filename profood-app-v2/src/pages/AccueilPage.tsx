@@ -12,6 +12,7 @@ import { haptic } from '../lib/haptics'
 import { useI18n } from '../i18n'
 import type { MsgKey } from '../i18n/fr'
 import { retryImgOnError } from '../lib/imgRetry'
+import { whatsappUrl, WHATSAPP_DISPLAY } from '../lib/contact'
 
 /**
  * Accueil vitrine — reprend section par section la home du site profood-web
@@ -244,6 +245,9 @@ export function AccueilPage() {
             <img src="/logo-profood.png" alt="PROFOOD" className="h-8 w-auto mx-auto" />
             <p className="font-title font-extrabold mt-3">{t('home.footerTagline')}</p>
             <p className="text-taupe text-[13px] mt-1">{t('home.footerNote')}</p>
+            <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-3 text-[13px] font-bold text-halal">
+              <Icon name="chat" size={16} fill /> {t('home.whatsapp', { number: WHATSAPP_DISPLAY })}
+            </a>
           </footer>
         </div>
       </Page>

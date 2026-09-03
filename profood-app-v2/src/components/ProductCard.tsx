@@ -56,7 +56,7 @@ export function ProductCard({ slice }: { slice: Slice }) {
 
       <div className="flex flex-1 flex-col p-3.5">
         <h3 className="font-title text-sm font-bold leading-snug">{slice.name}</h3>
-        <p className="mt-0.5 text-xs text-taupe">{categoryLabel(slice.category)} · {slice.weight} kg</p>
+        <p className="mt-0.5 text-xs text-taupe">{categoryLabel(slice.category)}</p>
         <div className="mt-3 flex flex-1 items-end justify-between gap-2">
           <span className="font-title text-base font-extrabold text-terre tabular-nums">{fmtFcfa(slice.price)}</span>
           {qty === 0 ? (

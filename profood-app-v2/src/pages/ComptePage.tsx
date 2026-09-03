@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useI18n } from '../i18n'
 import type { Lang } from '../i18n'
 import { haptic } from '../lib/haptics'
+import { whatsappUrl } from '../lib/contact'
 
 export function ComptePage() {
   const navigate = useNavigate()
@@ -35,7 +36,7 @@ export function ComptePage() {
     ...(isAuthenticated
       ? [{ icon: 'manage_accounts', label: t('account.editProfile'), onClick: () => navigate('/profil') }]
       : []),
-    { icon: 'help', label: t('account.help'), disabled: true },
+    { icon: 'help', label: t('account.help'), hint: 'WhatsApp', onClick: () => window.open(whatsappUrl(), '_blank', 'noopener') },
   ]
 
   const pickLang = (l: Lang) => {

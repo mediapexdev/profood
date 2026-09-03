@@ -107,21 +107,25 @@ export function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localites])
 
+  // Localité saisie mais absente du référentiel : on garde le texte tel quel,
+  // le serveur applique le tarif par défaut (localite_id null).
+  const freeLocalite = ordersApiEnabled && !localite && locQuery.trim().length >= 2
+
   // Frais officiels (serveur) à chaque changement de localité / sous-total.
   useEffect(() => {
-    if (!ordersApiEnabled || !localite) {
+    if (!ordersApiEnabled || (!localite && !freeLocalite)) {
       setQuote(null)
       return
     }
     const seq = ++quoteSeq.current
-    quoteDeliveryFee(localite.id, subtotal)
+    quoteDeliveryFee(localite?.id ?? null, subtotal)
       .then((q) => {
         if (seq === quoteSeq.current) setQuote({ fee: q.fee, threshold: q.freeShippingThreshold, applied: q.freeShippingApplied })
       })
       .catch(() => {
         if (seq === quoteSeq.current) setQuote(null)
       })
-  }, [localite, subtotal])
+  }, [localite, freeLocalite, subtotal])
 
   const suggestions = useMemo(
     () => (ordersApiEnabled && locOpen ? filterLocalites(localites, locQuery) : []),
@@ -146,6 +150,9 @@ export function CheckoutPage() {
       const found = localites.find((l) => l.id === Number(m[1]))
       setLocalite(found ?? null)
       setLocQuery(found?.wording ?? '')
+    } else if (ordersApiEnabled) {
+      setLocalite(null)
+      setLocQuery(a.commune)
     }
   }
   const useNewAddress = () => {
@@ -159,7 +166,7 @@ export function CheckoutPage() {
   // ── Frais / totaux ──────────────────────────────────────────────────────
   const zone = zoneById(zoneId)
   const fee = ordersApiEnabled ? quote?.fee ?? 0 : deliveryFee(zone, subtotal)
-  const feeKnown = ordersApiEnabled ? !!localite && quote !== null : !!zone
+  const feeKnown = ordersApiEnabled ? (!!localite || freeLocalite) && quote !== null : !!zone
   const freeShipping = ordersApiEnabled ? !!quote?.applied : !!zone && fee === 0
   const francoAmount = ordersApiEnabled ? quote?.threshold ?? null : zone?.franco ?? null
   const discount = promo?.valid ? Math.min(promo.discountAmount, subtotal + fee) : 0
@@ -194,7 +201,7 @@ export function CheckoutPage() {
     phone: !isValidPhone(phone) ? t('auth.phoneInvalid') : '',
     email: !isValidEmail(email) ? t('auth.emailInvalid') : '',
     zone: ordersApiEnabled
-      ? (localites.length > 0 && !localite ? t('checkout.errorZoneApi') : '')
+      ? (!localite && !freeLocalite ? t('checkout.errorZoneApi') : '')
       : (!zoneId ? t('checkout.errorZone') : ''),
     address: address.trim().length < 4 ? t('checkout.errorAddress') : '',
   }
@@ -219,8 +226,8 @@ export function CheckoutPage() {
     phone: phone.trim(),
     email: email.trim() || undefined,
     address: address.trim(),
-    zoneId: ordersApiEnabled && localite ? `loc:${localite.id}` : zoneId,
-    commune: ordersApiEnabled && localite ? localite.wording.split(',')[0].trim() : zone?.commune ?? '',
+    zoneId: ordersApiEnabled ? (localite ? `loc:${localite.id}` : `txt:${locQuery.trim()}`) : zoneId,
+    commune: ordersApiEnabled ? (localite ? localite.wording.split(',')[0].trim() : locQuery.trim()) : zone?.commune ?? '',
     note: note.trim() || undefined,
   })
 
@@ -243,6 +250,8 @@ export function CheckoutPage() {
 
     try {
       const localiteId = localite?.id ?? null
+      // Sans localite_id, le serveur ne connaît la localité que via l'adresse.
+      const serverAddress = localiteId == null && customer.commune ? `${customer.commune} — ${customer.address}` : customer.address
 
       if (payMethod === 'online') {
         // Brouillon gelé sous le hash → finalisé par la page de retour PayTech.
@@ -260,13 +269,13 @@ export function CheckoutPage() {
         if (loggedApi) {
           await syncServerCart(lines, user!.id!, apiToken!)
           url = await placeCustomerOrderWithPayment({
-            customerId: user!.id!, token: apiToken!, address: customer.address,
+            customerId: user!.id!, token: apiToken!, address: serverAddress,
             localiteId, montant: total, orderHash: hash,
             promotionCode: promo?.valid ? promo.code : undefined,
           })
         } else {
           url = await placeGuestOrderWithPayment(
-            { name: customer.name, phone: customer.phone, email: customer.email, address: customer.address,
+            { name: customer.name, phone: customer.phone, email: customer.email, address: serverAddress,
               localiteId, lines, promotionCode: promo?.valid ? promo.code : undefined },
             hash,
           )
@@ -282,7 +291,7 @@ export function CheckoutPage() {
       if (loggedApi) {
         await syncServerCart(lines, user!.id!, apiToken!)
         await placeCustomerOrder({
-          customerId: user!.id!, token: apiToken!, address: customer.address,
+          customerId: user!.id!, token: apiToken!, address: serverAddress,
           localiteId, montant: total, orderHash: await makeOrderHash(),
           promotionCode: promo?.valid ? promo.code : undefined,
         })
@@ -296,7 +305,7 @@ export function CheckoutPage() {
       } else {
         const placed = await placeGuestOrder({
           name: customer.name, phone: customer.phone, email: customer.email,
-          address: customer.address, localiteId, lines,
+          address: serverAddress, localiteId, lines,
           promotionCode: promo?.valid ? promo.code : undefined,
         })
         serverRef = placed.serverRef
@@ -378,6 +387,9 @@ export function CheckoutPage() {
                     autoComplete="off"
                   />
                 </Field>
+                {freeLocalite && suggestions.length === 0 && (
+                  <p className="-mt-1 mb-2 text-[12px] text-taupe">{t('checkout.localiteFreeText')}</p>
+                )}
                 {suggestions.length > 0 && !localite && (
                   <ul className="absolute z-20 left-0 right-0 mt-1 bg-surface border border-sable rounded-xl shadow-lg overflow-hidden">
                     {suggestions.map((l) => (
@@ -489,7 +501,7 @@ export function CheckoutPage() {
           <section className="bg-creme-dark rounded-card p-4">
             <div className="flex justify-between text-[14px]"><span className="text-taupe">{t('common.subtotal')}</span><span className="tabular-nums font-semibold">{fmtFcfa(subtotal)}</span></div>
             <div className="flex justify-between text-[14px] mt-1.5">
-              <span className="text-taupe">{t('common.delivery')}{ordersApiEnabled ? (localite ? ` · ${localite.wording.split(',')[0].trim()}` : '') : (zone ? ` · ${zone.commune}` : '')}</span>
+              <span className="text-taupe">{t('common.delivery')}{ordersApiEnabled ? (localite ? ` · ${localite.wording.split(',')[0].trim()}` : freeLocalite ? ` · ${locQuery.trim()}` : '') : (zone ? ` · ${zone.commune}` : '')}</span>
               <span className="tabular-nums font-semibold">{feeKnown ? (freeShipping ? t('common.free') : fmtFcfa(fee)) : '—'}</span>
             </div>
             {discount > 0 && (

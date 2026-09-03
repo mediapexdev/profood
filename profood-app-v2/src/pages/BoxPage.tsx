@@ -262,7 +262,7 @@ export function BoxDetailPage() {
                     <img src={s.image} alt={s.name} loading="lazy" onError={retryImgOnError} className="w-full aspect-[4/3] object-cover bg-creme" />
                     <div className="p-2.5">
                       <p className="font-title font-bold text-[14px] leading-tight line-clamp-2">{s.name}</p>
-                      <p className="text-[12px] text-taupe mt-0.5">{categoryLabel(s.category)} · {s.weight} kg</p>
+                      <p className="text-[12px] text-taupe mt-0.5">{categoryLabel(s.category)}</p>
                       <div className="mt-2">
                         <Stepper s={s} />
                       </div>
@@ -328,7 +328,7 @@ export function BoxDetailPage() {
             <div key={s.id} className="flex items-center gap-3 py-2.5">
               <div className="flex-1 min-w-0">
                 <p className="font-title font-bold text-[15px] truncate">{s.name}</p>
-                <p className="text-[12px] text-taupe">{categoryLabel(s.category)} · {s.weight} kg</p>
+                <p className="text-[12px] text-taupe">{categoryLabel(s.category)}</p>
               </div>
               <Stepper s={s} compact />
             </div>
