@@ -87,6 +87,7 @@ export function CheckoutPage() {
   const [locOpen, setLocOpen] = useState(false)
   const [quote, setQuote] = useState<{ fee: number; threshold: number | null; applied: boolean } | null>(null)
   const quoteSeq = useRef(0)
+  const locInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!ordersApiEnabled) return
@@ -107,30 +108,29 @@ export function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localites])
 
-  // Localité saisie mais absente du référentiel : on garde le texte tel quel,
-  // le serveur applique le tarif par défaut (localite_id null).
-  const freeLocalite = ordersApiEnabled && !localite && locQuery.trim().length >= 2
-
   // Frais officiels (serveur) à chaque changement de localité / sous-total.
   useEffect(() => {
-    if (!ordersApiEnabled || (!localite && !freeLocalite)) {
+    if (!ordersApiEnabled || !localite) {
       setQuote(null)
       return
     }
     const seq = ++quoteSeq.current
-    quoteDeliveryFee(localite?.id ?? null, subtotal)
+    quoteDeliveryFee(localite.id, subtotal)
       .then((q) => {
         if (seq === quoteSeq.current) setQuote({ fee: q.fee, threshold: q.freeShippingThreshold, applied: q.freeShippingApplied })
       })
       .catch(() => {
         if (seq === quoteSeq.current) setQuote(null)
       })
-  }, [localite, freeLocalite, subtotal])
+  }, [localite, subtotal])
 
   const suggestions = useMemo(
-    () => (ordersApiEnabled && locOpen ? filterLocalites(localites, locQuery) : []),
-    [localites, locQuery, locOpen],
+    () => (ordersApiEnabled && locOpen && !localite ? filterLocalites(localites, locQuery, 10) : []),
+    [localites, locQuery, locOpen, localite],
   )
+  // La zone doit venir du référentiel : une saisie sans correspondance n'est pas retenue.
+  const locNoMatch = ordersApiEnabled && !localite && localites.length > 0
+    && locQuery.trim().length >= 2 && suggestions.length === 0
 
   const pickLocalite = (l: Localite) => {
     haptic('light')
@@ -138,6 +138,13 @@ export function CheckoutPage() {
     setLocQuery(l.wording)
     setLocOpen(false)
     if (savedAddresses.length) setPickedAddrId(undefined)
+  }
+  const clearLocalite = () => {
+    setLocalite(null)
+    setLocQuery('')
+    setLocOpen(true)
+    if (savedAddresses.length) setPickedAddrId(undefined)
+    locInputRef.current?.focus()
   }
 
   const pickAddress = (a: SavedAddress) => {
@@ -166,7 +173,7 @@ export function CheckoutPage() {
   // ── Frais / totaux ──────────────────────────────────────────────────────
   const zone = zoneById(zoneId)
   const fee = ordersApiEnabled ? quote?.fee ?? 0 : deliveryFee(zone, subtotal)
-  const feeKnown = ordersApiEnabled ? (!!localite || freeLocalite) && quote !== null : !!zone
+  const feeKnown = ordersApiEnabled ? !!localite && quote !== null : !!zone
   const freeShipping = ordersApiEnabled ? !!quote?.applied : !!zone && fee === 0
   const francoAmount = ordersApiEnabled ? quote?.threshold ?? null : zone?.franco ?? null
   const discount = promo?.valid ? Math.min(promo.discountAmount, subtotal + fee) : 0
@@ -201,7 +208,7 @@ export function CheckoutPage() {
     phone: !isValidPhone(phone) ? t('auth.phoneInvalid') : '',
     email: !isValidEmail(email) ? t('auth.emailInvalid') : '',
     zone: ordersApiEnabled
-      ? (!localite && !freeLocalite ? t('checkout.errorZoneApi') : '')
+      ? (!localite ? t('checkout.errorZoneApi') : '')
       : (!zoneId ? t('checkout.errorZone') : ''),
     address: address.trim().length < 4 ? t('checkout.errorAddress') : '',
   }
@@ -226,8 +233,8 @@ export function CheckoutPage() {
     phone: phone.trim(),
     email: email.trim() || undefined,
     address: address.trim(),
-    zoneId: ordersApiEnabled ? (localite ? `loc:${localite.id}` : `txt:${locQuery.trim()}`) : zoneId,
-    commune: ordersApiEnabled ? (localite ? localite.wording.split(',')[0].trim() : locQuery.trim()) : zone?.commune ?? '',
+    zoneId: ordersApiEnabled ? `loc:${localite?.id ?? ''}` : zoneId,
+    commune: ordersApiEnabled ? localite?.wording.split(',')[0].trim() ?? '' : zone?.commune ?? '',
     note: note.trim() || undefined,
   })
 
@@ -250,8 +257,7 @@ export function CheckoutPage() {
 
     try {
       const localiteId = localite?.id ?? null
-      // Sans localite_id, le serveur ne connaît la localité que via l'adresse.
-      const serverAddress = localiteId == null && customer.commune ? `${customer.commune} — ${customer.address}` : customer.address
+      const serverAddress = customer.address
 
       if (payMethod === 'online') {
         // Brouillon gelé sous le hash → finalisé par la page de retour PayTech.
@@ -377,20 +383,35 @@ export function CheckoutPage() {
             {ordersApiEnabled ? (
               <div className="relative">
                 <Field label={t('checkout.fieldLocalite')} error={touched ? errors.zone : ''}>
-                  <input
-                    className={inputCls}
-                    value={locQuery}
-                    onChange={(e) => { setLocQuery(e.target.value); setLocalite(null); setLocOpen(true) }}
-                    onFocus={() => setLocOpen(true)}
-                    onBlur={() => setTimeout(() => setLocOpen(false), 150)}
-                    placeholder={t('checkout.localitePlaceholder')}
-                    autoComplete="off"
-                  />
+                  <div className="relative">
+                    <input
+                      ref={locInputRef}
+                      className={`${inputCls} ${localite ? 'pr-10' : ''}`}
+                      value={locQuery}
+                      onChange={(e) => { setLocQuery(e.target.value); setLocalite(null); setLocOpen(true) }}
+                      onFocus={() => setLocOpen(true)}
+                      onBlur={() => setTimeout(() => setLocOpen(false), 150)}
+                      placeholder={t('checkout.localitePlaceholder')}
+                      autoComplete="off"
+                      role="combobox"
+                      aria-expanded={suggestions.length > 0}
+                    />
+                    {localite && (
+                      <button
+                        type="button"
+                        onClick={clearLocalite}
+                        aria-label={t('checkout.localiteChange')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full grid place-items-center text-taupe hover:bg-creme-dark active:bg-creme-dark transition-colors"
+                      >
+                        <Icon name="close" size={16} />
+                      </button>
+                    )}
+                  </div>
                 </Field>
-                {freeLocalite && suggestions.length === 0 && (
-                  <p className="-mt-1 mb-2 text-[12px] text-taupe">{t('checkout.localiteFreeText')}</p>
+                {locNoMatch && (
+                  <p className="mt-1.5 text-[12px] text-taupe">{t('checkout.localiteNoMatch')}</p>
                 )}
-                {suggestions.length > 0 && !localite && (
+                {suggestions.length > 0 && (
                   <ul className="absolute z-20 left-0 right-0 mt-1 bg-surface border border-sable rounded-xl shadow-lg overflow-hidden">
                     {suggestions.map((l) => (
                       <li key={l.id}>
@@ -501,7 +522,7 @@ export function CheckoutPage() {
           <section className="bg-creme-dark rounded-card p-4">
             <div className="flex justify-between text-[14px]"><span className="text-taupe">{t('common.subtotal')}</span><span className="tabular-nums font-semibold">{fmtFcfa(subtotal)}</span></div>
             <div className="flex justify-between text-[14px] mt-1.5">
-              <span className="text-taupe">{t('common.delivery')}{ordersApiEnabled ? (localite ? ` · ${localite.wording.split(',')[0].trim()}` : freeLocalite ? ` · ${locQuery.trim()}` : '') : (zone ? ` · ${zone.commune}` : '')}</span>
+              <span className="text-taupe">{t('common.delivery')}{ordersApiEnabled ? (localite ? ` · ${localite.wording.split(',')[0].trim()}` : '') : (zone ? ` · ${zone.commune}` : '')}</span>
               <span className="tabular-nums font-semibold">{feeKnown ? (freeShipping ? t('common.free') : fmtFcfa(fee)) : '—'}</span>
             </div>
             {discount > 0 && (

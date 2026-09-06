@@ -41,7 +41,7 @@ export function ProduitPage() {
           </div>
 
           <div className="px-4 pt-4 md:pt-0">
-            <p className="text-[11px] font-bold tracking-[.16em] uppercase text-taupe">{categoryLabel(slice.category)} · {slice.weight} kg</p>
+            <p className="text-[11px] font-bold tracking-[.16em] uppercase text-taupe">{categoryLabel(slice.category)}</p>
             <div className="flex items-start justify-between gap-3 mt-1">
               <h2 className="text-2xl md:text-3xl">{slice.name}</h2>
               <button
