@@ -42,7 +42,11 @@ npm run open:android   # Android Studio
 npm run open:ios       # Xcode
 ```
 
-- Les dossiers `ios/` et `android/` **n'existent pas encore** : faire `npx cap add ios` / `npx cap add android` la première fois.
+- `ios/` est généré et versionné (Capacitor 7, cible iOS 14, iPhone verrouillé en portrait, version marketing `2.0.0`). `android/` n'existe pas encore : `npx cap add android` la première fois.
+- **Le build natif embarque les `VITE_*` du build web** : créer `.env.local` (ignoré par git) avec `VITE_APP_KEY` (valeur = `PROFOOD_APP_KEY` du serveur prod), `VITE_USE_API_CATALOG=true`, `VITE_USE_API_ORDERS=true` **avant** `npm run build:mobile`, sinon l'app iOS part en mode local (comptes localStorage, commandes de démo).
+- Icônes et splash : sources dans `assets/` (`icon.png` 1024 = une seule boîte nue, 3 faces blanches sur orange `#EF5403`, sans le motif viande ; source vectorielle `assets/icon-source.svg` extraite de `public/icons/logo-profood-symbole.svg`, rendue via Chrome headless `--screenshot` 1024² ; `splash.png`/`splash-dark.png` 2732 fond `#221610`), régénérer avec `npx @capacitor/assets generate --ios`.
+- Kit de publication (textes App Store/Play, icônes, captures aux bonnes dimensions, politique de confidentialité) dans `store/` — voir `store/README.md`. `ITSAppUsesNonExemptEncryption=false` est posé dans `Info.plist`.
+- Signature, archive et envoi App Store se font dans Xcode (`npm run open:ios`) : sélectionner l'équipe dans Signing & Capabilities, puis Product → Archive → Distribute.
 - `appId` = `com.profoodapp.app` — **le même que l'app Ionic v1**. Sur les stores, la v2 sera donc une mise à jour de la v1 (même fiche). C'est cohérent avec un remplacement, mais interdit de publier v1 et v2 côte à côte.
 - Rendu mobile **non vérifié visuellement** à ce jour (seulement en émulation navigateur 390 px).
 
@@ -97,7 +101,7 @@ En une phrase : **avec les trois drapeaux posés (`VITE_APP_KEY`, `VITE_USE_API_
 | Dark mode | ✅ | Persisté, suit `prefers-color-scheme`. |
 | PWA / service worker | ✅ | Mieux que la v1 (autoUpdate, caches runtime). |
 | Capacitor natif | 🟡 | Config + plugins présents, mais `ios/`/`android/` jamais générés. |
-| FAQ / CGU / confidentialité, vues serveur `/views/*`, Firebase, rappel de connexion invité | ❌ | Absents ; « Aide & contact » désactivé dans le compte. |
+| FAQ / CGU, vues serveur `/views/*`, Firebase, rappel de connexion invité | ❌ | Absents. Politique de confidentialité présente (`/confidentialite`, lien dans Compte) ; « Aide & contact » ouvre WhatsApp. |
 
 **En plus dans la v2 (absent de la v1)** : favoris (page + cœurs), mode démo hors-ligne complet, planche anatomique interactive, tokens de commande opaques (non devinables, vs référence énumérable v1).
 
