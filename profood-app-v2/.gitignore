@@ -38,3 +38,4 @@ android/app/src/main/assets/capacitor.plugins.json
 *.njsproj
 *.sln
 *.sw?
+store/android/build/
