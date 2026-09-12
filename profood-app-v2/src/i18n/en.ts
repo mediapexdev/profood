@@ -23,6 +23,7 @@ export const en: Record<MsgKey, string> = {
   'account.favorites': 'My favourite cuts',
   'account.addresses': 'My addresses',
   'account.help': 'Help & contact',
+  'account.privacy': 'Privacy policy',
   'account.language': 'Language',
 
   'order.stage.received': 'Order received',

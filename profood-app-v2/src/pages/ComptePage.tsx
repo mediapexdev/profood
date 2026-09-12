@@ -37,6 +37,7 @@ export function ComptePage() {
       ? [{ icon: 'manage_accounts', label: t('account.editProfile'), onClick: () => navigate('/profil') }]
       : []),
     { icon: 'help', label: t('account.help'), hint: 'WhatsApp', onClick: () => window.open(whatsappUrl(), '_blank', 'noopener') },
+    { icon: 'privacy_tip', label: t('account.privacy'), onClick: () => navigate('/confidentialite') },
   ]
 
   const pickLang = (l: Lang) => {

@@ -25,6 +25,7 @@ export const fr = {
   'account.favorites': 'Mes découpes favorites',
   'account.addresses': 'Mes adresses',
   'account.help': 'Aide & contact',
+  'account.privacy': 'Politique de confidentialité',
   'account.language': 'Langue',
 
   // Étapes de commande (STAGES)

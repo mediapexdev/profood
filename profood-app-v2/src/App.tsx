@@ -18,6 +18,7 @@
  *   /connexion             → ConnexionPage
  *   /inscription           → InscriptionPage
  *   /mot-de-passe-oublie   → MotDePasseOubliePage
+ *   /confidentialite       → ConfidentialitePage (politique de confidentialité, URL déclarée sur les stores)
  *   *                      → redirection vers /
  *
  * La nav (AppBar en haut, BottomNav en bas sur mobile) persiste entre les
@@ -46,6 +47,7 @@ import { AdressesPage } from './pages/AdressesPage'
 import { ConnexionPage } from './pages/ConnexionPage'
 import { InscriptionPage } from './pages/InscriptionPage'
 import { MotDePasseOubliePage } from './pages/MotDePasseOubliePage'
+import { ConfidentialitePage } from './pages/ConfidentialitePage'
 import { PaiementRetourPage } from './pages/PaiementRetourPage'
 import { BoxesPage, BoxDetailPage } from './pages/BoxPage'
 import { ProfilPage } from './pages/ProfilPage'
@@ -91,6 +93,7 @@ export default function App() {
                 <Route path="/connexion" element={<ConnexionPage />} />
                 <Route path="/inscription" element={<InscriptionPage />} />
                 <Route path="/mot-de-passe-oublie" element={<MotDePasseOubliePage />} />
+                <Route path="/confidentialite" element={<ConfidentialitePage />} />
                 {/* Retours PayTech — chemins construits côté serveur (client_app_url). */}
                 <Route path="/guest-order-success/:hash" element={<PaiementRetourPage outcome="success" />} />
                 <Route path="/orders/successful-order/:hash" element={<PaiementRetourPage outcome="success" />} />
