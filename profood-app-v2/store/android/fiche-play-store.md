@@ -12,7 +12,7 @@ Préparée en même temps que la fiche App Store. Le projet Android est génér�
 | Adresse e-mail de contact | à renseigner (obligatoire sur Play) |
 | Site web | `https://profood-app.com` |
 | Politique de confidentialité | `https://profood-app.com/confidentialite` |
-| Application ID | `com.profoodapp.app` |
+| Application ID | `sn.profood.app` (⚠️ différent d'iOS : `com.profoodapp.app` est déjà pris sur Google Play par un autre compte) |
 
 ## Description complète (4000 max)
 

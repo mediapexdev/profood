@@ -10,7 +10,7 @@ android {
     namespace "com.profoodapp.app"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.profoodapp.app"
+        applicationId "sn.profood.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 10
