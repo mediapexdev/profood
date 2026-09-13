@@ -8,8 +8,8 @@ Préparée en même temps que la fiche App Store. Le projet Android est génér�
 |---|---|
 | Nom de l'app (30 max) | `PROFOOD – Boucherie halal` |
 | Description courte (80 max) | `Viande halal fraîche, préparée par nos bouchers et livrée chez vous à Dakar.` (77) |
-| Catégorie | Gastronomie et boissons |
-| Adresse e-mail de contact | à renseigner (obligatoire sur Play) |
+| Catégorie | Alimentation et boissons (libellé Play Console) |
+| Adresse e-mail de contact | `admin.profood@gmail.com` (public sur la fiche ; aussi utilisé pour l'IARC) |
 | Site web | `https://profood-app.com` |
 | Politique de confidentialité | `https://profood-app.com/confidentialite` |
 | Application ID | `sn.profood.app` (identique à iOS ; `com.profoodapp.app` est déjà pris sur les deux stores par d'autres comptes) |
