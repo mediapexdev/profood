@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-    appId: 'com.profoodapp.app',
+    appId: 'sn.profood.app',
     appName: 'Profood',
     webDir: 'dist',
     plugins: {

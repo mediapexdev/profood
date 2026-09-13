@@ -11,7 +11,7 @@
 | Catégorie principale | Alimentation et boissons (Food & Drink) |
 | Catégorie secondaire | Shopping |
 | Classification | 4+ (aucun contenu sensible) |
-| Bundle ID | `com.profoodapp.app` (même que la v1 : la fiche existante est mise à jour) |
+| Bundle ID | `sn.profood.app` (`com.profoodapp.app` est réservé par une autre équipe Apple, comme sur Google Play ; App ID enregistré le 2026-09-13) |
 | Version | 2.0.0 — build 1 |
 | Copyright | © 2026 Profood |
 | Langue principale | Français (France) |
