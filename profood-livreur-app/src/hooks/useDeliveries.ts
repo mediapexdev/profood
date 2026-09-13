@@ -69,16 +69,20 @@ export function useDeliveries(): UseDeliveriesReturn {
       if (status === 401) {
         setError('Session expirée. Veuillez vous reconnecter.')
         setDeliveries([])
-      } else {
-        // Development fallback: use mock data so the UI is usable even when
-        // the API is unreachable or the livreur endpoint is not yet implemented.
-        console.warn(
-          '[useDeliveries] API unavailable, falling back to mock data.',
-          err
-        )
+      } else if (import.meta.env.DEV) {
+        // Repli sur les données de démonstration en développement uniquement :
+        // en production, une API indisponible ne doit jamais afficher une fausse tournée.
+        console.warn('[useDeliveries] API unavailable, falling back to mock data.', err)
         setDeliveries(MOCK_DELIVERIES)
         setError(
           `Données de démonstration (API indisponible : ${
+            axiosError.response?.data?.message ?? axiosError.message ?? 'erreur réseau'
+          })`
+        )
+      } else {
+        setDeliveries([])
+        setError(
+          `Impossible de charger la tournée (${
             axiosError.response?.data?.message ?? axiosError.message ?? 'erreur réseau'
           })`
         )

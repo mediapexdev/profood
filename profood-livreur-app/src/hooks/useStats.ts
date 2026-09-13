@@ -5,6 +5,19 @@ import mockStats from '../mocks/stats.json'
 
 const MOCK_STATS = mockStats as unknown as DailyStats
 
+const EMPTY_STATS: DailyStats = {
+  deliveriesTotal: 0,
+  deliveriesGrouped: 0,
+  deliveriesIndividual: 0,
+  deliveriesCompleted: 0,
+  deliveriesInProgress: 0,
+  deliveriesPending: 0,
+  deliveriesWithIssues: 0,
+  totalDistance: '–',
+  averageTime: '–',
+  totalAmount: 0,
+}
+
 export interface UseStatsReturn {
   stats: DailyStats
   loading: boolean
@@ -25,7 +38,7 @@ export interface UseStatsReturn {
  * rendered as '–' placeholders. See src/api/stats.ts for details.
  */
 export function useStats(): UseStatsReturn {
-  const [stats, setStats] = useState<DailyStats>(MOCK_STATS)
+  const [stats, setStats] = useState<DailyStats>(import.meta.env.DEV ? MOCK_STATS : EMPTY_STATS)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -45,20 +58,22 @@ export function useStats(): UseStatsReturn {
         message?: string
       }
 
-      // Network errors or 4xx/5xx fall back to mock data so the dashboard
-      // remains usable when the API is unreachable (e.g. offline field use).
-      console.warn(
-        '[useStats] API unavailable, falling back to mock data.',
-        err
-      )
-      setStats(MOCK_STATS)
-      setError(
-        `Statistiques de démonstration (API : ${
-          axiosError.response?.data?.message ??
-          axiosError.message ??
-          'erreur réseau'
-        })`
-      )
+      if (import.meta.env.DEV) {
+        console.warn('[useStats] API unavailable, falling back to mock data.', err)
+        setStats(MOCK_STATS)
+        setError(
+          `Statistiques de démonstration (API : ${
+            axiosError.response?.data?.message ?? axiosError.message ?? 'erreur réseau'
+          })`
+        )
+      } else {
+        setStats(EMPTY_STATS)
+        setError(
+          `Statistiques indisponibles (${
+            axiosError.response?.data?.message ?? axiosError.message ?? 'erreur réseau'
+          })`
+        )
+      }
     } finally {
       setLoading(false)
     }
