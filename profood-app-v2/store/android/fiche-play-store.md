@@ -1,6 +1,6 @@
 # Fiche Google Play — PROFOOD 2.0.0
 
-Préparée en même temps que la fiche App Store. Le projet Android est généré et l'**AAB signé** est produit : `store/android/build/profood-2.0.0-vc10.aab` (hors git ; se régénère avec `cd android && JAVA_HOME=/opt/homebrew/opt/openjdk@21 ./gradlew bundleRelease`). Clé d'upload et mots de passe dans `~/Keys/profood/` (voir `DEPLOYMENT.md` §4). Visuels et textes ci-dessous prêts.
+Préparée en même temps que la fiche App Store. Le projet Android est généré et l'**AAB signé** est produit : `store/android/build/profood-2.0.0-vc11.aab` (hors git ; se régénère avec `cd android && JAVA_HOME=/opt/homebrew/opt/openjdk@21 ./gradlew bundleRelease`). Clé d'upload et mots de passe dans `~/Keys/profood/` (voir `DEPLOYMENT.md` §4). Visuels et textes ci-dessous prêts.
 
 ## Fiche principale
 
