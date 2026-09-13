@@ -39,3 +39,4 @@ android/app/src/main/assets/capacitor.plugins.json
 *.sln
 *.sw?
 store/android/build/
+store/ios/build/
