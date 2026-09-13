@@ -19,6 +19,7 @@
  *   /inscription           → InscriptionPage
  *   /mot-de-passe-oublie   → MotDePasseOubliePage
  *   /confidentialite       → ConfidentialitePage (politique de confidentialité, URL déclarée sur les stores)
+ *   /confidentialite-livreur → ConfidentialiteLivreurPage (politique de l'app Profood Livreur)
  *   *                      → redirection vers /
  *
  * La nav (AppBar en haut, BottomNav en bas sur mobile) persiste entre les
@@ -48,6 +49,7 @@ import { ConnexionPage } from './pages/ConnexionPage'
 import { InscriptionPage } from './pages/InscriptionPage'
 import { MotDePasseOubliePage } from './pages/MotDePasseOubliePage'
 import { ConfidentialitePage } from './pages/ConfidentialitePage'
+import { ConfidentialiteLivreurPage } from './pages/ConfidentialiteLivreurPage'
 import { PaiementRetourPage } from './pages/PaiementRetourPage'
 import { BoxesPage, BoxDetailPage } from './pages/BoxPage'
 import { ProfilPage } from './pages/ProfilPage'
@@ -94,6 +96,7 @@ export default function App() {
                 <Route path="/inscription" element={<InscriptionPage />} />
                 <Route path="/mot-de-passe-oublie" element={<MotDePasseOubliePage />} />
                 <Route path="/confidentialite" element={<ConfidentialitePage />} />
+                <Route path="/confidentialite-livreur" element={<ConfidentialiteLivreurPage />} />
                 {/* Retours PayTech — chemins construits côté serveur (client_app_url). */}
                 <Route path="/guest-order-success/:hash" element={<PaiementRetourPage outcome="success" />} />
                 <Route path="/orders/successful-order/:hash" element={<PaiementRetourPage outcome="success" />} />
