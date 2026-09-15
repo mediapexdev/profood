@@ -336,6 +336,14 @@ export const fr = {
   'profil.newPassword': 'Nouveau mot de passe',
   'profil.passwordSaved': 'Mot de passe mis à jour.',
   'profil.changePasswordCta': 'Changer le mot de passe',
+  'account.delete': 'Supprimer mon compte',
+  'account.deleteTitle': 'Supprimer votre compte ?',
+  'account.deleteWarning': 'Votre nom, votre numéro, votre e-mail et vos adresses enregistrées seront effacés et vous serez déconnecté. Vos commandes passées restent enregistrées pour notre comptabilité. Cette action est définitive.',
+  'account.deletePasswordLabel': 'Confirmez avec votre mot de passe',
+  'account.deleteConfirm': 'Supprimer définitivement',
+  'account.deleteBusy': 'Suppression…',
+  'account.deleteCancel': 'Annuler',
+  'account.deleted': 'Votre compte a été supprimé.',
 
   // Accueil (vitrine — calqué sur le site profood-web)
   'home.heroKicker': 'Viandes halal · Livraison à Dakar',

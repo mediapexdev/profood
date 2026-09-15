@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Page } from '../components/shell/Page'
 import { AppBar } from '../components/shell/AppBar'
 import { Icon } from '../components/ui/Icon'
 import { Button } from '../components/ui/Button'
+import { Sheet } from '../components/shell/Sheet'
+import { AuthError } from '../lib/auth'
 import { listOrders } from '../lib/orders'
 import { getProfile } from '../lib/profile'
 import { useFavorites } from '../contexts/FavoritesContext'
@@ -17,7 +20,7 @@ export function ComptePage() {
   const orders = listOrders()
   const lastOrder = orders[0]
   const { count: favCount } = useFavorites()
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated, logout, deleteAccount } = useAuth()
   const { t, lang, setLang } = useI18n()
   const profile = getProfile()
   const displayName = user?.name || profile.name || t('account.guest')
@@ -39,6 +42,36 @@ export function ComptePage() {
     { icon: 'help', label: t('account.help'), hint: 'WhatsApp', onClick: () => window.open(whatsappUrl(), '_blank', 'noopener') },
     { icon: 'privacy_tip', label: t('account.privacy'), onClick: () => navigate('/confidentialite') },
   ]
+
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteBusy, setDeleteBusy] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [deleted, setDeleted] = useState(false)
+
+  const closeDelete = () => {
+    if (deleteBusy) return
+    setDeleteOpen(false)
+    setDeletePassword('')
+    setDeleteError(null)
+  }
+
+  const confirmDelete = async () => {
+    if (deleteBusy || !deletePassword) return
+    setDeleteBusy(true)
+    setDeleteError(null)
+    haptic('medium')
+    try {
+      await deleteAccount(deletePassword)
+      setDeleteOpen(false)
+      setDeletePassword('')
+      setDeleted(true)
+    } catch (e) {
+      setDeleteError(e instanceof AuthError ? e.message : t('common.genericError'))
+    } finally {
+      setDeleteBusy(false)
+    }
+  }
 
   const pickLang = (l: Lang) => {
     if (l === lang) return
@@ -65,6 +98,12 @@ export function ComptePage() {
               </span>
             )}
           </div>
+
+          {deleted && (
+            <p role="status" className="mt-3 flex items-center gap-2 bg-surface border border-sable rounded-card p-4 text-[14px] font-semibold text-halal">
+              <Icon name="check_circle" size={20} fill /> {t('account.deleted')}
+            </p>
+          )}
 
           {!isAuthenticated && (
             <div className="mt-3 flex gap-2">
@@ -114,8 +153,40 @@ export function ComptePage() {
               <Icon name="logout" size={20} /> {t('account.signOut')}
             </button>
           )}
+
+          {isAuthenticated && (
+            <button
+              onClick={() => { haptic('light'); setDeleteOpen(true) }}
+              className="w-full mt-2 py-3 text-[13px] font-semibold text-taupe underline underline-offset-2 active:text-alerte transition-colors"
+            >
+              {t('account.delete')}
+            </button>
+          )}
         </div>
       </Page>
+
+      <Sheet open={deleteOpen} onClose={closeDelete} title={t('account.deleteTitle')}>
+        <div className="flex flex-col gap-3.5 pb-4">
+          <p className="text-[14px] text-taupe">{t('account.deleteWarning')}</p>
+          <label className="block">
+            <span className="text-[13px] font-bold text-taupe">{t('account.deletePasswordLabel')}</span>
+            <input
+              type="password"
+              autoComplete="current-password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              className="mt-1 w-full rounded-xl border-[1.5px] border-sable bg-surface px-3.5 py-2.5 text-[15px] text-ink outline-none focus:border-terre transition-colors"
+            />
+          </label>
+          {deleteError && <p role="alert" className="text-[13px] font-semibold text-alerte">{deleteError}</p>}
+          <Button full variant="danger" disabled={deleteBusy || !deletePassword} onClick={confirmDelete}>
+            {deleteBusy ? t('account.deleteBusy') : t('account.deleteConfirm')}
+          </Button>
+          <Button full variant="ghost" disabled={deleteBusy} onClick={closeDelete}>
+            {t('account.deleteCancel')}
+          </Button>
+        </div>
+      </Sheet>
     </>
   )
 }

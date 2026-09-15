@@ -130,6 +130,10 @@ export function patchOrder(token: string, patch: Partial<Order>): Order | undefi
   return orders[i]
 }
 
+export function clearOrders(): void {
+  localStorage.removeItem(STORAGE_KEY)
+}
+
 export function listOrders(): Order[] {
   return readAll().sort((a, b) => b.createdAt - a.createdAt)
 }

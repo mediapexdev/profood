@@ -1,11 +1,12 @@
 import { haptic } from '../../lib/haptics'
 
-type Variant = 'primary' | 'ghost' | 'dark'
+type Variant = 'primary' | 'ghost' | 'dark' | 'danger'
 
 const VARIANTS: Record<Variant, string> = {
   primary: 'bg-terre text-white shadow-[0_8px_20px_-8px_rgba(240,124,36,.7)] active:bg-terre-dark',
   ghost: 'bg-transparent text-ink border-[1.5px] border-sable active:bg-creme-dark',
   dark: 'bg-ink text-surface active:opacity-90',
+  danger: 'bg-alerte text-white active:opacity-90',
 }
 
 export function Button({

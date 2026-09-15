@@ -105,3 +105,7 @@ export function rememberFromOrder(c: OrderCustomer): void {
   saveContact({ name: c.name, phone: c.phone, email: c.email })
   upsertAddress({ label: c.commune, address: c.address, zoneId: c.zoneId, commune: c.commune }, true)
 }
+
+export function clearProfile(): void {
+  localStorage.removeItem(STORAGE_KEY)
+}

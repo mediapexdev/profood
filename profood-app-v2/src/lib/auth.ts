@@ -20,7 +20,8 @@
  *            /check-verification-code {for:'PASSWORD_RESET'} → /password-reset.
  */
 import api, { TOKEN_KEY } from '../api/client'
-import { saveContact } from './profile'
+import { clearProfile, saveContact } from './profile'
+import { clearOrders } from './orders'
 
 const APP_KEY = import.meta.env.VITE_APP_KEY as string | undefined
 export const authMode: 'api' | 'local' = APP_KEY ? 'api' : 'local'
@@ -295,6 +296,33 @@ export async function changePassword(input: {
       { headers: { Authorization: `Bearer ${token}` } },
     )
   } catch (e) { fail(e, 'Changement de mot de passe impossible. Réessayez.') }
+}
+
+// ── Suppression du compte ─────────────────────────────────────────────────
+/**
+ * POST /delete-account. Le serveur refuse (409, message affichable) tant
+ * qu'une commande est en cours. Les données personnelles gardées sur
+ * l'appareil sont effacées avec la session.
+ */
+export async function deleteAccount(password: string): Promise<void> {
+  const token = currentToken()
+  const me = currentUser()
+  if (!token || !me) throw new AuthError('Session expirée. Reconnectez-vous.')
+  if (authMode === 'local') {
+    const accounts = readAccounts()
+    const acc = accounts.find((a) => normalizePhone(a.phone) === normalizePhone(me.phone))
+    if (!acc || (await hash(password, acc.salt)) !== acc.passwordHash) {
+      throw new AuthError('Le mot de passe saisi est incorrect')
+    }
+    writeAccounts(accounts.filter((a) => a !== acc))
+  } else {
+    try {
+      await api.post('/delete-account', { password }, { headers: { Authorization: `Bearer ${token}` } })
+    } catch (e) { fail(e, 'Suppression impossible. Réessayez.') }
+  }
+  clearSession()
+  clearProfile()
+  clearOrders()
 }
 
 // ── Conversion commande invitée → compte ──────────────────────────────────

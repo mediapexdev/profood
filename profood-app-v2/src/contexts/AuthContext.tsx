@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { AuthUser } from '../lib/auth'
-import { authMode, currentUser, login as doLogin, logout as doLogout, registerLocal } from '../lib/auth'
+import { authMode, currentUser, deleteAccount as doDeleteAccount, login as doLogin, logout as doLogout, registerLocal } from '../lib/auth'
 
 interface AuthValue {
   user: AuthUser | null
@@ -10,6 +10,7 @@ interface AuthValue {
   /** Inscription immédiate (mode local uniquement) — connecte l'utilisateur. */
   register: (input: { firstName: string; lastName: string; email?: string; phone: string; password: string }) => Promise<void>
   logout: () => Promise<void>
+  deleteAccount: (password: string) => Promise<void>
   /** Relit la session persistée (après convert-guest-order, édition profil…). */
   refresh: () => void
 }
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         window.dispatchEvent(new CustomEvent('auth:login'))
       },
       logout: async () => { await doLogout(); setUser(null) },
+      deleteAccount: async (password) => { await doDeleteAccount(password); setUser(null) },
       refresh: () => setUser(currentUser()),
     }),
     [user],

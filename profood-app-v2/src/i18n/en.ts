@@ -306,6 +306,14 @@ export const en: Record<MsgKey, string> = {
   'profil.newPassword': 'New password',
   'profil.passwordSaved': 'Password updated.',
   'profil.changePasswordCta': 'Change password',
+  'account.delete': 'Delete my account',
+  'account.deleteTitle': 'Delete your account?',
+  'account.deleteWarning': 'Your name, number, e-mail and saved addresses will be erased and you will be signed out. Past orders stay on record for our accounting. This cannot be undone.',
+  'account.deletePasswordLabel': 'Confirm with your password',
+  'account.deleteConfirm': 'Delete permanently',
+  'account.deleteBusy': 'Deleting…',
+  'account.deleteCancel': 'Cancel',
+  'account.deleted': 'Your account has been deleted.',
 
   // Home (storefront — mirrors the profood-web site)
   'home.heroKicker': 'Halal meats \u00b7 Delivery in Dakar',
