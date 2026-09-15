@@ -250,6 +250,7 @@ Route::middleware(['auth:api', 'check.token.expiration'])->group(function () {
     Route::post('check-user-data-requesting-change-of-phone-number', [UserController::class, 'checkUserDataRequestingChangeOfPhoneNumber']);
 
     Route::post('signout', [UserController::class, 'signout']);
+    Route::post('delete-account', [UserController::class, 'deleteAccount']);
 
     Route::post('change-password', [UserController::class, 'changePassword']);
     Route::post('update-profile-details', [UserController::class, 'updateProfileDetails']);

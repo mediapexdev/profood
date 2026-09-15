@@ -28,6 +28,9 @@ use Illuminate\Validation\Rules;
 use App\Services\ImageService;
 use Throwable;
 use App\Core\Sms;
+use App\Models\Order;
+use App\Models\OrderStatus;
+use Illuminate\Support\Facades\DB;
 
 /**
  * 
@@ -1781,6 +1784,66 @@ class UserController extends Controller
         $user->save();
 
         $this->logout();
+    }
+
+    /**
+     * Self-service deletion required by App Store guideline 5.1.1(v). Orders are
+     * kept for accounting, so the account is anonymized and soft-deleted; the
+     * phone number is released so it can be registered again.
+     */
+    public function deleteAccount(Request $request)
+    {
+        $user = User::with('role')->find(Auth::user()->getAuthIdentifier());
+
+        if(!isset($user)){
+            return response()->json(['message' => 'Demande rejetée ! Accès non autorisé'], 401);
+        }
+        if($user->role->code != Role::CUSTOMER){
+            return response()->json(['message' => 'Les comptes du personnel sont supprimés par un administrateur'], 403);
+        }
+        $validator = Validator::make($request->all(), [
+            'password' => ['required', 'string'],
+        ]);
+        if($validator->fails()){
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+        if(!Hash::check($request->password, $user->password)){
+            return response()->json(['message' => 'Le mot de passe saisi est incorrect'], 403);
+        }
+        $customer = Customer::where('user_id', $user->id)->first();
+
+        if(isset($customer)){
+            // The shop still needs the customer's contact while an order is open.
+            $openStatusIds = OrderStatus::whereIn('code', [
+                OrderStatus::AWAITING_PROCESSING,
+                OrderStatus::BEING_PROCESSED,
+                OrderStatus::IN_THE_PROCESS_OF_DELIVERY,
+            ])->pluck('id');
+
+            if(Order::where('customer_id', $customer->id)->whereIn('order_status_id', $openStatusIds)->exists()){
+                return response()->json(['message' => 'Vous avez une commande en cours. Annulez-la ou attendez sa livraison avant de supprimer votre compte'], 409);
+            }
+        }
+        DB::transaction(function () use ($user, $customer) {
+            $user->forceFill([
+                'first_name'           => 'Compte',
+                'last_name'            => 'supprimé',
+                'phone_number'         => 'deleted-' . $user->id . '-' . now()->timestamp,
+                'email'                => null,
+                'avatar'               => null,
+                'password'             => Hash::make(Str::random(40)),
+                'api_token'            => null,
+                'api_token_expires_at' => null,
+                'remember_token'       => null,
+                'active'               => false,
+                'logged'               => false,
+                'session_count'        => 0,
+            ])->save();
+            $user->delete();
+            $customer?->delete();
+        });
+
+        return response()->json(['message' => 'Votre compte a été supprimé'], 200);
     }
 
     /**
