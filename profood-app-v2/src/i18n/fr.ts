@@ -395,7 +395,7 @@ export const fr = {
   'home.stat3Label': 'Livraisons en moyenne',
   'home.stat4Value': '1200+',
   'home.stat4Label': 'Clients satisfaits',
-  'home.footerTagline': 'La qualité, de la terre à la mer.',
+  'home.footerTagline': 'Un partenariat culinaire fondé sur une tradition de qualité !',
   'home.footerNote': 'Marque sénégalaise · Produits frais · Halal',
   'home.whatsapp': 'WhatsApp : {number}',
   'wa.title': 'Profood',

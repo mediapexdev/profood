@@ -365,7 +365,7 @@ export const en: Record<MsgKey, string> = {
   'home.stat3Label': 'Deliveries on average',
   'home.stat4Value': '1200+',
   'home.stat4Label': 'Happy customers',
-  'home.footerTagline': 'Quality, from land to sea.',
+  'home.footerTagline': 'A culinary partnership built on a tradition of quality!',
   'home.footerNote': 'Senegalese brand \u00b7 Fresh products \u00b7 Halal',
   'home.whatsapp': 'WhatsApp: {number}',
   'wa.title': 'Profood',
