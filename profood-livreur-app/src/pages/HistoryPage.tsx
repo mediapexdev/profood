@@ -62,7 +62,10 @@ export function HistoryPage() {
     return {
       deliveredCount: delivered.length,
       issueCount: issues.length,
-      collected: delivered.reduce((sum, d) => sum + (d.amount || 0), 0),
+      // Orders already paid online were not collected by the driver.
+      collected: delivered
+        .filter((d) => !d.isPaid)
+        .reduce((sum, d) => sum + (d.amount || 0), 0),
     }
   }, [completedDeliveries])
 

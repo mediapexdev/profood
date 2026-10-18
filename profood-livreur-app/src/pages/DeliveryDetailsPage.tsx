@@ -177,9 +177,12 @@ export function DeliveryDetailsPage() {
             {delivery.items.map((item, index) => (
               <li key={index} className="flex items-center gap-3">
                 <Icon name="inventory_2" size="sm" className="text-primary flex-shrink-0" />
-                <span className="flex-1 text-sm font-medium text-gray-800 truncate">
-                  {item.name}
-                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">{item.name}</p>
+                  {item.detail && (
+                    <p className="text-xs text-gray-500">{item.detail}</p>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {item.weight && (
                     <span className="text-xs text-gray-400">{item.weight}</span>
@@ -207,10 +210,30 @@ export function DeliveryDetailsPage() {
         )}
 
         {/* ── 7. Amount card ─────────────────────────────────────────────── */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm flex items-center justify-between">
-          <p className="text-sm font-semibold text-gray-500">Montant total</p>
-          <p className="text-lg font-bold text-gray-900">{formatFCFA(delivery.amount)}</p>
-        </div>
+        {delivery.isPaid ? (
+          <div className="bg-white rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-gray-500">Montant total</p>
+              <p className="text-xs font-bold text-green-700 flex items-center gap-1 mt-0.5">
+                <Icon name="check_circle" size="sm" />
+                Déjà payée — rien à encaisser
+              </p>
+            </div>
+            <p className="text-lg font-bold text-gray-900">{formatFCFA(delivery.amount)}</p>
+          </div>
+        ) : (
+          <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-amber-700">
+                À encaisser
+              </p>
+              {delivery.paymentMethod && (
+                <p className="text-xs text-amber-800 mt-0.5">{delivery.paymentMethod}</p>
+              )}
+            </div>
+            <p className="text-xl font-bold text-amber-900">{formatFCFA(delivery.amount)}</p>
+          </div>
+        )}
 
         {/* ── 8. Action buttons ──────────────────────────────────────────── */}
         {showActions && (

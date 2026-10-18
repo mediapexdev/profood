@@ -22,6 +22,7 @@ export interface DeliveryItem {
   name: string
   quantity: number
   weight?: string
+  detail?: string
 }
 
 export interface Delivery {
@@ -34,6 +35,8 @@ export interface Delivery {
   scheduledTime: string
   estimatedDuration: string
   amount: number
+  paymentMethod?: string
+  isPaid?: boolean
   notes?: string
   stopNumber?: number
   /**

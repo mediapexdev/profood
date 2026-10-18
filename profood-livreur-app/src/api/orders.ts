@@ -39,27 +39,37 @@ interface ApiOrder {
   } | null
   cart: {
     id: number
-    boxesData?: ApiBox[]
-    slicesData?: ApiCartSlice[]
+    boxes_data?: ApiBox[]
+    slices_data?: ApiCartSlice[]
   } | null
   created_at: string
 }
 
+// Slice.weight is a decimal in kg, serialized as a string ("2.50").
+interface ApiSlice {
+  id: number
+  wording: string
+  weight: number | string | null
+}
+
 interface ApiBox {
   id: number
-  type: { id: number; name: string } | null
+  type: { id: number; wording: string } | null
   box_slices: Array<{
     id: number
     quantity: number
-    slice?: { id: number; name: string; weight_in_grams: number | null } | null
+    slice?: ApiSlice | null
   }>
 }
 
 interface ApiCartSlice {
   id: number
   quantity: number
-  slice: { id: number; name: string; weight_in_grams: number | null } | null
+  slice: ApiSlice | null
 }
+
+// OrderPaymentStatus.code constants from app/Models/OrderPaymentStatus.php
+const PAYMENT_STATUS_PAID = 8
 
 // OrderStatus.code constants from app/Models/OrderStatus.php
 const ORDER_STATUS_CODE = {
@@ -104,9 +114,12 @@ function mapStatusCodeToDeliveryStatus(code: number | null | undefined): Deliver
   }
 }
 
-function formatWeight(grams: number | null | undefined): string | undefined {
-  if (grams == null) return undefined
-  return grams >= 1000 ? `${(grams / 1000).toFixed(1)} kg` : `${grams} g`
+function formatWeight(kg: number | string | null | undefined): string | undefined {
+  const value = typeof kg === 'string' ? Number(kg) : kg
+  if (value == null || !Number.isFinite(value) || value <= 0) return undefined
+  return value >= 1
+    ? `${value.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} kg`
+    : `${Math.round(value * 1000)} g`
 }
 
 // Postgres decimal columns come back as strings via the Laravel JSON cast;
@@ -136,21 +149,23 @@ function mapApiOrderToDelivery(order: ApiOrder, stopNumber: number): Delivery {
 
   const customerAvatar = order.customer?.user.avatar ?? undefined
 
-  const boxes = order.cart?.boxesData ?? []
-  const slices = order.cart?.slicesData ?? []
+  const boxes = order.cart?.boxes_data ?? []
+  const slices = order.cart?.slices_data ?? []
 
-  const boxItems = boxes.flatMap((b) =>
-    b.box_slices.map((bs) => ({
-      name: bs.slice?.name ?? b.type?.name ?? 'Article',
-      quantity: bs.quantity,
-      weight: formatWeight(bs.slice?.weight_in_grams),
-    }))
-  )
+  // One row per physical box (a box ordered twice is stored as two rows),
+  // its contents shown as detail so the driver can check what's inside.
+  const boxItems = boxes.map((b) => ({
+    name: b.type?.wording ? `Box ${b.type.wording}` : 'Box',
+    quantity: 1,
+    detail: b.box_slices
+      .map((bs) => `${bs.quantity}× ${bs.slice?.wording ?? 'Article'}`)
+      .join(', ') || undefined,
+  }))
 
   const sliceItems = slices.map((s) => ({
-    name: s.slice?.name ?? 'Article',
+    name: s.slice?.wording ?? 'Article',
     quantity: s.quantity,
-    weight: formatWeight(s.slice?.weight_in_grams),
+    weight: formatWeight(s.slice?.weight),
   }))
 
   const scheduledTime = new Date(order.created_at).toLocaleTimeString('fr-FR', {
@@ -172,6 +187,8 @@ function mapApiOrderToDelivery(order: ApiOrder, stopNumber: number): Delivery {
     scheduledTime,
     estimatedDuration: '–',
     amount: typeof order.montant === 'string' ? Number(order.montant) : order.montant,
+    paymentMethod: order.payment_method ?? undefined,
+    isPaid: order.payment_status?.code === PAYMENT_STATUS_PAID,
     notes: undefined,
     stopNumber,
   }

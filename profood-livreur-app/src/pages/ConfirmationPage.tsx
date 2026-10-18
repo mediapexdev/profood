@@ -35,10 +35,10 @@ export function ConfirmationPage() {
   // "complete" vs "partial" toggle state.
   const [isComplete, setIsComplete] = useState(true)
 
-  // Track which items are checked — default all checked for complete delivery.
-  const [checkedItems, setCheckedItems] = useState<boolean[]>(
-    () => (delivery?.items ?? []).map(() => true)
-  )
+  // Tracks unchecked indices rather than checked ones: on a cold start the
+  // delivery loads after mount, and its items must still default to checked.
+  const [uncheckedItems, setUncheckedItems] = useState<ReadonlySet<number>>(new Set())
+  const isChecked = (index: number) => !uncheckedItems.has(index)
 
   const [photos, setPhotos] = useState<string[]>([])
   const [note, setNote] = useState('')
@@ -63,9 +63,12 @@ export function ConfirmationPage() {
 
   /** Toggle the checked state for a single item by its index. */
   const toggleItem = (index: number) => {
-    setCheckedItems((prev) =>
-      prev.map((checked, i) => (i === index ? !checked : checked))
-    )
+    setUncheckedItems((prev) => {
+      const next = new Set(prev)
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
+      return next
+    })
   }
 
   /**
@@ -77,7 +80,7 @@ export function ConfirmationPage() {
   const handleToggleMode = (complete: boolean) => {
     setIsComplete(complete)
     if (complete) {
-      setCheckedItems((prev) => prev.map(() => true))
+      setUncheckedItems(new Set())
     }
   }
 
@@ -114,7 +117,7 @@ export function ConfirmationPage() {
         items: delivery.items.map((item, i) => ({
           name: item.name,
           quantity: item.quantity,
-          delivered: checkedItems[i] ?? true,
+          delivered: isChecked(i),
         })),
         photos,
       })
@@ -228,25 +231,30 @@ export function ConfirmationPage() {
                   type="button"
                   onClick={() => toggleItem(index)}
                   className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border-2 transition-colors ${
-                    checkedItems[index]
+                    isChecked(index)
                       ? 'bg-green-600 border-green-600'
                       : 'border-gray-300 bg-white'
                   }`}
-                  aria-checked={checkedItems[index]}
+                  aria-checked={isChecked(index)}
                   role="checkbox"
                   aria-label={item.name}
                 >
-                  {checkedItems[index] && (
+                  {isChecked(index) && (
                     <Icon name="check" size="sm" className="text-white" />
                   )}
                 </button>
-                <span
-                  className={`flex-1 text-sm font-medium transition-colors ${
-                    checkedItems[index] ? 'text-gray-800' : 'text-gray-400 line-through'
-                  }`}
-                >
-                  {item.name}
-                </span>
+                <div className="flex-1 min-w-0">
+                  <p
+                    className={`text-sm font-medium transition-colors ${
+                      isChecked(index) ? 'text-gray-800' : 'text-gray-400 line-through'
+                    }`}
+                  >
+                    {item.name}
+                  </p>
+                  {item.detail && (
+                    <p className="text-xs text-gray-500">{item.detail}</p>
+                  )}
+                </div>
                 <span className="text-xs text-gray-400 flex-shrink-0">
                   {item.weight ? `${item.weight} × ` : ''}{item.quantity}x
                 </span>
@@ -274,6 +282,18 @@ export function ConfirmationPage() {
           <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 flex items-start gap-2">
             <Icon name="error" size="sm" className="mt-0.5 flex-shrink-0" />
             <span>{error}</span>
+          </div>
+        )}
+
+        {!delivery.isPaid && (
+          <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-center justify-between gap-3">
+            <span className="text-sm font-semibold text-amber-800 flex items-center gap-2">
+              <Icon name="payments" size="sm" />
+              À encaisser
+            </span>
+            <span className="text-base font-bold text-amber-900">
+              {delivery.amount.toLocaleString('fr-FR')} FCFA
+            </span>
           </div>
         )}
 
