@@ -335,7 +335,6 @@ export const en: Record<MsgKey, string> = {
   'home.how3Text': 'Fast cold-chain delivery or in-store pickup.',
   'home.boxesTitle': 'Our Boxes',
   'home.boxesSubtitle': 'Four sizes, one standard of quality. Build yours.',
-  'home.boxPerCut': 'that is {price} per cut',
   'home.boxPopular': 'Most popular',
   'home.boxDesc1': 'Perfect to discover PROFOOD or for a small family selection.',
   'home.boxDesc2': 'The right balance between budget, quantity and variety.',

@@ -365,7 +365,6 @@ export const fr = {
   'home.how3Text': 'Livraison rapide en froid maîtrisé ou retrait en magasin.',
   'home.boxesTitle': 'Nos Box',
   'home.boxesSubtitle': 'Quatre formats, un même standard de qualité. Composez la vôtre.',
-  'home.boxPerCut': 'soit {price} la découpe',
   'home.boxPopular': 'La plus populaire',
   'home.boxDesc1': 'Idéal pour découvrir PROFOOD ou une petite sélection familiale.',
   'home.boxDesc2': 'Le bon équilibre entre budget, quantité et variété.',

@@ -145,9 +145,6 @@ export function AccueilPage() {
                       </span>
                     </div>
                     <p className="font-title font-extrabold tabular-nums mt-2">{fmtFcfa(b.price)}</p>
-                    <p className="text-[12px] text-taupe tabular-nums">
-                      {t('home.boxPerCut', { price: fmtFcfa(Math.round(b.price / b.capacity)) })}
-                    </p>
                     {BOX_DESC[b.id] && <p className="text-[13px] text-taupe mt-2">{t(BOX_DESC[b.id])}</p>}
                     <span className="inline-flex items-center gap-1 text-[13px] font-bold text-terre mt-2.5">
                       {t('boxes.fill')} <Icon name="arrow_forward" size={16} />
