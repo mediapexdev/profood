@@ -57,4 +57,10 @@ return [
         'client_app_url' => env('CLIENT_APP_URL', 'https://profood-app.com'),
     ],
 
+    // Compte livreur fourni aux équipes de validation Apple / Google.
+    'livreur_demo' => [
+        'phone_number' => env('LIVREUR_DEMO_PHONE_NUMBER'),
+        'password'     => env('LIVREUR_DEMO_PASSWORD'),
+    ],
+
 ];
